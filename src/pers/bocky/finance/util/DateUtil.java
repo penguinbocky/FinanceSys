@@ -21,9 +21,9 @@ public class DateUtil {
 		return date;
 	}
 	
-	public static String getCurrentDateString(){
+	public static String getCurrentDateString(String format){
 		Date date = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf = new SimpleDateFormat(format == null ? "yyyy-MM-dd HH:mm:ss" : format);
 		return sdf.format(date);
 	}
 	
