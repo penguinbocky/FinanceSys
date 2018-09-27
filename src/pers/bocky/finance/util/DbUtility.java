@@ -1,5 +1,9 @@
 package pers.bocky.finance.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -23,13 +27,14 @@ public enum DbUtility {
 	private String url;
     private String userName;
     private String password;
+    private final String DB_NAME = "financial_sys";
 	
     private int connCount;
     
     private DbUtility(boolean useOracle) {
     	connCount = 0;
 		this.driver = useOracle ? JDBC_ORACLE : JDBC_MYSQL;
-		this.url = useOracle ? "jdbc:oracle:thin:@localhost:1521:BOCKYDB" : "jdbc:mysql://localhost:3306/financial_sys";
+		this.url = useOracle ? "jdbc:oracle:thin:@localhost:1521:BOCKYDB" : "jdbc:mysql://localhost:3306/" + DB_NAME;
 		this.userName = useOracle ? "bocky" : "root";
 		this.password = useOracle ? "123456" : "123456";
 		
@@ -70,6 +75,37 @@ public enum DbUtility {
 				System.out.println("数据库关闭失败。");
 			}
 		}
+	}
+	
+	public boolean dumpDB(String dbName, String path) {
+		BufferedReader br = null;
+		StringBuilder sBuilder = null;
+		try {
+			String cmd = "cmd /c mysqldump -u" + this.userName 
+					+ " -p" + this.password 
+					+ " -t " + (dbName == null ? DB_NAME : dbName)//only data, no structure 
+					+ " > " + path + "/generated_by_java_" + DateUtil.getCurrentDateString("yy_MM_dd") + ".sql";
+			Process process = Runtime.getRuntime().exec(cmd);
+			br = new BufferedReader(new InputStreamReader(process.getErrorStream(), Charset.forName("gbk")));
+			sBuilder = new StringBuilder();
+			String line;
+			while((line = br.readLine()) != null) {
+				sBuilder.append(line + "\n");
+				System.out.println("CMD result > " + line + "\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return sBuilder == null || "".equals(sBuilder.toString());
 	}
 
 }
