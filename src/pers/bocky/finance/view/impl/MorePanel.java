@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import pers.bocky.finance.bean.TypeBean;
+import pers.bocky.finance.dao.BaseDao;
 import pers.bocky.finance.dao.BorrowDao;
 import pers.bocky.finance.dao.ConsumeDao;
 import pers.bocky.finance.dao.DepositDao;
@@ -29,6 +30,8 @@ public class MorePanel extends JPanel implements WillBeInMainTabbed {
 	private JButton calRemainingBorrowAmountFromRelationshipBtn;
 	private JButton calAllNormalConsumeLastMonthBtn;
 	private JButton calAllNormalConsumeFromThisMonthBtn;
+	
+	private JButton dumpDataBaseBtn;
 	
 	public MorePanel() {
 		setStyles();
@@ -110,6 +113,15 @@ public class MorePanel extends JPanel implements WillBeInMainTabbed {
 			}
 		});
 		
+		dumpDataBaseBtn = new JButton("一键备份数据库所有数据");
+		dumpDataBaseBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(MorePanel.this, BaseDao.dumpAllData("C:\\Users\\bocky\\git\\FinanceSys"), "结果", JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
+		
 		JPanel panelC = new JPanel(new GridLayout(0, 1, 2, 5));
 		panelC.setBackground(Color.LIGHT_GRAY);
 		panelC.add(calAllNormalConsumeLatest30DaysBtn);
@@ -120,10 +132,13 @@ public class MorePanel extends JPanel implements WillBeInMainTabbed {
 		panelS.add(calNetDepositBtn1);
 		JPanel panelE = new JPanel(new GridLayout(0, 1, 2, 5));
 		panelE.add(calRemainingBorrowAmountFromRelationshipBtn);
+		JPanel panelW = new JPanel(new GridLayout(0, 1, 2, 5));
+		panelW.add(dumpDataBaseBtn);
+		
 		add(panelC, BorderLayout.CENTER);
 		add(openConfigBtn, BorderLayout.NORTH);
 		add(panelS, BorderLayout.SOUTH);
-		add(new JPanel(), BorderLayout.WEST);
+		add(panelW, BorderLayout.WEST);
 		add(panelE, BorderLayout.EAST);
 	}
 
