@@ -612,7 +612,7 @@ public class ConsumeDao extends BaseDao {
 		return sum;
 	}
 	
-	public static double calculateAmountOfLatestMonthOfType(Integer typeId){
+	public static double calculateAmountOfLatestMonthOfType(Integer... typeId){
 		double sum = 0;
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
@@ -623,9 +623,15 @@ public class ConsumeDao extends BaseDao {
 				+ " AND t.category_id = c.category_id"
 				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
 
-		if (typeId != null && typeId != 0) {
-			sql.append(" AND d.type_id = " + typeId);
+		if (typeId != null && typeId.length > 0) {
+			sql.append(" AND ( d.type_id = " + typeId[0]);
+			for (int i = 1; i < typeId.length; i++) {
+				Integer type = typeId[i];
+				sql.append(" or d.type_id = " + type);
+			}
+			sql.append(" ) ");
 		}
+		
 		sql.append(" AND occur_ts >= date_sub(CURRENT_TIMESTAMP, interval 30 day)");
 		
 		try {
@@ -645,7 +651,7 @@ public class ConsumeDao extends BaseDao {
 		return sum;
 	}
 	
-	public static double calculateAvgMonthAmountOfType(Integer typeId){
+	public static double calculateAvgMonthAmountOfType(Integer... typeId){
 		double avg = 0;
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer("select avg(sum) avg from (" + 
@@ -656,8 +662,13 @@ public class ConsumeDao extends BaseDao {
 				+ " AND t.category_id = c.category_id"
 				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
 
-		if (typeId != null && typeId != 0) {
-			sql.append(" AND d.type_id = " + typeId);
+		if (typeId != null && typeId.length > 0) {
+			sql.append(" AND ( d.type_id = " + typeId[0]);
+			for (int i = 1; i < typeId.length; i++) {
+				Integer type = typeId[i];
+				sql.append(" or d.type_id = " + type);
+			}
+			sql.append(" ) ");
 		}
 		sql.append(" AND date_format(occur_ts, '%Y-%m') != '2018-05' ");
 		sql.append(" AND date_format(occur_ts, '%Y-%m') != '2018-06' ");
@@ -681,7 +692,7 @@ public class ConsumeDao extends BaseDao {
 		return avg;
 	}
 	
-	public static double calculateAmountFromThisMonthOfType(Integer typeId) {
+	public static double calculateAmountFromThisMonthOfType(Integer... typeId) {
 		double sum = 0;
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
@@ -692,8 +703,13 @@ public class ConsumeDao extends BaseDao {
 				+ " AND t.category_id = c.category_id"
 				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
 
-		if (typeId != null && typeId != 0) {
-			sql.append(" AND d.type_id = " + typeId);
+		if (typeId != null && typeId.length > 0) {
+			sql.append(" AND ( d.type_id = " + typeId[0]);
+			for (int i = 1; i < typeId.length; i++) {
+				Integer type = typeId[i];
+				sql.append(" or d.type_id = " + type);
+			}
+			sql.append(" ) ");
 		}
 		sql.append(" AND date_format(occur_ts, '%Y-%m') = date_format(now(), '%Y-%m')");
 		
@@ -714,7 +730,7 @@ public class ConsumeDao extends BaseDao {
 		return sum;
 	}
 
-	public static double calculateAmountOfLastMonthhOfType(Integer typeId) {
+	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
 		double sum = 0;
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
@@ -725,8 +741,13 @@ public class ConsumeDao extends BaseDao {
 				+ " AND t.category_id = c.category_id"
 				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
 
-		if (typeId != null && typeId != 0) {
-			sql.append(" AND d.type_id = " + typeId);
+		if (typeId != null && typeId.length > 0) {
+			sql.append(" AND ( d.type_id = " + typeId[0]);
+			for (int i = 1; i < typeId.length; i++) {
+				Integer type = typeId[i];
+				sql.append(" or d.type_id = " + type);
+			}
+			sql.append(" ) ");
 		}
 		sql.append(" AND date_format(occur_ts, '%Y-%m') = date_format(date_sub(CURRENT_TIMESTAMP, interval 1 month), '%Y-%m')");
 		
