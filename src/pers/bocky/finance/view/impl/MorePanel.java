@@ -143,11 +143,19 @@ public class MorePanel extends JPanel implements WillBeInMainTabbed {
 	}
 
 	protected Object calAllNormalConsumeFromThisMonth() {
-		return ConsumeDao.calculateAmountFromThisMonthOfType(TypeBean.TypeIdMappedInDB.NORMAL_CONSUME.getId());
+		return ConsumeDao.calculateAmountFromThisMonthOfType(TypeBean.TypeIdMappedInDB.NORMAL_CONSUME.getId()
+				, TypeBean.TypeIdMappedInDB.FOOD_AND_DRINK.getId()
+				, TypeBean.TypeIdMappedInDB.TRANSPORT.getId()
+				, TypeBean.TypeIdMappedInDB.ENTERTAINMENT.getId()
+				, TypeBean.TypeIdMappedInDB.SHOPPING.getId());
 	}
 
 	protected Object calAllNormalConsumeLastMonth() {
-		return ConsumeDao.calculateAmountOfLastMonthhOfType(TypeBean.TypeIdMappedInDB.NORMAL_CONSUME.getId());
+		return ConsumeDao.calculateAmountOfLastMonthhOfType(TypeBean.TypeIdMappedInDB.NORMAL_CONSUME.getId()
+				, TypeBean.TypeIdMappedInDB.FOOD_AND_DRINK.getId()
+				, TypeBean.TypeIdMappedInDB.TRANSPORT.getId()
+				, TypeBean.TypeIdMappedInDB.ENTERTAINMENT.getId()
+				, TypeBean.TypeIdMappedInDB.SHOPPING.getId());
 	}
 
 	protected Object calRemainingBorrowAmountFromRelationship() {
@@ -155,11 +163,19 @@ public class MorePanel extends JPanel implements WillBeInMainTabbed {
 	}
 
 	protected Object calAvgNormalConsumeOfMonth() {
-		return ConsumeDao.calculateAvgMonthAmountOfType(TypeBean.TypeIdMappedInDB.NORMAL_CONSUME.getId());
+		return ConsumeDao.calculateAvgMonthAmountOfType(TypeBean.TypeIdMappedInDB.NORMAL_CONSUME.getId()
+				, TypeBean.TypeIdMappedInDB.FOOD_AND_DRINK.getId()
+				, TypeBean.TypeIdMappedInDB.TRANSPORT.getId()
+				, TypeBean.TypeIdMappedInDB.ENTERTAINMENT.getId()
+				, TypeBean.TypeIdMappedInDB.SHOPPING.getId());
 	}
 
 	protected Object calAllNormalConsumeLatest30Days() {
-		return ConsumeDao.calculateAmountOfLatestMonthOfType(TypeBean.TypeIdMappedInDB.NORMAL_CONSUME.getId());
+		return ConsumeDao.calculateAmountOfLatestMonthOfType(TypeBean.TypeIdMappedInDB.NORMAL_CONSUME.getId()
+				, TypeBean.TypeIdMappedInDB.FOOD_AND_DRINK.getId()
+				, TypeBean.TypeIdMappedInDB.TRANSPORT.getId()
+				, TypeBean.TypeIdMappedInDB.ENTERTAINMENT.getId()
+				, TypeBean.TypeIdMappedInDB.SHOPPING.getId());
 	}
 
 	protected double calNetDeposit() {
