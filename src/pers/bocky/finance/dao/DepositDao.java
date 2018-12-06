@@ -559,31 +559,24 @@ public class DepositDao extends BaseDao {
 	}
 	
 	public static double calculateAllDepositRecsAmount(){
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) as sum"
-				+ " FROM deposit d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + DepositBean.CATEGORY_ID);
+		System.out.println("In calculateAllDepositRecsAmount >>> ");
+		return calculateAmountOfType(DepositBean.CATEGORY_ID);
+	}
+	
+	public static double calculateAmountOfLatestMonthOfType(Integer... typeId){
+		return calculateAmountOfLastMonthhOfType(DepositBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAvgMonthAmountOfType(Integer... typeId){
+		return calculateAvgMonthAmountOfType(DepositBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAmountFromThisMonthOfType(Integer... typeId) {
+		return calculateAmountFromThisMonthOfType(DepositBean.CATEGORY_ID, typeId);
+	}
 
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
+		return calculateAmountOfLastMonthhOfType(DepositBean.CATEGORY_ID, typeId);
 	}
 	
 	/**

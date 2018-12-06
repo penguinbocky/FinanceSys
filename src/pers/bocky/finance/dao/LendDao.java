@@ -209,6 +209,22 @@ public class LendDao extends BaseDao {
 		return list;
 	}
 	
+	public static double calculateAmountOfLatestMonthOfType(Integer... typeId){
+		return calculateAmountOfLatestMonthOfType(LendBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAvgMonthAmountOfType(Integer... typeId){
+		return calculateAvgMonthAmountOfType(LendBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAmountFromThisMonthOfType(Integer... typeId) {
+		return calculateAmountFromThisMonthOfType(LendBean.CATEGORY_ID, typeId);
+	}
+
+	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
+		return calculateAmountOfLastMonthhOfType(LendBean.CATEGORY_ID, typeId);
+	}
+	
 	/**
 	 * @param bean
 	 */

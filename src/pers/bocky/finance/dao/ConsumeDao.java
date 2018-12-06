@@ -576,196 +576,23 @@ public class ConsumeDao extends BaseDao {
 	}
 	
 	public static double calculateAmountOfType(Integer... typeId){
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) as sum"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
-
-		if (typeId.length > 0) {
-			sql.append(" AND ( d.type_id = " + typeId[0]);
-			for (int i = 1; i < typeId.length; i++) {
-				Integer type = typeId[i];
-				sql.append(" or d.type_id = " + type);
-			}
-			sql.append(" ) ");
-		}
-		
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+		return calculateAmountOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 	
 	public static double calculateAmountOfLatestMonthOfType(Integer... typeId){
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) as sum"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
-
-		if (typeId != null && typeId.length > 0) {
-			sql.append(" AND ( d.type_id = " + typeId[0]);
-			for (int i = 1; i < typeId.length; i++) {
-				Integer type = typeId[i];
-				sql.append(" or d.type_id = " + type);
-			}
-			sql.append(" ) ");
-		}
-		
-		sql.append(" AND occur_ts >= date_sub(CURRENT_TIMESTAMP, interval 30 day)");
-		
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+		return calculateAmountOfLatestMonthOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 	
 	public static double calculateAvgMonthAmountOfType(Integer... typeId){
-		double avg = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer("select avg(sum) avg from (" + 
-				"SELECT date_format(occur_ts, '%Y-%m'), sum(d.amount) as sum"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
-
-		if (typeId != null && typeId.length > 0) {
-			sql.append(" AND ( d.type_id = " + typeId[0]);
-			for (int i = 1; i < typeId.length; i++) {
-				Integer type = typeId[i];
-				sql.append(" or d.type_id = " + type);
-			}
-			sql.append(" ) ");
-		}
-		sql.append(" AND date_format(occur_ts, '%Y-%m') != '2018-05' ");
-		sql.append(" AND date_format(occur_ts, '%Y-%m') != '2018-06' ");
-		sql.append(" AND date_format(occur_ts, '%Y-%m') != date_format(now(), '%Y-%m') ");
-		sql.append(" group by date_format(occur_ts, '%Y-%m')) temp");
-		
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				avg = rs.getDouble("avg");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return avg;
+		return calculateAvgMonthAmountOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 	
 	public static double calculateAmountFromThisMonthOfType(Integer... typeId) {
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) as sum"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
-
-		if (typeId != null && typeId.length > 0) {
-			sql.append(" AND ( d.type_id = " + typeId[0]);
-			for (int i = 1; i < typeId.length; i++) {
-				Integer type = typeId[i];
-				sql.append(" or d.type_id = " + type);
-			}
-			sql.append(" ) ");
-		}
-		sql.append(" AND date_format(occur_ts, '%Y-%m') = date_format(now(), '%Y-%m')");
-		
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+		return calculateAmountFromThisMonthOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 
 	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) as sum"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
-
-		if (typeId != null && typeId.length > 0) {
-			sql.append(" AND ( d.type_id = " + typeId[0]);
-			for (int i = 1; i < typeId.length; i++) {
-				Integer type = typeId[i];
-				sql.append(" or d.type_id = " + type);
-			}
-			sql.append(" ) ");
-		}
-		sql.append(" AND date_format(occur_ts, '%Y-%m') = date_format(date_sub(CURRENT_TIMESTAMP, interval 1 month), '%Y-%m')");
-		
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+		return calculateAmountOfLastMonthhOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 
 	/**

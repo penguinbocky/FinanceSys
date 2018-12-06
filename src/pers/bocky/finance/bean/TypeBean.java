@@ -9,13 +9,13 @@ public class TypeBean {
 		PAY_BACK_TO_RELATIONSHIPS(7), PAY_BACK_LOAN(17),
 		CONSUME_FOR_PAY_LOAN(14), CONSUME_FOR_PAY_RELATIONSHIPS(19);
 		
-		private int id;
+		private Integer id;
 
-		private TypeIdMappedInDB(int id) {
+		private TypeIdMappedInDB(Integer id) {
 			this.id = id;
 		}
 
-		public int getId() {
+		public Integer getId() {
 			return id;
 		}
 	}

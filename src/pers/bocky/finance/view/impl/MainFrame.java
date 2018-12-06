@@ -49,6 +49,7 @@ public class MainFrame extends JFrame {
 		tabbedPanels.add(getLendPanel());
 		tabbedPanels.add(getReadMePanel());
 		tabbedPanels.add(new MorePanel());
+		tabbedPanels.add(getReportPanel());
 		
 		getContentPane().setBackground(new Color(129, 195, 230));
 		add(createRootContainer(tabbedPanels));
@@ -102,6 +103,11 @@ public class MainFrame extends JFrame {
 		return dp;
 	}
 	
+	private WillBeInMainTabbed getReportPanel() {
+		WillBeInMainTabbed dp = new ReportPanel();
+		return dp;
+	}
+
 	/**
 	 * UI Entry
 	 */

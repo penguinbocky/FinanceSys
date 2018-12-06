@@ -204,6 +204,7 @@ public class BorrowDao extends BaseDao {
 	}
 	
 	public static double calAllBorrowHistoryAmountOfType(Integer typeId){
+		System.out.println("In calAllBorrowHistoryAmountOfType >>> ");
 		double sum = 0;
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
@@ -232,34 +233,23 @@ public class BorrowDao extends BaseDao {
 	}
 	
 	public static double calAllBorrowAmountOfType(Integer typeId){
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) sum"
-				+ " FROM borrow d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + BorrowBean.CATEGORY_ID);
+		return calculateAmountOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAmountOfLatestMonthOfType(Integer... typeId){
+		return calculateAmountOfLatestMonthOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAvgMonthAmountOfType(Integer... typeId){
+		return calculateAvgMonthAmountOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAmountFromThisMonthOfType(Integer... typeId) {
+		return calculateAmountFromThisMonthOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
 
-		if (typeId != null && typeId != 0) {
-			sql.append(" AND d.type_id = " + typeId);
-		}
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
+		return calculateAmountOfLastMonthhOfType(BorrowBean.CATEGORY_ID, typeId);
 	}
 	
 	/**
