@@ -75,6 +75,7 @@ public class FilterPanel extends JPanel {
 		initAvailableFilters();
 		initOkBtn();
 		configFilter();
+		setOpaque(false);
 	}
 
 	private void initOkBtn() {
