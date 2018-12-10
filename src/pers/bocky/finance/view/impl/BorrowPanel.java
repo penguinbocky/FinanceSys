@@ -13,15 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
@@ -81,36 +78,11 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(129, 195, 230));
 		
-		JCheckBox checkStatus = new JCheckBox("显示状态", true);
-		checkStatus.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (checkStatus.isSelected()) {
-					System.out.println("checked");
-				} else {
-					System.out.println("unchecked");
-				}
-			}
-		});
-		
-		JRadioButton orderByUptsAsc = new JRadioButton("按更新时间升序排序");
-		JRadioButton orderByUptsDesc = new JRadioButton("按更新时间降序排序");
-		JRadioButton orderByAtsAsc = new JRadioButton("按添加时间升序排序");
-		JRadioButton orderByAtsDesc = new JRadioButton("按添加时间降序排序");
-		ButtonGroup bGroup = new ButtonGroup();
-		bGroup.add(orderByUptsAsc);
-		bGroup.add(orderByUptsDesc);
-		bGroup.add(orderByAtsAsc);
-		bGroup.add(orderByAtsDesc);
-		
 		JButton refresh = new JButton("刷新");
 		refresh.setActionCommand("refreshDataGrid");
 		refresh.addActionListener(new ButtonActionListener(this));
 		JLabel filterLabel = new JLabel("请选择过滤条件：");
 		
-		panel.add(orderByUptsAsc);panel.add(orderByAtsAsc);
-		panel.add(checkStatus);
 		panel.add(refresh);
 		panel.add(filterLabel);
 		

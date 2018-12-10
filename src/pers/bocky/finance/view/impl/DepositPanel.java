@@ -17,13 +17,10 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.Popup;
-import javax.swing.PopupFactory;
 
 import pers.bocky.finance.bean.DepositBean;
 import pers.bocky.finance.bean.TypeBean;
@@ -108,8 +105,8 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		JPanel p2 = new JPanel();
 		p2.add(new JLabel("删除"));
 		p2.setForeground(Color.MAGENTA);
-		JList<String> items = new JList<String>(new String[]{new String("更新"), new String("删除")});
-		PopupFactory popupFactory = PopupFactory.getSharedInstance();
+//		JList<String> items = new JList<String>(new String[]{new String("更新"), new String("删除")});
+//		PopupFactory popupFactory = PopupFactory.getSharedInstance();
 		datagrid.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -121,11 +118,11 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 					if (e.getButton() == MouseEvent.BUTTON1) {
 						fillFields(datagrid, selectedRowIndex);
 					} else if (e.getButton() == MouseEvent.BUTTON3) {
-						Popup pop = popupFactory.getPopup(datagrid, items, e.getXOnScreen(), e.getYOnScreen());
-						pop.show();
-						
-						String depositId = datagrid.getValueAt(selectedRowIndex, 0).toString();
-						System.out.println("depositId > " + depositId);
+//						Popup pop = popupFactory.getPopup(datagrid, items, e.getXOnScreen(), e.getYOnScreen());
+//						pop.show();
+//						
+//						String depositId = datagrid.getValueAt(selectedRowIndex, 0).toString();
+//						System.out.println("depositId > " + depositId);
 					}
 				}
 			}
