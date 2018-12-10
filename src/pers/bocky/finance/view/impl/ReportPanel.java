@@ -131,6 +131,8 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		} else {
 			okBtn.setEnabled(false);
 		}
+		
+		selectedTypes.get().clear();
 		return panelForCheckbox;
 	}
 
@@ -138,13 +140,14 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		JPanel layoutPanel = new JPanel(new GridLayout(2, 0));
 
 		JPanel panelForRadios2 = new JPanel(new GridLayout(1, 0));
-		panelForRadios2.setBackground(Color.YELLOW);
+		panelForRadios2.setBackground(new Color(204, 170, 126, 255));
 		ButtonGroup bg2 = new ButtonGroup();
 		timeOptionsList.stream().forEach(timeOption -> {
 			JPanel panel = new JPanel();
 			panel.setOpaque(false);
 			JRadioButton radioButton = new JRadioButton(timeOption.getTimeOptionName(),
 					timeOption == selectedTimeOption);
+			radioButton.setOpaque(false);
 			panel.add(radioButton);
 			panelForRadios2.add(panel);
 			bg2.add(radioButton);
