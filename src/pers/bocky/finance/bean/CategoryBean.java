@@ -13,9 +13,10 @@ public class CategoryBean {
 	public CategoryBean() {
 		super();
 	}
-	public CategoryBean(Integer categoryId) {
+	public CategoryBean(Integer categoryId, String categoryName) {
 		super();
 		this.categoryId = categoryId;
+		this.categoryName = categoryName;
 	}
 	public Integer getCategoryId() {
 		return categoryId;
