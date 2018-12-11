@@ -4,18 +4,22 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.FontUIResource;
 
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
@@ -25,6 +29,7 @@ public class MainFrame extends JFrame {
 	
 	private final int WIDTH = 860;
 	private final int HEIGHT = 640;
+	private final Font GLOBAL_FONT = new Font("Microsoft Yahei", Font.PLAIN, 14);
 	
 	public MainFrame() throws HeadlessException {
 		super();
@@ -52,6 +57,7 @@ public class MainFrame extends JFrame {
 		tabbedPanels.add(getReportPanel());
 		
 		getContentPane().setBackground(new Color(129, 195, 230));
+		initGlobalFontSetting(GLOBAL_FONT);
 		add(createRootContainer(tabbedPanels));
 	}
 
@@ -108,6 +114,16 @@ public class MainFrame extends JFrame {
 		return dp;
 	}
 
+	private void initGlobalFontSetting(Font fnt) {
+		FontUIResource fontRes = new FontUIResource(fnt);
+		for (Enumeration<Object> keys = UIManager.getDefaults().keys(); keys.hasMoreElements();) {
+			Object key = keys.nextElement();
+			Object value = UIManager.get(key);
+			if (value instanceof FontUIResource)
+				UIManager.put(key, fontRes);
+		}
+	}
+		
 	/**
 	 * UI Entry
 	 */
