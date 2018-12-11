@@ -564,7 +564,7 @@ public class DepositDao extends BaseDao {
 	}
 	
 	public static double calculateAmountOfLatestMonthOfType(Integer... typeId){
-		return calculateAmountOfLastMonthhOfType(DepositBean.CATEGORY_ID, typeId);
+		return calculateAmountOfLatestMonthOfType(DepositBean.CATEGORY_ID, typeId);
 	}
 	
 	public static double calculateAvgMonthAmountOfType(Integer... typeId){
