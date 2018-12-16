@@ -3,22 +3,11 @@ package pers.bocky.finance.bean;
 import java.sql.Timestamp;
 
 public class TypeBean {
-	public enum TypeIdMappedInDB {
-		SALARY(1),
-		NORMAL_CONSUME(5), FOOD_AND_DRINK(20), TRANSPORT(21), ENTERTAINMENT(22), SHOPPING(24),
-		PAY_BACK_TO_RELATIONSHIPS(7), PAY_BACK_LOAN(17),
-		CONSUME_FOR_PAY_LOAN(14), CONSUME_FOR_PAY_RELATIONSHIPS(19);
-		
-		private Integer id;
-
-		private TypeIdMappedInDB(Integer id) {
-			this.id = id;
-		}
-
-		public Integer getId() {
-			return id;
-		}
-	}
+	public final static Integer BORROW_FROM_RELATIONSHIPS = 7;
+	public final static Integer BORROW_FROM_LOAN = 17;
+	public final static Integer CONSUME_FOR_PAY_LOAN = 14;
+	public final static Integer CONSUME_FOR_PAY_RELATIONSHIPS = 19;
+	public final static Integer CONSUME_COSTING_DEPOSIT = 39;
 	
 	private Integer typeId;
 	private Integer categoryId;
