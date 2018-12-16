@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import pers.bocky.finance.bean.CategoryBean;
 import pers.bocky.finance.util.DbUtility;
 import pers.bocky.finance.util.LoggerUtil;
 
@@ -22,16 +23,16 @@ public class BaseDao {
 		Connection con = dbUtil.getCon();
 		String tableName = null;
 		switch (categoryId) {
-		case 1:
+		case CategoryBean.DEPOSIT:
 			tableName = "deposit";
 			break;
-		case 2:
+		case CategoryBean.CONSUME:
 			tableName = "consume";
 			break;
-		case 3:
+		case CategoryBean.BORROW:
 			tableName = "borrow";
 			break;
-		case 4:
+		case CategoryBean.LEND:
 			tableName = "lend";
 			break;
 
@@ -81,16 +82,16 @@ public class BaseDao {
 		Connection con = dbUtil.getCon();
 		String tableName = null;
 		switch (categoryId) {
-		case 1:
+		case CategoryBean.DEPOSIT:
 			tableName = "deposit";
 			break;
-		case 2:
+		case CategoryBean.CONSUME:
 			tableName = "consume";
 			break;
-		case 3:
+		case CategoryBean.BORROW:
 			tableName = "borrow";
 			break;
-		case 4:
+		case CategoryBean.LEND:
 			tableName = "lend";
 			break;
 
@@ -142,16 +143,16 @@ public class BaseDao {
 		Connection con = dbUtil.getCon();
 		String tableName = null;
 		switch (categoryId) {
-		case 1:
+		case CategoryBean.DEPOSIT:
 			tableName = "deposit";
 			break;
-		case 2:
+		case CategoryBean.CONSUME:
 			tableName = "consume";
 			break;
-		case 3:
+		case CategoryBean.BORROW:
 			tableName = "borrow";
 			break;
-		case 4:
+		case CategoryBean.LEND:
 			tableName = "lend";
 			break;
 
@@ -177,7 +178,7 @@ public class BaseDao {
 			}
 			sql.append(" ) ");
 		}
-		if (categoryId == 2) {//consume within 2018.5/6 has dirty data
+		if (categoryId == CategoryBean.CONSUME) {//consume within 2018.5/6 has dirty data
 			sql.append(" AND date_format(occur_ts, '%Y-%m') != '2018-05' ");
 			sql.append(" AND date_format(occur_ts, '%Y-%m') != '2018-06' ");
 		}
@@ -207,16 +208,16 @@ public class BaseDao {
 		Connection con = dbUtil.getCon();
 		String tableName = null;
 		switch (categoryId) {
-		case 1:
+		case CategoryBean.DEPOSIT:
 			tableName = "deposit";
 			break;
-		case 2:
+		case CategoryBean.CONSUME:
 			tableName = "consume";
 			break;
-		case 3:
+		case CategoryBean.BORROW:
 			tableName = "borrow";
 			break;
-		case 4:
+		case CategoryBean.LEND:
 			tableName = "lend";
 			break;
 
@@ -267,16 +268,16 @@ public class BaseDao {
 		Connection con = dbUtil.getCon();
 		String tableName = null;
 		switch (categoryId) {
-		case 1:
+		case CategoryBean.DEPOSIT:
 			tableName = "deposit";
 			break;
-		case 2:
+		case CategoryBean.CONSUME:
 			tableName = "consume";
 			break;
-		case 3:
+		case CategoryBean.BORROW:
 			tableName = "borrow";
 			break;
-		case 4:
+		case CategoryBean.LEND:
 			tableName = "lend";
 			break;
 

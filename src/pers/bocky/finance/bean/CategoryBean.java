@@ -3,7 +3,11 @@ package pers.bocky.finance.bean;
 import java.sql.Timestamp;
 
 public class CategoryBean {
-
+	public final static int DEPOSIT = 1;
+	public final static int CONSUME = 2;
+	public final static int BORROW = 3;
+	public final static int LEND = 4;
+	
 	private Integer categoryId;
 	private String categoryName;
 	private String description;
