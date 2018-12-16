@@ -28,13 +28,13 @@ public enum DbUtility {
     private String userName;
     private String password;
     private final String DB_NAME = "financial_sys";
-	
+	private String host = PropertiesUtil.getValue("host.ip") != null ? PropertiesUtil.getValue("host.ip") : "localhost";
     private int connCount;
     
     private DbUtility(boolean useOracle) {
     	connCount = 0;
 		this.driver = useOracle ? JDBC_ORACLE : JDBC_MYSQL;
-		this.url = useOracle ? "jdbc:oracle:thin:@localhost:1521:BOCKYDB" : "jdbc:mysql://localhost:3306/" + DB_NAME;
+		this.url = useOracle ? "jdbc:oracle:thin:@" + host + ":1521:BOCKYDB" : "jdbc:mysql://" + host + ":3306/" + DB_NAME;
 		this.userName = useOracle ? "bocky" : "root";
 		this.password = useOracle ? "123456" : "123456";
 		

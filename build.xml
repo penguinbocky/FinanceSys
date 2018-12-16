@@ -59,6 +59,9 @@
 				<attribute name="Main-Class" value="pers.bocky.finance.view.impl.MainFrame"/> 
 				<attribute name="Class-Path" value="${mf.classpath}"/>
 			</manifest>
+       	
+       		<fileset dir="${src.dir}" excludes="pers/**" />
+
 	   </jar>
 
     </target> 
