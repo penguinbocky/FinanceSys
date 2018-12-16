@@ -355,7 +355,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 	}
 	
 	private void loadTypeDropDown() {
-		List<TypeBean> list = TypeDao.fetchTypeByCategory(LendBean.CATEGORY_ID);
+		List<TypeBean> list = TypeDao.fetchTypeBy(LendBean.CATEGORY_ID, null);
 		final TypeBean[] actions = list.toArray(new TypeBean[0]);
 		typesDropdown.setModel(new DefaultComboBoxModel<TypeBean>(actions));
 	}

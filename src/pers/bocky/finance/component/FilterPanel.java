@@ -218,7 +218,7 @@ public class FilterPanel extends JPanel {
 			}
 		} else if (selectedFilter.getType().equalsIgnoreCase("type")) {
 			filterValueOfTypes = new JComboBox<TypeBean>();
-			List<TypeBean> list = TypeDao.fetchTypeByCategory(categoryId);
+			List<TypeBean> list = TypeDao.fetchTypeBy(categoryId, null);
 			final TypeBean[] actions = list.toArray(new TypeBean[0]);
 			filterValueOfTypes.setModel(new DefaultComboBoxModel<TypeBean>(actions));
 			add(filterValueOfTypes);

@@ -333,7 +333,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 	 * 
 	 */
 	private void loadTypeDropDown() {
-		List<TypeBean> list = TypeDao.fetchTypeByCategory(ConsumeBean.CATEGORY_ID);
+		List<TypeBean> list = TypeDao.fetchTypeBy(ConsumeBean.CATEGORY_ID, null);
 		final TypeBean[] actions = list.toArray(new TypeBean[0]);
 		typesDropdown.setModel(new DefaultComboBoxModel<TypeBean>(actions));
 	}
