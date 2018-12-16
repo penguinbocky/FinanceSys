@@ -4,6 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -12,6 +16,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -23,6 +28,7 @@ import pers.bocky.finance.dao.CategoryDao;
 import pers.bocky.finance.dao.TypeDao;
 import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
+import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.view.WillBeInConfigTabbed;
 
 public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
@@ -35,6 +41,8 @@ public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
 	private JTextField typeField;
 	private JTextField descField;
 	private JComboBox<CategoryBean> categoryDropdown;
+	private JButton updateBtn;
+	private JButton deleteBtn;
 	
 	public TypeConfigPanel() {
 		super();
@@ -76,11 +84,59 @@ public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
 		
 		final String[] COL_NAMES = {"whatever", "类别ID", "类别名称", "类型ID", "类型名称", "类型描述", "最后更新于", "创建时间"};
 		datagrid = new DataGrid(COL_NAMES);
+		datagrid.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				super.mouseClicked(e);
+				checkForButtons();
+				int selectedRowIndex = datagrid.getSelectedRow();
+				if (selectedRowIndex != -1) {
+					if (e.getButton() == MouseEvent.BUTTON1) {
+						fillFields(datagrid, selectedRowIndex);
+					}
+				}
+			}
+			
+		});
 		scrollPane.setViewportView(datagrid);
 		
 		loadDatagrid();
 		
 		return scrollPane;
+	}
+
+	protected void fillFields(DataGrid datagrid2, int selectedRowIndex) {
+		if (datagrid != null && selectedRowIndex > -1) {
+			String categoryId = (String) datagrid.getValueAt(selectedRowIndex, 1);
+			String typeName = (String) datagrid.getValueAt(selectedRowIndex, 4);
+			String desc = (String) datagrid.getValueAt(selectedRowIndex, 5);
+			
+			categoryDropdown.setSelectedIndex(getDropdownIndexByTypeId(Integer.parseInt(categoryId)));
+			typeField.setText(typeName);
+			descField.setText(desc);
+		}
+	}
+
+	private int getDropdownIndexByTypeId(int categoryId) {
+		int size = categoryDropdown.getItemCount();
+		for (int i = 0; i < size; i++) {
+			CategoryBean bean = categoryDropdown.getItemAt(i);
+			if (bean.getCategoryId() == categoryId) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	protected void checkForButtons() {
+		if (datagrid.getSelectedRow() == -1) {
+			updateBtn.setEnabled(false);
+			deleteBtn.setEnabled(false);
+		} else {
+			updateBtn.setEnabled(true);
+			deleteBtn.setEnabled(true);
+		}
 	}
 
 	private JPanel createBottomPanel() {
@@ -109,6 +165,26 @@ public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
 		JLabel descLabel = new JLabel("类型描述");
 		descField = new JTextField();
 		
+		updateBtn = new JButton("更新");
+		updateBtn.setEnabled(false);
+		updateBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				updateRecord();
+			}
+		});
+		
+		deleteBtn = new JButton("删除");
+		deleteBtn.setEnabled(false);
+		deleteBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				deleteRecord();
+			}
+		});
+		
 		inputPanel.add(categoryLabel);
 		inputPanel.add(categoryDropdown);
 		inputPanel.add(typeLabel);
@@ -116,10 +192,71 @@ public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
 		inputPanel.add(descLabel);
 		inputPanel.add(descField);
 		inputPanel.add(save);
+		inputPanel.add(updateBtn);
+		inputPanel.add(deleteBtn);
 		
 		panel.add(inputPanel);
 		
 		return panel;
+	}
+
+	protected void deleteRecord() {
+		int selectedRow = datagrid.getSelectedRow();
+		if (selectedRow < 0) {
+			JOptionPane.showMessageDialog(this, "请选择需要删除的记录");
+			return;
+		}
+		if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "删除该类型后对应的记录将不再被显示，确定要删除吗？")) {
+			return;
+		}
+		
+		int id = Integer.parseInt(
+				datagrid.getValueAt(selectedRow, 3).toString()
+				);
+		TypeBean bean = new TypeBean();
+		bean.setTypeId(id);
+
+		if (TypeDao.deleteRecord(bean) == DaoResponse.DELETE_SUCCESS) {
+			clearInput();
+			datagrid.clearSelection();
+			loadDatagrid();
+			JOptionPane.showMessageDialog(this, "删除成功");
+		} else {
+			JOptionPane.showMessageDialog(this, "删除失败");
+		}
+		checkForButtons();
+	}
+
+	protected void updateRecord() {
+		int selectedRow = datagrid.getSelectedRow();
+		if (selectedRow < 0) {
+			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
+			return;
+		}
+		int categoryId = Integer.parseInt(
+				datagrid.getValueAt(selectedRow, 1).toString()//Stick to what id column number is
+				);
+		int id = Integer.parseInt(
+				datagrid.getValueAt(selectedRow, 3).toString()//Stick to what id column number is
+				);
+		TypeBean bean = new TypeBean();
+		bean.setCategoryId(categoryId);
+		bean.setTypeId(id);
+		bean.setTypeName(typeField.getText().trim());
+		bean.setDescription(descField.getText().trim());
+		
+		DaoResponse dr = TypeDao.updateRecord(bean);
+		if (dr == DaoResponse.UPDATE_SUCCESS) {
+			clearInput();
+			datagrid.clearSelection();
+			loadDatagrid();
+			JOptionPane.showMessageDialog(this, "更新名称/描述成功(类别暂不可更新)");
+		} else if (dr == DaoResponse.EXISTED) {
+			JOptionPane.showMessageDialog(this, "该名称已存在，请输入其他名称");
+		} else {
+			JOptionPane.showMessageDialog(this, "更新失败");
+		}
+		checkForButtons();
 	}
 
 	@Override
