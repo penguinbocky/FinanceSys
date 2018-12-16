@@ -85,6 +85,8 @@ public class ButtonActionListener implements ActionListener {
 					if (response == DaoResponse.SAVE_SUCCESS) {
 						ccp.loadDatagrid();
 						ccp.clearInput();
+					} else if (response == DaoResponse.EXISTED) {
+						JOptionPane.showMessageDialog(null, "该名称已存在，请输入其他名称");
 					}
 					
 					break;
@@ -95,6 +97,8 @@ public class ButtonActionListener implements ActionListener {
 					if (response == DaoResponse.SAVE_SUCCESS) {
 						tcp.loadDatagrid();
 						tcp.clearInput();
+					} else if (response == DaoResponse.EXISTED) {
+						JOptionPane.showMessageDialog(null, "该名称已存在，请输入其他名称");
 					}
 					
 					break;
