@@ -40,7 +40,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 	private Map<Integer, List<TypeBean>> typeDefsMap;
 	private List<TimeOption> timeOptionsList;
 
-	private CategoryBean selectedCategory = new CategoryBean(1, "默认");
+	private CategoryBean selectedCategory = new CategoryBean(CategoryBean.DEPOSIT, "默认");
 	private TimeOption selectedTimeOption = TimeOption.LATEST_30;
 	private Optional<List<TypeBean>> selectedTypes;
 
