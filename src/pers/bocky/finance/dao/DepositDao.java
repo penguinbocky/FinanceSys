@@ -576,7 +576,7 @@ public class DepositDao extends BaseDao {
 	}
 
 	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
-		return calculateAmountOfLastMonthhOfType(DepositBean.CATEGORY_ID, typeId);
+		return calculateAmountOfLastMonthOfType(DepositBean.CATEGORY_ID, typeId);
 	}
 	
 	/**
@@ -622,5 +622,21 @@ public class DepositDao extends BaseDao {
 		}
 		
 		return list;
+	}
+
+	public static double calculateAmountOfLastWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfLastWeekOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountFromThisWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountFromThisWeekOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountOfTodayOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfTodayOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAvgWeekAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAvgWeekAmountOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
 	}
 }

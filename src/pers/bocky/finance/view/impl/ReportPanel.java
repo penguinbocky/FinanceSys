@@ -102,13 +102,12 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 	}
 
 	private void tryCalculate() {
-		System.out.println("tryCalculate > " + selectedTypes.isPresent() + ", " + (selectedTypes.isPresent() ? selectedTypes.get() : "not present"));
+		System.out.println("selected values:");
+		System.out.println(selectedTimeOption);
+		System.out.println(selectedCategory + "" + selectedCategory.getCategoryId());
+		System.out.println(selectedTypes);
+		System.out.println("tryCalculate selectedTypes.isPresent() > " + (selectedTypes.isPresent() ? selectedTypes.get() : "not present"));
 		if (selectedTypes.isPresent() && selectedTypes.get().size() > 0) {
-			System.out.println("none null");
-			System.out.println("selected values:");
-			System.out.println(selectedTimeOption);
-			System.out.println(selectedCategory + "" + selectedCategory.getCategoryId());
-			System.out.println(selectedTypes);
 
 			Integer[] selectedTypeIds = selectedTypes.get().stream().map(bean -> bean.getTypeId()).toArray(Integer[]::new);
 			double result = 0;
@@ -126,6 +125,18 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 					break;
 				case CURRENT_MONTH:
 					result = DepositDao.calculateAmountFromThisMonthOfType(selectedTypeIds);
+					break;
+				case LAST_WEEK:
+					result = DepositDao.calculateAmountOfLastWeekOfType(selectedTypeIds);
+					break;
+				case CURRENT_WEEK:
+					result = DepositDao.calculateAmountFromThisWeekOfType(selectedTypeIds);
+					break;
+				case TODAY:
+					result = DepositDao.calculateAmountOfTodayOfType(selectedTypeIds);
+					break;
+				case AVG_WEEK:
+					result = DepositDao.calculateAvgWeekAmountOfType(selectedTypeIds);
 					break;
 				default:
 					break;
@@ -145,6 +156,18 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 				case CURRENT_MONTH:
 					result = ConsumeDao.calculateAmountFromThisMonthOfType(selectedTypeIds);
 					break;
+				case LAST_WEEK:
+					result = ConsumeDao.calculateAmountOfLastWeekOfType(selectedTypeIds);
+					break;
+				case CURRENT_WEEK:
+					result = ConsumeDao.calculateAmountFromThisWeekOfType(selectedTypeIds);
+					break;
+				case TODAY:
+					result = ConsumeDao.calculateAmountOfTodayOfType(selectedTypeIds);
+					break;
+				case AVG_WEEK:
+					result = ConsumeDao.calculateAvgWeekAmountOfType(selectedTypeIds);
+					break;
 				default:
 					break;
 				}
@@ -163,6 +186,18 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 				case CURRENT_MONTH:
 					result = BorrowDao.calculateAmountFromThisMonthOfType(selectedTypeIds);
 					break;
+				case LAST_WEEK:
+					result = BorrowDao.calculateAmountOfLastWeekOfType(selectedTypeIds);
+					break;
+				case CURRENT_WEEK:
+					result = BorrowDao.calculateAmountFromThisWeekOfType(selectedTypeIds);
+					break;
+				case TODAY:
+					result = BorrowDao.calculateAmountOfTodayOfType(selectedTypeIds);
+					break;
+				case AVG_WEEK:
+					result = BorrowDao.calculateAvgWeekAmountOfType(selectedTypeIds);
+					break;
 				default:
 					break;
 				}
@@ -180,6 +215,18 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 					break;
 				case CURRENT_MONTH:
 					result = LendDao.calculateAmountFromThisMonthOfType(selectedTypeIds);
+					break;
+				case LAST_WEEK:
+					result = LendDao.calculateAmountOfLastWeekOfType(selectedTypeIds);
+					break;
+				case CURRENT_WEEK:
+					result = LendDao.calculateAmountFromThisWeekOfType(selectedTypeIds);
+					break;
+				case TODAY:
+					result = LendDao.calculateAmountOfTodayOfType(selectedTypeIds);
+					break;
+				case AVG_WEEK:
+					result = LendDao.calculateAvgWeekAmountOfType(selectedTypeIds);
 					break;
 				default:
 					break;
@@ -250,10 +297,9 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 				@Override
 				public void itemStateChanged(ItemEvent e) {
 					if (e.getStateChange() == ItemEvent.SELECTED) {
-						System.out.println(timeOption.toString());
 						selectedTimeOption = timeOption;
+						tryCalculate();
 					}
-					tryCalculate();
 				}
 			});
 		});
@@ -278,6 +324,10 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 
 	private List<TimeOption> loadAllTimeOptions() {
 		List<TimeOption> list = new ArrayList<>();
+		list.add(TimeOption.TODAY);
+		list.add(TimeOption.LAST_WEEK);
+		list.add(TimeOption.CURRENT_WEEK);
+		list.add(TimeOption.AVG_WEEK);
 		list.add(TimeOption.LATEST_30);
 		list.add(TimeOption.AVG_MONTH);
 		list.add(TimeOption.LAST_MONTH);

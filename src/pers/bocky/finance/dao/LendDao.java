@@ -222,7 +222,7 @@ public class LendDao extends BaseDao {
 	}
 
 	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
-		return calculateAmountOfLastMonthhOfType(LendBean.CATEGORY_ID, typeId);
+		return calculateAmountOfLastMonthOfType(LendBean.CATEGORY_ID, typeId);
 	}
 	
 	/**
@@ -235,6 +235,22 @@ public class LendDao extends BaseDao {
 		} else {
 			return true;
 		}
+	}
+
+	public static double calculateAmountOfLastWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfLastWeekOfType(LendBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountFromThisWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountFromThisWeekOfType(LendBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountOfTodayOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfTodayOfType(LendBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAvgWeekAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAvgWeekAmountOfType(LendBean.CATEGORY_ID, selectedTypeIds);
 	}
 	
 }

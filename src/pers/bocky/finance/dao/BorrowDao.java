@@ -249,7 +249,7 @@ public class BorrowDao extends BaseDao {
 	}
 
 	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
-		return calculateAmountOfLastMonthhOfType(BorrowBean.CATEGORY_ID, typeId);
+		return calculateAmountOfLastMonthOfType(BorrowBean.CATEGORY_ID, typeId);
 	}
 	
 	/**
@@ -262,6 +262,22 @@ public class BorrowDao extends BaseDao {
 		} else {
 			return true;
 		}
+	}
+
+	public static double calculateAmountOfLastWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfLastWeekOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountFromThisWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountFromThisWeekOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountOfTodayOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfTodayOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAvgWeekAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAvgWeekAmountOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
 	}
 	
 }
