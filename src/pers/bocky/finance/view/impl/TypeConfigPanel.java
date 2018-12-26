@@ -206,7 +206,7 @@ public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
 			JOptionPane.showMessageDialog(this, "请选择需要删除的记录");
 			return;
 		}
-		if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "删除该类型后对应的记录将不再被显示，确定要删除吗？")) {
+		if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "删除该类型后对应的数据记录将不再被显示，确定要删除吗？")) {
 			return;
 		}
 		

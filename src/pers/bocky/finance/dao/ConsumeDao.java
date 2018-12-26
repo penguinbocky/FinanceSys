@@ -592,7 +592,7 @@ public class ConsumeDao extends BaseDao {
 	}
 
 	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
-		return calculateAmountOfLastMonthhOfType(ConsumeBean.CATEGORY_ID, typeId);
+		return calculateAmountOfLastMonthOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 
 	/**
@@ -638,6 +638,22 @@ public class ConsumeDao extends BaseDao {
 		}
 		
 		return list;
+	}
+
+	public static double calculateAmountOfLastWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfLastWeekOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountFromThisWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountFromThisWeekOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountOfTodayOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfTodayOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAvgWeekAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAvgWeekAmountOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
 	}
 	
 }
