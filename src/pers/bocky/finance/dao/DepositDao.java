@@ -639,4 +639,8 @@ public class DepositDao extends BaseDao {
 	public static double calculateAvgWeekAmountOfType(Integer[] selectedTypeIds) {
 		return calculateAvgWeekAmountOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
 	}
+
+	public static double calculateAvgDayAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAvgDayAmountOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
 }
