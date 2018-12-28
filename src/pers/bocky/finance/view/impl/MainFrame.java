@@ -76,6 +76,10 @@ public class MainFrame extends JFrame {
 				WillBeInMainTabbed panel = (WillBeInMainTabbed) tabbedPane.getSelectedComponent();
 				if (!panel.hasMainUI()) {
 					panel.createMainUI();
+				} else {
+					if (panel instanceof ReportPanel) {
+						panel.loadDatagrid();
+					}
 				}
 			}
 		});

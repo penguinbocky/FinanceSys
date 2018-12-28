@@ -345,9 +345,13 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 
 	@Override
 	public void loadDatagrid() {
-		categoryDefsList = loadAllCategoryDefs();
-		typeDefsMap = loadAllTypes();
-		timeOptionsList = loadAllTimeOptions();
+		if (hasMainUI) {
+			tryCalculate();
+		} else {
+			categoryDefsList = loadAllCategoryDefs();
+			typeDefsMap = loadAllTypes();
+			timeOptionsList = loadAllTimeOptions();
+		}
 	}
 
 	private List<TimeOption> loadAllTimeOptions() {
