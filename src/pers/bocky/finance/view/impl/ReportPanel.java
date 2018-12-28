@@ -26,7 +26,9 @@ import pers.bocky.finance.dao.CategoryDao;
 import pers.bocky.finance.dao.ConsumeDao;
 import pers.bocky.finance.dao.DepositDao;
 import pers.bocky.finance.dao.LendDao;
+import pers.bocky.finance.dao.ReportDao;
 import pers.bocky.finance.dao.TypeDao;
+import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
 public class ReportPanel extends JPanel implements WillBeInMainTabbed {
@@ -62,8 +64,9 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 	private void createUIAndLoadOnce() {
 		loadDatagrid();// Init static data first
 		add(createTopPanel(), BorderLayout.NORTH);
-		add(createMiddlePanel(false), BorderLayout.CENTER);
+		add(createMiddlePanel(), BorderLayout.CENTER);
 		add(createBottomPanel(), BorderLayout.SOUTH);
+		tryCalculate();
 	}
 
 	private Component createTopPanel() {
@@ -89,7 +92,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 						System.out.println(selectedCategory + " > " + selectedCategory.getCategoryId());
 						panelForCheckbox.removeAll();
 //						panelForCheckbox.invalidate();
-						add(createMiddlePanel(false), BorderLayout.CENTER);
+						add(createMiddlePanel(), BorderLayout.CENTER);
 						panelForCheckbox.updateUI();
 //						panelForCheckbox.repaint();
 						tryCalculate();
@@ -107,10 +110,9 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		System.out.println(selectedCategory + "" + selectedCategory.getCategoryId());
 		System.out.println(selectedTypes);
 		System.out.println("tryCalculate selectedTypes.isPresent() > " + (selectedTypes.isPresent() ? selectedTypes.get() : "not present"));
+		double result = 0;
 		if (selectedTypes.isPresent() && selectedTypes.get().size() > 0) {
-
 			Integer[] selectedTypeIds = selectedTypes.get().stream().map(bean -> bean.getTypeId()).toArray(Integer[]::new);
-			double result = 0;
 			switch (selectedCategory.getCategoryId()) {
 			case 1://deposit
 				switch (selectedTimeOption) {
@@ -252,17 +254,21 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 			//JOptionPane.showMessageDialog(null, "Result: " + result + (selectedCategory.getCategoryId() == 2 ? "\nNote: 2018.5 and 6 and current month are not taken into account." : ""), selectedTimeOption.getTimeOptionName() + " For " + selectedCategory, JOptionPane.INFORMATION_MESSAGE);
 //		}
 			
-			resultText.setText(selectedTimeOption.getTimeOptionName() + " for " + selectedCategory.getCategoryName() + ": " + result);
-		}//end if
+		} else {
+			result = 0;
+		}
+		resultText.setText(selectedTimeOption.getTimeOptionName() + " for " + selectedCategory.getCategoryName() + ": " + result);
 	}
 
-	private JPanel createMiddlePanel(boolean allChecked) {
+	private JPanel createMiddlePanel() {
 		panelForCheckbox = new JPanel(new GridLayout(5, 0));
 		panelForCheckbox.setBackground(new Color(208, 223, 239));
+		//Fetch all available types for UI to display.
 		selectedTypes = Optional.ofNullable(typeDefsMap.get(selectedCategory.getCategoryId()));
+		List<Integer> favTypeList = ReportDao.fetchFavoriteReportOptions(selectedCategory.getCategoryId()).stream().map(bean -> bean.getTypeId()).collect(Collectors.toList());
 		if (selectedTypes.isPresent()) {
 			selectedTypes.get().stream().forEach(typeBean -> {
-				JCheckBox checkBox = new JCheckBox(typeBean.getTypeName(), allChecked);
+				JCheckBox checkBox = new JCheckBox(typeBean.getTypeName(), favTypeList.contains(typeBean.getTypeId()));
 				checkBox.setOpaque(false);
 				panelForCheckbox.add(checkBox);
 				checkBox.addItemListener(new ItemListener() {
@@ -277,15 +283,25 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 							selectedTypes.get().remove(typeBean);
 						}
 						tryCalculate();
+						//Currently, save for each time change happens.
+						saveSelectedTypesForCategory(selectedCategory.getCategoryId(), selectedTypes.get());
 					}
 				});
 			});
-			if (!allChecked) {
-				selectedTypes.get().clear();
-			}
+			//Ensure it holds the real selected/checked types.
+			selectedTypes = Optional.ofNullable(selectedTypes.get().stream().filter(bean -> favTypeList.contains(bean.getTypeId())).collect(Collectors.toList()));
 		}
 		
 		return panelForCheckbox;
+	}
+
+	protected void saveSelectedTypesForCategory(Integer categoryId, List<TypeBean> list) {
+		DaoResponse dr = ReportDao.saveFavReportOptions(categoryId, list);
+		if (dr == DaoResponse.SAVE_SUCCESS) {
+			System.out.println("Favorite report options saved successfully.");
+		} else {
+			System.out.println("Failed to save favorite report options.");
+		}
 	}
 
 	private JPanel createBottomPanel() {
