@@ -114,7 +114,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		if (selectedTypes.isPresent() && selectedTypes.get().size() > 0) {
 			Integer[] selectedTypeIds = selectedTypes.get().stream().map(bean -> bean.getTypeId()).toArray(Integer[]::new);
 			switch (selectedCategory.getCategoryId()) {
-			case 1://deposit
+			case CategoryBean.DEPOSIT:
 				switch (selectedTimeOption) {
 				case LATEST_30:
 					result = DepositDao.calculateAmountOfLatestMonthOfType(selectedTypeIds);
@@ -147,7 +147,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 					break;
 				}
 				break;
-			case 2://consume
+			case CategoryBean.CONSUME:
 				switch (selectedTimeOption) {
 				case LATEST_30:
 					result = ConsumeDao.calculateAmountOfLatestMonthOfType(selectedTypeIds);
@@ -180,7 +180,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 					break;
 				}
 				break;
-			case 3://borrow
+			case CategoryBean.BORROW:
 				switch (selectedTimeOption) {
 				case LATEST_30:
 					result = BorrowDao.calculateAmountOfLatestMonthOfType(selectedTypeIds);
@@ -213,7 +213,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 					break;
 				}
 				break;
-			case 4://lend
+			case CategoryBean.LEND:
 				switch (selectedTimeOption) {
 				case LATEST_30:
 					result = LendDao.calculateAmountOfLatestMonthOfType(selectedTypeIds);
@@ -250,14 +250,11 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 			default:
 				break;
 			}//end switch
-			
-			//JOptionPane.showMessageDialog(null, "Result: " + result + (selectedCategory.getCategoryId() == 2 ? "\nNote: 2018.5 and 6 and current month are not taken into account." : ""), selectedTimeOption.getTimeOptionName() + " For " + selectedCategory, JOptionPane.INFORMATION_MESSAGE);
-//		}
-			
 		} else {
 			result = 0;
 		}
-		resultText.setText(selectedTimeOption.getTimeOptionName() + " " + selectedCategory.getCategoryName() + ": " + result);
+		resultText.setText(selectedTimeOption.getTimeOptionName() + " " + selectedCategory.getCategoryName() + ": " + result
+				+ (selectedCategory.getCategoryId() == CategoryBean.CONSUME ? "\nNote: 2018.5 and 6 and current month are not taken into account." : ""));
 	}
 
 	private JPanel createMiddlePanel() {
