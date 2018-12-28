@@ -43,7 +43,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 	private List<TimeOption> timeOptionsList;
 
 	private CategoryBean selectedCategory = new CategoryBean(CategoryBean.DEPOSIT, "默认");
-	private TimeOption selectedTimeOption = TimeOption.LATEST_30;
+	private TimeOption selectedTimeOption = TimeOption.TODAY;
 	private Optional<List<TypeBean>> selectedTypes;
 
 	private JPanel panelForCheckbox;
@@ -257,7 +257,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		} else {
 			result = 0;
 		}
-		resultText.setText(selectedTimeOption.getTimeOptionName() + " for " + selectedCategory.getCategoryName() + ": " + result);
+		resultText.setText(selectedTimeOption.getTimeOptionName() + " " + selectedCategory.getCategoryName() + ": " + result);
 	}
 
 	private JPanel createMiddlePanel() {
