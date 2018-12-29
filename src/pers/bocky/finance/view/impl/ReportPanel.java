@@ -260,8 +260,12 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		} else {
 			result = 0;
 		}
-		resultText.setText(selectedTimeOption.getTimeOptionName() + " " + selectedCategory.getCategoryName() + ": " + result
-				+ (selectedCategory.getCategoryId() == CategoryBean.CONSUME ? "\nNote: 2018.5 and 6 and current month are not taken into account." : ""));
+		resultText.setText(selectedTimeOption.getTimeOptionName() + " " + selectedCategory.getCategoryName() + ": " + result);
+		if (selectedCategory.getCategoryId() == CategoryBean.CONSUME ) {
+			resultText.setToolTipText("2018年5月和6月存在脏数据，不纳入统计范围.");
+		} else {
+			resultText.setToolTipText(null);
+		}
 	}
 
 	private JPanel createMiddlePanel() {
