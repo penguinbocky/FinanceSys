@@ -21,6 +21,14 @@ public class PropertiesUtil {
 			p.load(in);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 
 		return (String) p.get(key);
