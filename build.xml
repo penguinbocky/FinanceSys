@@ -23,6 +23,10 @@
        <javac srcdir="${src.dir}" destdir="${bin.dir}" classpathref="classpath">
 		<compilerarg line="-encoding UTF-8 "/>
 	   </javac>
+    	
+    	<copy todir="${bin.dir}">
+    		<fileset dir="${src.dir}" excludes="pers/**" /><!-- This is only for resource files -->
+    	</copy>
 
     </target>
 
