@@ -20,8 +20,17 @@ public class ConfigFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private final int WIDTH = 800;
-	private final int HEIGHT = 640;
+	private final int BASE_WIDTH = 980;
+	private final int BASE_HEIGHT = 640;
+	private final Dimension d;
+	private final int WIDTH;
+	private final int HEIGHT;
+	
+	{
+		d = Toolkit.getDefaultToolkit().getScreenSize();
+		WIDTH = (int) (BASE_WIDTH * d.getWidth() / 1366);
+		HEIGHT = (int) (BASE_HEIGHT * d.getHeight() / 768);
+	}
 	
 	static class ConfigFrameLazyHolder {
 		public static ConfigFrame cf = new ConfigFrame();

@@ -23,8 +23,17 @@ public class BorrowHistoryFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private final int WIDTH = 460;
-	private final int HEIGHT = 500;
+	private final int BASE_WIDTH = 460;
+	private final int BASE_HEIGHT = 500;
+	private final Dimension d;
+	private final int WIDTH;
+	private final int HEIGHT;
+	
+	{
+		d = Toolkit.getDefaultToolkit().getScreenSize();
+		WIDTH = (int) (BASE_WIDTH * d.getWidth() / 1366);
+		HEIGHT = (int) (BASE_HEIGHT * d.getHeight() / 768);
+	}
 	
 //	private static class BorrowHistoryFrameLazyHolder {
 //		private static final BorrowHistoryFrame INSTANCE = new BorrowHistoryFrame(borrowId);

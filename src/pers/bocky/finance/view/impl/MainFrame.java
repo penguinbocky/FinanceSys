@@ -27,15 +27,26 @@ public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final int WIDTH = 860;
-	private final int HEIGHT = 640;
-	private final Font GLOBAL_FONT = new Font("Microsoft Yahei", Font.PLAIN, 14);
+	private final int BASE_WIDTH = 1098;
+	private final int BASE_HEIGHT = 640;
+	private final int BASE_FONT_SIZE = 14;
+	private final Dimension d;
+	private final int WIDTH;
+	private final int HEIGHT;
+	private final Font GLOBAL_FONT;
+	
+	{
+		d = Toolkit.getDefaultToolkit().getScreenSize();
+		WIDTH = (int) (BASE_WIDTH * d.getWidth() / 1366);
+		HEIGHT = (int) (BASE_HEIGHT * d.getHeight() / 768);
+		
+		GLOBAL_FONT = new Font("Microsoft Yahei", Font.PLAIN, (int) (BASE_FONT_SIZE * d.getHeight() / 640));
+	}
 	
 	public MainFrame() throws HeadlessException {
 		super();
 		
 		setTitle("财务管理系统");
-		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		setBounds((int)(d.getWidth() - WIDTH) / 2, (int)(d.getHeight() - HEIGHT) / 2, 
 				WIDTH, HEIGHT);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);	

@@ -1,7 +1,9 @@
 package pers.bocky.finance.component;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -16,6 +18,17 @@ public class DataGrid extends JTable {
 
 	private static final long serialVersionUID = 1L;
 
+	private final int BASE_ROW_HEIGHT = 20;
+	private final int BASE_FONT_SIZE = 14;
+	private final int ROW_HEIGHT;
+	private final Font GLOBAL_FONT;
+	
+	{
+		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+		ROW_HEIGHT = (int) (BASE_ROW_HEIGHT * d.getHeight() / 768);
+		GLOBAL_FONT = new Font("Microsoft Yahei", Font.PLAIN, (int) (BASE_FONT_SIZE * d.getHeight() / 640));
+	}
+	
 	private DefaultTableModel datagridModel;
 	
 	public DataGrid(String[] colNames) {
@@ -25,8 +38,8 @@ public class DataGrid extends JTable {
 
 	@SuppressWarnings("serial")
 	private void init(String[] colNames) {
-		setRowHeight(20);
-		setFont(new Font("", Font.PLAIN, 16));
+		setRowHeight(ROW_HEIGHT);
+		setFont(GLOBAL_FONT);
 		setBackground(new Color(199, 237, 204, 255));
 //		setForeground(new Color(255, 60, 60, 255));
 		addMouseListener(new MouseAdapter() {
