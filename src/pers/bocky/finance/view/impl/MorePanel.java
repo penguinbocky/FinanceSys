@@ -11,11 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.dao.BaseDao;
-import pers.bocky.finance.dao.BorrowDao;
-import pers.bocky.finance.dao.ConsumeDao;
-import pers.bocky.finance.dao.DepositDao;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 import pers.bocky.finance.view.impl.ConfigFrame.ConfigFrameLazyHolder;
 
@@ -24,10 +20,9 @@ public class MorePanel extends JPanel implements WillBeInMainTabbed {
 	private static final long serialVersionUID = 1L;
 
 	private JButton openConfigBtn;
-	private JButton calNetDepositBtn1;
-	private JButton calRemainingBorrowAmountFromRelationshipBtn;
-	
 	private JButton dumpDataBaseBtn;
+	
+	private final String DUMP_PATH = "C:\\Users\\bocky\\git\\FinanceSys";
 	
 	public MorePanel() {
 		setStyles();
@@ -56,62 +51,30 @@ public class MorePanel extends JPanel implements WillBeInMainTabbed {
 			}
 		});
 		
-		calNetDepositBtn1 = new JButton("根据（存款栏总和-支出栏的偿还首付/房贷总和）计算实际存款");
-		calNetDepositBtn1.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(MorePanel.this, calNetDeposit(), "计算结果", JOptionPane.INFORMATION_MESSAGE);
-			}
-		});
-		
-		calRemainingBorrowAmountFromRelationshipBtn = new JButton("计算剩余欠款(不含银行贷款)");
-		calRemainingBorrowAmountFromRelationshipBtn.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(MorePanel.this, calRemainingBorrowAmountFromRelationship(), "计算结果", JOptionPane.INFORMATION_MESSAGE);
-			}
-		});
-		
 		dumpDataBaseBtn = new JButton("一键备份数据库所有数据");
+		dumpDataBaseBtn.setToolTipText("文件生成目录：" + DUMP_PATH);
 		dumpDataBaseBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(MorePanel.this, BaseDao.dumpAllData("C:\\Users\\bocky\\git\\FinanceSys"), "结果", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(MorePanel.this, BaseDao.dumpAllData(DUMP_PATH), "结果", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
-		JPanel panelC = new JPanel(new GridLayout(0, 1, 2, 5));
-		panelC.setBackground(Color.LIGHT_GRAY);
+//		JPanel panelC = new JPanel(new GridLayout(0, 1, 2, 5));
+//		panelC.setBackground(Color.LIGHT_GRAY);
 		JPanel panelS = new JPanel(new GridLayout(0, 1, 2, 5));
-		panelS.add(calNetDepositBtn1);
-		JPanel panelE = new JPanel(new GridLayout(0, 1, 2, 5));
-		panelE.add(calRemainingBorrowAmountFromRelationshipBtn);
-		JPanel panelW = new JPanel(new GridLayout(0, 1, 2, 5));
-		panelW.add(dumpDataBaseBtn);
+		panelS.add(dumpDataBaseBtn);
+//		JPanel panelE = new JPanel(new GridLayout(0, 1, 2, 5));
+//		panelE.add();
+//		JPanel panelW = new JPanel(new GridLayout(0, 1, 2, 5));
+//		panelW.add();
 		
-		add(panelC, BorderLayout.CENTER);
+//		add(panelC, BorderLayout.CENTER);
 		add(openConfigBtn, BorderLayout.NORTH);
 		add(panelS, BorderLayout.SOUTH);
-		add(panelW, BorderLayout.WEST);
-		add(panelE, BorderLayout.EAST);
-	}
-
-	protected Object calRemainingBorrowAmountFromRelationship() {
-		return BorrowDao.calAllBorrowAmountOfType(TypeBean.BORROW_FROM_RELATIONSHIPS) - BorrowDao.calAllBorrowHistoryAmountOfType(TypeBean.BORROW_FROM_RELATIONSHIPS);
-	}
-
-	protected double calNetDeposit() {
-		return ((double) Math.round(
-				(DepositDao.calculateAllDepositRecsAmount() 
-				- ConsumeDao.calculateAmountOfType(
-						TypeBean.CONSUME_FOR_PAY_LOAN, 
-						TypeBean.CONSUME_FOR_PAY_RELATIONSHIPS,
-						TypeBean.CONSUME_COSTING_DEPOSIT
-						)
-				) * 100)) / 100;
+//		add(panelW, BorderLayout.WEST);
+//		add(panelE, BorderLayout.EAST);
 	}
 
 	@Override

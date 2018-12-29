@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
@@ -13,8 +15,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
@@ -48,6 +52,9 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 
 	private JPanel panelForCheckbox;
 	private JLabel resultText;
+	
+	private JButton calNetDepositBtn1;
+	private JButton calRemainingBorrowAmountFromRelationshipBtn;
 	
 	public ReportPanel() {
 		super();
@@ -332,11 +339,32 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 			});
 		});
 
-		JPanel panelForBtn = new JPanel();
+		JPanel panelForBtn = new JPanel(new BorderLayout(150, 10));
 		resultText = new JLabel();
 		resultText.setForeground(Color.RED);
-		panelForBtn.add(resultText);
 
+		calNetDepositBtn1 = new JButton("实际存款");
+		calNetDepositBtn1.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(ReportPanel.this, calNetDeposit(), "实际存款", JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
+		
+		calRemainingBorrowAmountFromRelationshipBtn = new JButton("剩余欠款");
+		calRemainingBorrowAmountFromRelationshipBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(ReportPanel.this, calRemainingBorrowAmountFromRelationship(), "剩余欠款", JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
+		
+		panelForBtn.add(calNetDepositBtn1, BorderLayout.WEST);
+		panelForBtn.add(resultText, BorderLayout.CENTER);
+		panelForBtn.add(calRemainingBorrowAmountFromRelationshipBtn, BorderLayout.EAST);
+		
 		layoutPanel.add(panelForRadios2);
 		layoutPanel.add(panelForBtn);
 
@@ -393,4 +421,19 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		return hasMainUI;
 	}
 
+	private Object calRemainingBorrowAmountFromRelationship() {
+		return BorrowDao.calAllBorrowAmountOfType(TypeBean.BORROW_FROM_RELATIONSHIPS) - BorrowDao.calAllBorrowHistoryAmountOfType(TypeBean.BORROW_FROM_RELATIONSHIPS);
+	}
+
+	private double calNetDeposit() {
+		return ((double) Math.round(
+				(DepositDao.calculateAllDepositRecsAmount() 
+				- ConsumeDao.calculateAmountOfType(
+						TypeBean.CONSUME_FOR_PAY_LOAN, 
+						TypeBean.CONSUME_FOR_PAY_RELATIONSHIPS,
+						TypeBean.CONSUME_COSTING_DEPOSIT
+						)
+				) * 100)) / 100;
+	}
+	
 }
