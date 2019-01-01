@@ -659,5 +659,9 @@ public class ConsumeDao extends BaseDao {
 	public static double calculateAvgDayAmountOfType(Integer[] selectedTypeIds) {
 		return calculateAvgDayAmountOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
 	}
+
+	public static double calculateYesterdayAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfYesterdayOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
 	
 }

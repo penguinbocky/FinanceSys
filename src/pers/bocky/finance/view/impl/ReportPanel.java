@@ -118,6 +118,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		System.out.println(selectedTypes);
 		System.out.println("tryCalculate selectedTypes.isPresent() > " + (selectedTypes.isPresent() ? selectedTypes.get() : "not present"));
 		double result = 0;
+		String tooltipText = null;
 		if (selectedTypes.isPresent() && selectedTypes.get().size() > 0) {
 			Integer[] selectedTypeIds = selectedTypes.get().stream().map(bean -> bean.getTypeId()).toArray(Integer[]::new);
 			switch (selectedCategory.getCategoryId()) {
@@ -151,6 +152,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 					result = DepositDao.calculateAvgDayAmountOfType(selectedTypeIds);
 					break;
 				default:
+					tooltipText = "存款项不支持此统计类型";
 					break;
 				}
 				break;
@@ -183,7 +185,11 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 				case AVG_DAY:
 					result = ConsumeDao.calculateAvgDayAmountOfType(selectedTypeIds);
 					break;
+				case YESTERDAY:
+					result = ConsumeDao.calculateYesterdayAmountOfType(selectedTypeIds);
+					break;
 				default:
+					tooltipText = "存款项不支持此统计类型";
 					break;
 				}
 				break;
@@ -217,6 +223,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 					result = BorrowDao.calculateAvgDayAmountOfType(selectedTypeIds);
 					break;
 				default:
+					tooltipText = "借入项不支持此统计类型";
 					break;
 				}
 				break;
@@ -250,11 +257,13 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 					result = LendDao.calculateAvgDayAmountOfType(selectedTypeIds);
 					break;
 				default:
+					tooltipText = "借出项不支持此统计类型";
 					break;
 				}
 				break;
 
 			default:
+				tooltipText = "不支持的CATEGORY";
 				break;
 			}//end switch
 		} else {
@@ -264,7 +273,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		if (selectedCategory.getCategoryId() == CategoryBean.CONSUME ) {
 			resultText.setToolTipText("2018年5月和6月存在脏数据，不纳入统计范围.");
 		} else {
-			resultText.setToolTipText(null);
+			resultText.setToolTipText(tooltipText);
 		}
 	}
 
@@ -385,11 +394,12 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 
 	private List<TimeOption> loadAllTimeOptions() {
 		List<TimeOption> list = new ArrayList<>();
+		list.add(TimeOption.YESTERDAY);
 		list.add(TimeOption.TODAY);
 		list.add(TimeOption.AVG_DAY);
 		list.add(TimeOption.LAST_WEEK);
 		list.add(TimeOption.CURRENT_WEEK);
-		list.add(TimeOption.AVG_WEEK);
+//		list.add(TimeOption.AVG_WEEK);
 		list.add(TimeOption.LATEST_30);
 		list.add(TimeOption.AVG_MONTH);
 		list.add(TimeOption.LAST_MONTH);

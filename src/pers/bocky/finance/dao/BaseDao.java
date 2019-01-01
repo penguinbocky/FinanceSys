@@ -632,4 +632,64 @@ public class BaseDao {
 		return avg;
 	}
 	
+	protected static double calculateAmountOfYesterdayOfType(int categoryId, Integer... typeId) {
+		System.out.println("calculating Yesterday for categoryId: " + categoryId + ", and typeId: " + typeId);
+		double sum = 0;
+		Connection con = dbUtil.getCon();
+		String tableName = null;
+		switch (categoryId) {
+		case CategoryBean.DEPOSIT:
+			tableName = "deposit";
+			break;
+		case CategoryBean.CONSUME:
+			tableName = "consume";
+			break;
+		case CategoryBean.BORROW:
+			tableName = "borrow";
+			break;
+		case CategoryBean.LEND:
+			tableName = "lend";
+			break;
+
+		default:
+			tableName = "consume";
+			break;
+		}
+		StringBuffer sql = new StringBuffer(
+				"SELECT sum(d.amount) as sum"
+				+ " FROM"
+				+ " " + tableName
+				+ " d, type_dfntn t, category_dfntn c"
+				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
+				+ " AND d.type_id = t.type_id"
+				+ " AND t.category_id = c.category_id"
+				+ " AND c.category_id = " + categoryId);
+
+		if (typeId != null && typeId.length > 0) {
+			sql.append(" AND ( d.type_id = " + typeId[0]);
+			for (int i = 1; i < typeId.length; i++) {
+				Integer type = typeId[i];
+				sql.append(" or d.type_id = " + type);
+			}
+			sql.append(" ) ");
+		}
+		sql.append(" AND date_format(occur_ts, '%Y-%m-%d') = date_format(date_sub(CURRENT_TIMESTAMP, interval 1 day), '%Y-%m-%d')");
+		
+		try {
+			PreparedStatement pstat = con.prepareStatement(sql.toString());
+			ResultSet rs = pstat.executeQuery();
+			
+			if(rs != null && rs.next()){
+				sum = rs.getDouble("sum");
+			}
+			pstat.close();
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(con);
+		}
+		return sum;
+	}
+	
 }
