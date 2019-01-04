@@ -296,7 +296,7 @@ public class ConsumeDao extends BaseDao {
 		return list;
 	}
 	
-	public static List<ConsumeBean> fetchConsumeRecsByAmount(Comparator selectedComparator, Integer amount){
+	public static List<ConsumeBean> fetchConsumeRecsByAmount(Comparator selectedComparator, Double amount){
 		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
@@ -625,7 +625,7 @@ public class ConsumeDao extends BaseDao {
 			list = fetchConsumeRecsByDesc(selectedComparator, _filterValue);
 			break;
 		case "数量":
-			list = fetchConsumeRecsByAmount(selectedComparator, Integer.parseInt(_filterValue));
+			list = fetchConsumeRecsByAmount(selectedComparator, Double.parseDouble(_filterValue));
 			break;
 		case "最后更新于":
 			list = fetchConsumeRecsByLastUpdTs(selectedComparator, new Timestamp(Long.parseLong(_filterValue)), new Timestamp(Long.parseLong(_filterValue2)));

@@ -165,7 +165,7 @@ public class DepositDao extends BaseDao {
 		return list;
 	}
 	
-	public static List<DepositBean> fetchDepositRecsByAmount(Comparator selectedComparator, Integer amount){
+	public static List<DepositBean> fetchDepositRecsByAmount(Comparator selectedComparator, Double amount){
 		List<DepositBean> list = new ArrayList<DepositBean>();
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
@@ -609,7 +609,7 @@ public class DepositDao extends BaseDao {
 			list = fetchDepositRecsByDesc(selectedComparator, _filterValue);
 			break;
 		case "数量":
-			list = fetchDepositRecsByAmount(selectedComparator, Integer.parseInt(_filterValue));
+			list = fetchDepositRecsByAmount(selectedComparator, Double.parseDouble(_filterValue));
 			break;
 		case "最后更新于":
 			list = fetchDepositRecsByLastUpdTs(selectedComparator, new Timestamp(Long.parseLong(_filterValue)), new Timestamp(Long.parseLong(_filterValue2)));
