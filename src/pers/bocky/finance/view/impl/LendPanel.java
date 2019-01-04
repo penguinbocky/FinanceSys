@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -32,8 +33,6 @@ import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
-import pers.bocky.finance.util.NumberUtil;
-import pers.bocky.finance.util.StringUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
 public class LendPanel extends JPanel implements WillBeInMainTabbed{
@@ -204,7 +203,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				sumLabel.setText(StringUtil.subZeroAndDot(sumAmount()));
+				sumLabel.setText(NumberFormat.getNumberInstance().format(sumAmount()));
 			}
 		});
 		
@@ -347,11 +346,11 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		List<Double> doubleList = new ArrayList<Double>();
 		for (int row = 0; row < size; row++) {
 			String amountStr = (String) datagrid.getValueAt(row, 4);
-			double amount = Double.parseDouble(amountStr);
+			double amount = Double.parseDouble(amountStr.replaceAll(",", ""));
 			doubleList.add(amount);
 		}
 		
-		return NumberUtil.sum(doubleList);
+		return doubleList.stream().reduce((acc, ele) -> acc += ele).orElse(0d);
 	}
 	
 	private void loadTypeDropDown() {
@@ -371,7 +370,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			v.add(bean.getTypeId().toString());
 			v.add(bean.getTypeName());
 			v.add(bean.getToWho());
-			v.add(StringUtil.subZeroAndDot(bean.getAmount()));
+			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
 			v.add(bean.getOccurTs() != null ? DateUtil.timestamp2DateStr(bean.getOccurTs()) : null);
 			v.add(bean.getLastUpdateTs().toString());

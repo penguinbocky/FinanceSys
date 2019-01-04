@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -269,7 +270,9 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		} else {
 			result = 0;
 		}
-		resultText.setText(selectedTimeOption.getTimeOptionName() + " " + selectedCategory.getCategoryName() + ": " + result);
+		
+		DecimalFormat decimalFormat = new DecimalFormat("#,##0.0#");
+		resultText.setText(selectedTimeOption.getTimeOptionName() + " " + selectedCategory.getCategoryName() + ": " + decimalFormat.format(result));
 		if (selectedCategory.getCategoryId() == CategoryBean.CONSUME ) {
 			resultText.setToolTipText("2018年5月和6月存在脏数据，不纳入统计范围.");
 		} else {

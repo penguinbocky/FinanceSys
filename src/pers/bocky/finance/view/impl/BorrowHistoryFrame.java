@@ -6,6 +6,7 @@ import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -17,7 +18,6 @@ import pers.bocky.finance.bean.BorrowHistoryBean;
 import pers.bocky.finance.component.DataGrid;
 import pers.bocky.finance.dao.BorrowDao;
 import pers.bocky.finance.util.DateUtil;
-import pers.bocky.finance.util.StringUtil;
 
 public class BorrowHistoryFrame extends JFrame {
 
@@ -90,7 +90,7 @@ public class BorrowHistoryFrame extends JFrame {
 			Vector<String> v = new Vector<String>();
 			v.add(bean.getBorrowHistoryId().toString());
 			v.add(bean.getBorrowHistoryId().toString());//Dummy one
-			v.add(StringUtil.subZeroAndDot(bean.getAmount().toString()));
+			v.add(NumberFormat.getNumberInstance().format(bean.getAmount().toString()));
 			v.add(bean.getDescription());
 			v.add(bean.getOccurTs() != null ? DateUtil.timestamp2DateStr(bean.getOccurTs()) : null);
 			v.add(bean.getLastUpdateTs().toString());
