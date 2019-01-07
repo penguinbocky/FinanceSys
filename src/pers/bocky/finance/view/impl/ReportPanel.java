@@ -47,11 +47,11 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 	private Map<Integer, List<TypeBean>> typeDefsMap;
 	private List<TimeOption> timeOptionsList;
 
-	private CategoryBean selectedCategory = new CategoryBean(CategoryBean.DEPOSIT, "默认");
+	private CategoryBean selectedCategory = new CategoryBean(CategoryBean.CONSUME, "默认");
 	private TimeOption selectedTimeOption = TimeOption.TODAY;
 	private Optional<List<TypeBean>> selectedTypes;
 
-	private JPanel panelForCheckbox;
+	private JPanel panelForCheckbox = new JPanel(new GridLayout(5, 0));
 	private JLabel resultText;
 	
 	private JButton calNetDepositBtn1;
@@ -99,10 +99,10 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 						selectedCategory = categoryBean;
 						System.out.println(selectedCategory + " > " + selectedCategory.getCategoryId());
 						panelForCheckbox.removeAll();
-//						panelForCheckbox.invalidate();
+//						panelForCheckbox.revalidate();
 						add(createMiddlePanel(), BorderLayout.CENTER);
-						panelForCheckbox.updateUI();
-//						panelForCheckbox.repaint();
+//						panelForCheckbox.updateUI();
+						panelForCheckbox.repaint();
 						tryCalculate();
 					}
 
@@ -281,7 +281,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 	}
 
 	private JPanel createMiddlePanel() {
-		panelForCheckbox = new JPanel(new GridLayout(5, 0));
+//		panelForCheckbox = new JPanel(new GridLayout(5, 0));
 		panelForCheckbox.setBackground(new Color(208, 223, 239));
 		//Fetch all available types for UI to display.
 		selectedTypes = Optional.ofNullable(typeDefsMap.get(selectedCategory.getCategoryId()));
