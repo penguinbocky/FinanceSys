@@ -120,7 +120,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 	protected void startHistoryFrame() {
 		int selectedRowIndex = datagrid.getSelectedRow();
 		String lendIdStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
-		new LendHistoryFrame(Integer.parseInt(lendIdStr)).start();
+		new LendHistoryFrame(Integer.parseInt(lendIdStr));
 	}
 	
 	protected void fillFields(DataGrid datagrid, int selectedRowIndex) {

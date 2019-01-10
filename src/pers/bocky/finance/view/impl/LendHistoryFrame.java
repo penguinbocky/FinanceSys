@@ -23,7 +23,7 @@ public class LendHistoryFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private final int BASE_WIDTH = 460;
+	private final int BASE_WIDTH = 800;
 	private final int BASE_HEIGHT = 500;
 	private final Dimension d;
 	private final int WIDTH;

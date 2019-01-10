@@ -23,7 +23,7 @@ public class BorrowHistoryFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private final int BASE_WIDTH = 460;
+	private final int BASE_WIDTH = 800;
 	private final int BASE_HEIGHT = 500;
 	private final Dimension d;
 	private final int WIDTH;
@@ -90,7 +90,7 @@ public class BorrowHistoryFrame extends JFrame {
 			Vector<String> v = new Vector<String>();
 			v.add(bean.getBorrowHistoryId().toString());
 			v.add(bean.getBorrowHistoryId().toString());//Dummy one
-			v.add(NumberFormat.getNumberInstance().format(bean.getAmount().toString()));
+			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
 			v.add(bean.getOccurTs() != null ? DateUtil.timestamp2DateStr(bean.getOccurTs()) : null);
 			v.add(bean.getLastUpdateTs().toString());
