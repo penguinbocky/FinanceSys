@@ -133,7 +133,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			
 			typesDropdown.setSelectedIndex(getDropdownIndexByTypeId(Integer.parseInt(typeId)));
 			destField.setText(dest);
-			amountField.setText(amount);
+			amountField.setText(amount.replaceAll(",", ""));
 			descField.setText(desc);
 			if (occurTs != null && !"".equals(occurTs)) {
 				dp.fillFields(occurTs.substring(0, 4), occurTs.substring(5, 7), occurTs.substring(8, 10));

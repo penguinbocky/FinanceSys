@@ -153,7 +153,7 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 			
 			typesDropdown.setSelectedIndex(getDropdownIndexByTypeId(Integer.parseInt(typeId)));
 			sourceField.setText(source);
-			amountField.setText(amount);
+			amountField.setText(amount.replaceAll(",", ""));
 			descField.setText(desc);
 			
 			if (occurTs != null && !"".equals(occurTs)) {
