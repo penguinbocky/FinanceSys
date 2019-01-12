@@ -18,7 +18,8 @@ public class BorrowDao extends BaseDao {
 		List<BorrowBean> list = new ArrayList<BorrowBean>();
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"SELECT occur_ts, borrow_id, type_id, type_name, from_who, amount, description, add_ts, last_update_ts, PAYBACKEDAMT, (AMOUNT - PAYBACKEDAMT) LEFTAMT"
+				"SELECT occur_ts, borrow_id, type_id, type_name, from_who, amount, description, add_ts, last_update_ts"
+				+ ", PAYBACKEDAMT, CASE WHEN PAYBACKEDAMT IS NULL THEN amount else (AMOUNT - PAYBACKEDAMT) end LEFTAMT"
 				+ " FROM ("
 				+ " SELECT d.occur_ts, d.borrow_id, d.type_id, t.type_name, d.from_who, d.amount, d.description, d.add_ts, d.last_update_ts, SUM(H.AMOUNT) PAYBACKEDAMT"
 				+ " FROM borrow d LEFT JOIN BORROW_HISTORY H ON D.BORROW_ID = H.BORROW_ID, type_dfntn t, category_dfntn c"

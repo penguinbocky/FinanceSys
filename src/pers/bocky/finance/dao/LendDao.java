@@ -18,7 +18,8 @@ public class LendDao extends BaseDao {
 		List<LendBean> list = new ArrayList<LendBean>();
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"SELECT occur_ts, lend_id, type_id, type_name, to_who, amount, description, add_ts, last_update_ts, paybackedAmt, (amount - paybackedAmt) leftAmt"
+				"SELECT occur_ts, lend_id, type_id, type_name, to_who, amount, description, add_ts, last_update_ts"
+				+ ", paybackedAmt, CASE WHEN PAYBACKEDAMT IS NULL THEN amount else (amount - paybackedAmt) end leftAmt"
 				+ " FROM ("
 				+ " SELECT d.occur_ts, d.lend_id, d.type_id, t.type_name, d.to_who, d.amount, d.description, d.add_ts, d.last_update_ts, SUM(h.amount) paybackedAmt"
 				+ " FROM lend d LEFT JOIN LEND_HISTORY H ON D.LEND_ID = H.LEND_ID, type_dfntn t, category_dfntn c"
