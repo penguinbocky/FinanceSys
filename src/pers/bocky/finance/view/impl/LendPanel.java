@@ -92,7 +92,10 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
-		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "去向", "数量", "备注", "发生时间", "最后更新于", "创建时间"};
+		final String[] COL_NAMES = {
+				"ID", "类型 ID", "类型", "去向", "数量", "备注", "发生时间", "最后更新于", "创建时间",
+				"已还", "剩余"
+		};
 		datagrid = new DataGrid(COL_NAMES);
 		
 		datagrid.addMouseListener(new MouseAdapter() {
@@ -277,6 +280,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		if (LendDao.savePaybackHistory(bean)) {
 			clearInput();
 			datagrid.clearSelection();
+			loadDatagrid();//To refresh pay-backed/left amount
 			JOptionPane.showMessageDialog(this, "偿还成功");
 		} else {
 			JOptionPane.showMessageDialog(this, "偿还失败");
@@ -375,6 +379,8 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			v.add(bean.getOccurTs() != null ? DateUtil.timestamp2DateStr(bean.getOccurTs()) : null);
 			v.add(bean.getLastUpdateTs().toString());
 			v.add(bean.getAddTs().toString());
+			v.add(NumberFormat.getNumberInstance().format(bean.getPaybackedAmt()));
+			v.add(NumberFormat.getNumberInstance().format(bean.getLeftAmt()));
 			dataVectorList.add(v);
 		}
 		datagrid.setData(dataVectorList);

@@ -18,12 +18,16 @@ public class LendDao extends BaseDao {
 		List<LendBean> list = new ArrayList<LendBean>();
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.lend_id, d.type_id, t.type_name, d.to_who, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM lend d, type_dfntn t, category_dfntn c"
+				"SELECT occur_ts, lend_id, type_id, type_name, to_who, amount, description, add_ts, last_update_ts, paybackedAmt, (amount - paybackedAmt) leftAmt"
+				+ " FROM ("
+				+ " SELECT d.occur_ts, d.lend_id, d.type_id, t.type_name, d.to_who, d.amount, d.description, d.add_ts, d.last_update_ts, SUM(h.amount) paybackedAmt"
+				+ " FROM lend d LEFT JOIN LEND_HISTORY H ON D.LEND_ID = H.LEND_ID, type_dfntn t, category_dfntn c"
 				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
 				+ " AND d.type_id = t.type_id"
 				+ " AND t.category_id = c.category_id"
 				+ " AND c.category_id = " + LendBean.CATEGORY_ID
+				+ " GROUP BY d.lend_id"
+				+ " ) TEMP"
 				+ " ORDER BY last_update_ts DESC");
 
 		try {
@@ -42,6 +46,8 @@ public class LendDao extends BaseDao {
 				bean.setAddTs(rs.getTimestamp("add_ts"));
 				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
 				bean.setOccurTs(rs.getTimestamp("occur_ts"));
+				bean.setPaybackedAmt(rs.getDouble("paybackedAmt"));
+				bean.setLeftAmt(rs.getDouble("leftAmt"));
 				list.add(bean);
 			}
 			pstat.close();
