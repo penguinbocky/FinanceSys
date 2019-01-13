@@ -82,8 +82,9 @@ public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
-		final String[] COL_NAMES = {"whatever", "类别ID", "类别名称", "类型ID", "类型名称", "类型描述", "最后更新于", "创建时间"};
-		datagrid = new DataGrid(COL_NAMES);
+		final String[] COL_NAMES = {"类别ID", "类别名称", "类型 ID", "类型名称", "类型描述", "最后更新于", "创建时间"};
+		datagrid = new DataGrid(COL_NAMES, new String[] {"类别ID"}
+		, new String[] {"类别名称", "类型 ID"}, new String[] {"类型描述"});
 		datagrid.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -108,9 +109,9 @@ public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
 
 	protected void fillFields(DataGrid datagrid2, int selectedRowIndex) {
 		if (datagrid != null && selectedRowIndex > -1) {
-			String categoryId = (String) datagrid.getValueAt(selectedRowIndex, 1);
-			String typeName = (String) datagrid.getValueAt(selectedRowIndex, 4);
-			String desc = (String) datagrid.getValueAt(selectedRowIndex, 5);
+			String categoryId = (String) datagrid.getValueAt(selectedRowIndex, 0);
+			String typeName = (String) datagrid.getValueAt(selectedRowIndex, 3);
+			String desc = (String) datagrid.getValueAt(selectedRowIndex, 4);
 			
 			categoryDropdown.setSelectedIndex(getDropdownIndexByTypeId(Integer.parseInt(categoryId)));
 			typeField.setText(typeName);
@@ -211,7 +212,7 @@ public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
 		}
 		
 		int id = Integer.parseInt(
-				datagrid.getValueAt(selectedRow, 3).toString()
+				datagrid.getValueAt(selectedRow, 2).toString()
 				);
 		TypeBean bean = new TypeBean();
 		bean.setTypeId(id);
@@ -234,10 +235,10 @@ public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
 			return;
 		}
 		int categoryId = Integer.parseInt(
-				datagrid.getValueAt(selectedRow, 1).toString()//Stick to what id column number is
+				datagrid.getValueAt(selectedRow, 0).toString()//Stick to what id column number is
 				);
 		int id = Integer.parseInt(
-				datagrid.getValueAt(selectedRow, 3).toString()//Stick to what id column number is
+				datagrid.getValueAt(selectedRow, 2).toString()//Stick to what id column number is
 				);
 		TypeBean bean = new TypeBean();
 		bean.setCategoryId(categoryId);
@@ -267,7 +268,6 @@ public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
 			TypeBean bean = list.get(i);
 			Vector<String> v = new Vector<String>();
 			v.add(bean.getCategoryId().toString());
-			v.add(bean.getCategoryId().toString());//Dummy one
 			v.add(bean.getCategoryName());
 			v.add(bean.getTypeId().toString());
 			v.add(bean.getTypeName());

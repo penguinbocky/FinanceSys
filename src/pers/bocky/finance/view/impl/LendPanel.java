@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,8 +97,9 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 				"ID", "类型 ID", "类型", "去向", "数量", "备注", "发生时间", "最后更新于", "创建时间",
 				"已还", "剩余"
 		};
-		datagrid = new DataGrid(COL_NAMES);
-		
+		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID"}
+				, new String[] {"类型", "去向", "数量", "已还", "剩余", "发生时间"}, new String[] {"备注"});
+		datagrid.setRowColor(4, 9, (a, b) -> (new BigDecimal(a.replaceAll(",", "")).compareTo(new BigDecimal(b.replaceAll(",", ""))) <= 0));
 		datagrid.addMouseListener(new MouseAdapter() {
 
 			@Override

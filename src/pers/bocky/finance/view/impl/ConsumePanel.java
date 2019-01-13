@@ -95,7 +95,8 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
 		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "去向", "数量", "备注", "发生时间", "最后更新于", "创建时间"};
-		datagrid = new DataGrid(COL_NAMES);
+		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID"}
+		, new String[] {"类型", "去向", "数量", "发生时间"}, new String[] {"备注"});
 		
 		JPanel p1 = new JPanel();
 		p1.add(new JLabel("更新"));

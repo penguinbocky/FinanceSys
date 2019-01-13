@@ -78,8 +78,8 @@ public class BorrowHistoryFrame extends JFrame {
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
-		final String[] COL_NAMES = {"ID", "ID", "数量", "备注", "发生时间", "最后更新于", "创建时间"};
-		DataGrid historyDatagrid = new DataGrid(COL_NAMES);
+		final String[] COL_NAMES = {"ID", "数量", "备注", "发生时间", "最后更新于", "创建时间"};
+		DataGrid historyDatagrid = new DataGrid(COL_NAMES, new String[] {"ID"}, null, null);
 		
 		BorrowHistoryBean paramBean = new BorrowHistoryBean();
 		paramBean.setBorrowId(borrowId);
@@ -89,7 +89,6 @@ public class BorrowHistoryFrame extends JFrame {
 			BorrowHistoryBean bean = list.get(i);
 			Vector<String> v = new Vector<String>();
 			v.add(bean.getBorrowHistoryId().toString());
-			v.add(bean.getBorrowHistoryId().toString());//Dummy one
 			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
 			v.add(bean.getOccurTs() != null ? DateUtil.timestamp2DateStr(bean.getOccurTs()) : null);
