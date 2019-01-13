@@ -26,10 +26,12 @@ public class DataGrid extends JTable {
 	private final int BASE_FONT_SIZE = 14;
 	private final int ROW_HEIGHT;
 	private final Font GLOBAL_FONT;
+	private final int ratioForUI;
 	
 	{
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-		ROW_HEIGHT = (int) (BASE_ROW_HEIGHT * d.getHeight() / 768);
+		ratioForUI = (int) (d.getHeight() / 768);
+		ROW_HEIGHT = BASE_ROW_HEIGHT * ratioForUI;
 		GLOBAL_FONT = new Font("Microsoft Yahei", Font.PLAIN, (int) (BASE_FONT_SIZE * d.getHeight() / 640));
 	}
 	
@@ -90,13 +92,13 @@ public class DataGrid extends JTable {
 				tableCol.setMinWidth(0);
 				tableCol.setMaxWidth(0);
 			} else if (smallList.contains(tableCol.getHeaderValue())) {
-				tableCol.setPreferredWidth(100);
-				tableCol.setMinWidth(100);
-				tableCol.setMaxWidth(120);
+				tableCol.setPreferredWidth(100 * ratioForUI);
+				tableCol.setMinWidth(100 * ratioForUI);
+				tableCol.setMaxWidth(120 * ratioForUI);
 			} else if (largeList.contains(tableCol.getHeaderValue())) {
-				tableCol.setPreferredWidth(280);
-				tableCol.setMinWidth(240);
-				tableCol.setMaxWidth(360);
+				tableCol.setPreferredWidth(280 * ratioForUI);
+				tableCol.setMinWidth(240 * ratioForUI);
+				tableCol.setMaxWidth(360 * ratioForUI);
 			}
 		}
 	}
