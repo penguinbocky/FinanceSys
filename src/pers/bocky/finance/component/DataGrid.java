@@ -22,16 +22,16 @@ public class DataGrid extends JTable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final int BASE_ROW_HEIGHT = 20;
-	private final int BASE_FONT_SIZE = 14;
-	private final int ROW_HEIGHT;
-	private final Font GLOBAL_FONT;
-	private final int ratioForUI;
+	private final static int BASE_ROW_HEIGHT = 24;
+	private final static int BASE_FONT_SIZE = 14;
+	private final static int ROW_HEIGHT;
+	private final static Font GLOBAL_FONT;
+	private final static double ratioForUI;
 	
-	{
+	static {
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-		ratioForUI = (int) (d.getHeight() / 768);
-		ROW_HEIGHT = BASE_ROW_HEIGHT * ratioForUI;
+		ratioForUI = d.getHeight() / 768;
+		ROW_HEIGHT = (int) (BASE_ROW_HEIGHT * ratioForUI);
 		GLOBAL_FONT = new Font("Microsoft Yahei", Font.PLAIN, (int) (BASE_FONT_SIZE * d.getHeight() / 640));
 	}
 	
@@ -92,13 +92,13 @@ public class DataGrid extends JTable {
 				tableCol.setMinWidth(0);
 				tableCol.setMaxWidth(0);
 			} else if (smallList.contains(tableCol.getHeaderValue())) {
-				tableCol.setPreferredWidth(100 * ratioForUI);
-				tableCol.setMinWidth(100 * ratioForUI);
-				tableCol.setMaxWidth(120 * ratioForUI);
+				tableCol.setPreferredWidth((int) (100 * ratioForUI));
+				tableCol.setMinWidth((int) (100 * ratioForUI));
+				tableCol.setMaxWidth((int) (120 * ratioForUI));
 			} else if (largeList.contains(tableCol.getHeaderValue())) {
-				tableCol.setPreferredWidth(280 * ratioForUI);
-				tableCol.setMinWidth(240 * ratioForUI);
-				tableCol.setMaxWidth(360 * ratioForUI);
+				tableCol.setPreferredWidth((int) (280 * ratioForUI));
+				tableCol.setMinWidth((int) (240 * ratioForUI));
+				tableCol.setMaxWidth((int) (360 * ratioForUI));
 			}
 		}
 	}
