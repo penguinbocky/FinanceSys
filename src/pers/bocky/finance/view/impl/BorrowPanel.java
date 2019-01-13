@@ -283,6 +283,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		if (BorrowDao.savePaybackHistory(bean)) {
 			clearInput();
 			datagrid.clearSelection();
+			loadDatagrid();//To refresh pay-backed/left amount
 			JOptionPane.showMessageDialog(this, "偿还成功");
 		} else {
 			JOptionPane.showMessageDialog(this, "偿还失败");
@@ -336,7 +337,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		if (BorrowDao.deleteRecord(bean) == DaoResponse.DELETE_SUCCESS) {
 			clearInput();
 			datagrid.clearSelection();
-			loadDatagrid();//To refresh pay-backed/left amount
+			loadDatagrid();
 			JOptionPane.showMessageDialog(this, "删除成功");
 		} else {
 			JOptionPane.showMessageDialog(this, "删除失败");
