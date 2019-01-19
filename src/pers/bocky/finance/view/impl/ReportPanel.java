@@ -152,6 +152,9 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 				case AVG_DAY:
 					result = DepositDao.calculateAvgDayAmountOfType(selectedTypeIds);
 					break;
+				case YESTERDAY:
+					result = DepositDao.calculateYesterdayAmountOfType(selectedTypeIds);
+					break;
 				default:
 					tooltipText = "存款项不支持此统计类型";
 					break;
@@ -223,6 +226,9 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 				case AVG_DAY:
 					result = BorrowDao.calculateAvgDayAmountOfType(selectedTypeIds);
 					break;
+				case YESTERDAY:
+					result = BorrowDao.calculateYesterdayAmountOfType(selectedTypeIds);
+					break;
 				default:
 					tooltipText = "借入项不支持此统计类型";
 					break;
@@ -256,6 +262,9 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 					break;
 				case AVG_DAY:
 					result = LendDao.calculateAvgDayAmountOfType(selectedTypeIds);
+					break;
+				case YESTERDAY:
+					result = LendDao.calculateYesterdayAmountOfType(selectedTypeIds);
 					break;
 				default:
 					tooltipText = "借出项不支持此统计类型";

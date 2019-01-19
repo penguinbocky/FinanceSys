@@ -290,5 +290,9 @@ public class BorrowDao extends BaseDao {
 	public static double calculateAvgDayAmountOfType(Integer[] selectedTypeIds) {
 		return calculateAvgDayAmountOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
 	}
+
+	public static double calculateYesterdayAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfYesterdayOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
+	}
 	
 }
