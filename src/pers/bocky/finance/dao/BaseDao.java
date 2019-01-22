@@ -59,6 +59,7 @@ public class BaseDao {
 			sql.append(" ) ");
 		}
 		
+		logger.log(sql.toString());
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
 			ResultSet rs = pstat.executeQuery();
@@ -119,7 +120,7 @@ public class BaseDao {
 		}
 		
 		sql.append(" AND occur_ts >= date_sub(CURRENT_TIMESTAMP, interval 30 day)");
-		
+		logger.log(sql.toString());
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
 			ResultSet rs = pstat.executeQuery();
@@ -184,7 +185,7 @@ public class BaseDao {
 		}
 		sql.append(" AND date_format(occur_ts, '%Y-%m') != date_format(now(), '%Y-%m') ");
 		sql.append(" group by date_format(occur_ts, '%Y-%m')) temp");
-		
+		logger.log(sql.toString());
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
 			ResultSet rs = pstat.executeQuery();
@@ -244,7 +245,7 @@ public class BaseDao {
 			sql.append(" ) ");
 		}
 		sql.append(" AND date_format(occur_ts, '%Y-%m') = date_format(now(), '%Y-%m')");
-		
+		logger.log(sql.toString());
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
 			ResultSet rs = pstat.executeQuery();
@@ -304,7 +305,7 @@ public class BaseDao {
 			sql.append(" ) ");
 		}
 		sql.append(" AND date_format(occur_ts, '%Y-%m') = date_format(date_sub(CURRENT_TIMESTAMP, interval 1 month), '%Y-%m')");
-		
+		logger.log(sql.toString());
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
 			ResultSet rs = pstat.executeQuery();
@@ -369,7 +370,7 @@ public class BaseDao {
 		}
 		sql.append(" AND date_format(occur_ts, '%x-%v') != date_format(now(), '%x-%v') ");
 		sql.append(" group by date_format(occur_ts, '%x-%v')) temp");
-		
+		logger.log(sql.toString());
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
 			ResultSet rs = pstat.executeQuery();
@@ -429,7 +430,7 @@ public class BaseDao {
 			sql.append(" ) ");
 		}
 		sql.append(" AND date_format(occur_ts, '%x-%v') = date_format(now(), '%x-%v')");
-		
+		logger.log(sql.toString());
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
 			ResultSet rs = pstat.executeQuery();
@@ -489,7 +490,7 @@ public class BaseDao {
 			sql.append(" ) ");
 		}
 		sql.append(" AND date_format(occur_ts, '%x-%v') = date_format(date_sub(CURRENT_TIMESTAMP, interval 1 week), '%x-%v')");
-		
+		logger.log(sql.toString());
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
 			ResultSet rs = pstat.executeQuery();
@@ -549,7 +550,7 @@ public class BaseDao {
 			sql.append(" ) ");
 		}
 		sql.append(" AND date_format(occur_ts, '%Y-%m-%d') = date_format(now(), '%Y-%m-%d')");
-		
+		logger.log(sql.toString());
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
 			ResultSet rs = pstat.executeQuery();
@@ -614,7 +615,7 @@ public class BaseDao {
 		}
 		sql.append(" AND date_format(occur_ts, '%Y-%m-%d') != date_format(now(), '%Y-%m-%d') ");
 		sql.append(" group by date_format(occur_ts, '%Y-%m-%d')) temp");
-		
+		logger.log(sql.toString());
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
 			ResultSet rs = pstat.executeQuery();
@@ -674,7 +675,7 @@ public class BaseDao {
 			sql.append(" ) ");
 		}
 		sql.append(" AND date_format(occur_ts, '%Y-%m-%d') = date_format(date_sub(CURRENT_TIMESTAMP, interval 1 day), '%Y-%m-%d')");
-		
+		logger.log(sql.toString());
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
 			ResultSet rs = pstat.executeQuery();
