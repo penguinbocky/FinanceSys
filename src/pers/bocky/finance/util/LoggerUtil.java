@@ -30,7 +30,7 @@ public enum LoggerUtil {
 			output.setForeground(new Color(63, 169, 36, 255));
 			output.setBackground(Color.BLACK);
 			output.setEditable(false);
-			output.setFont(new Font("Microsoft Yahei", Font.PLAIN, 10));
+			output.setFont(new Font("Microsoft Yahei", Font.PLAIN, 11));
 			
 			JScrollPane scrollPane = new JScrollPane(output);
 			frame.add(scrollPane);
@@ -39,7 +39,8 @@ public enum LoggerUtil {
 	
 	public void log(String log) {
 		if (debugMode) {
-			System.out.println(new Date().toString() + " > " + log); 
+			System.out.println(new Date().toString() + " > " + log);
+			logToPanel(new LogBean(log, new Date()));
 		}
 	}
 	
