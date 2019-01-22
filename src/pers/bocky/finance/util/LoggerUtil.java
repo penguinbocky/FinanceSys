@@ -11,7 +11,7 @@ import javax.swing.JTextArea;
 import pers.bocky.finance.bean.LogBean;
 
 public enum LoggerUtil {
-	SQLogger("SQL Logger", "on".equals(PropertiesUtil.getValue("debug.switch")));
+	SQLogger("SQL Logger", "on".equals(PropertiesUtil.getValueAsString("debug.switch")));
 	
 	private JFrame frame;
 	private JTextArea output;

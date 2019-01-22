@@ -21,6 +21,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.FontUIResource;
 
+import pers.bocky.finance.util.PropertiesUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
 public class MainFrame extends JFrame {
@@ -76,7 +77,13 @@ public class MainFrame extends JFrame {
 		JTabbedPane tabbedPane = new JTabbedPane();
 		for (Iterator<WillBeInMainTabbed> iterator = tabbedPanels.iterator(); iterator.hasNext();) {
 			WillBeInMainTabbed willBeInTabbed = iterator.next();
+			if (!PropertiesUtil.getValueAsBoolean(willBeInTabbed.getTabTitle())) {
+				continue;
+			}
 			tabbedPane.addTab(willBeInTabbed.getTabTitle(), (Component) willBeInTabbed);
+		}
+		if (tabbedPane.getTabCount() <= 0) {
+			tabbedPane.add(tabbedPanels.get(0).getTabTitle(), (Component) tabbedPanels.get(0));
 		}
 		//1 - Trigger first tab panel change event
 		tabbedPane.setSelectedIndex(-1);

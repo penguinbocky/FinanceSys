@@ -27,16 +27,16 @@ public enum DbUtility {
 	private String url;
     private String userName;
     private String password;
-    private final String DB_NAME = PropertiesUtil.getValue("mysql.db") != null ? PropertiesUtil.getValue("mysql.db") : "financial_sys";
-	private String host = PropertiesUtil.getValue("host.ip") != null ? PropertiesUtil.getValue("host.ip") : "localhost";
+    private final String DB_NAME = PropertiesUtil.getValueAsString("mysql.db") != null ? PropertiesUtil.getValueAsString("mysql.db") : "financial_sys";
+	private String host = PropertiesUtil.getValueAsString("host.ip") != null ? PropertiesUtil.getValueAsString("host.ip") : "localhost";
     private int connCount;
     
     private DbUtility(boolean useOracle) {
     	connCount = 0;
 		this.driver = useOracle ? JDBC_ORACLE : JDBC_MYSQL;
 		this.url = useOracle ? "jdbc:oracle:thin:@" + host + ":1521:BOCKYDB" : "jdbc:mysql://" + host + ":3306/" + DB_NAME;
-		this.userName = useOracle ? "bocky" : PropertiesUtil.getValue("mysql.user") != null ? PropertiesUtil.getValue("mysql.user") : "root";
-		this.password = useOracle ? "123456" : PropertiesUtil.getValue("mysql.password") != null ? PropertiesUtil.getValue("mysql.password") : "123456";
+		this.userName = useOracle ? "bocky" : PropertiesUtil.getValueAsString("mysql.user") != null ? PropertiesUtil.getValueAsString("mysql.user") : "root";
+		this.password = useOracle ? "123456" : PropertiesUtil.getValueAsString("mysql.password") != null ? PropertiesUtil.getValueAsString("mysql.password") : "123456";
 		
 		try {
 			Class.forName(this.driver);//PropertiesUtil.getValue("dbDriver"));

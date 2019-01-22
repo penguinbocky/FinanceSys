@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /*
 *1.在jar包代码中要使用绝对路径，路径以 / 开始。
@@ -29,8 +30,23 @@ public class PropertiesUtil {
 		return properties.keySet();
 	}
 	
-	public static String getValue(String key) {
+	public static String getValueAsString(String key) {
 		return (String) properties.get(key);
+	}
+	
+	/**
+	 * Get property value by key and convert the value to a boolean value.
+	 * boolean false for value: number 0(even negative number stands for true), string false, or no value present
+	 * @param key
+	 * @return
+	 */
+	public static boolean getValueAsBoolean(String key) {
+		String value = getValueAsString(key);
+		if (value == null) {
+			return false;
+		}
+		Pattern pattern = Pattern.compile("[0]*|false", Pattern.CASE_INSENSITIVE);
+		return !pattern.matcher(value).matches();
 	}
 	
 //	public static String getValue() {
