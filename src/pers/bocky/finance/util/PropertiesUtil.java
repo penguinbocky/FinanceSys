@@ -2,10 +2,6 @@ package pers.bocky.finance.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -17,8 +13,6 @@ import java.util.Set;
 */
 public class PropertiesUtil {
 
-	public static Map<String, String> propertiesMap;
-	
 	private static String resourcePath = "/app.properties";
 	private static Properties properties;
 	
@@ -27,23 +21,8 @@ public class PropertiesUtil {
 //		resourcePath = userDir + resourcePath;
 		System.out.println("resourcePath > " + resourcePath);
 		
-		propertiesMap = PropertiesUtil.getKeyValues();
-		System.out.println("properties in system > " + propertiesMap);
-	}
-	
-	public static Map<String, String> getKeyValues() {
 		initProperties();
-		Map<String, String> propertiesMap = new HashMap<String, String>();
-		
-		Iterator<Entry<Object, Object>> it = properties.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry<Object, Object> entry = it.next();
-			String key = (String) entry.getKey();
-			String value = (String) entry.getValue();
-			propertiesMap.put(key, value);
-		}
-		
-		return propertiesMap;
+		System.out.println("properties in system > " + properties);
 	}
 	
 	public static Set<Object> getKeySet() {
@@ -54,18 +33,6 @@ public class PropertiesUtil {
 		return (String) properties.get(key);
 	}
 	
-//	public static void setValue(String key, String value) {
-//		Properties p = new Properties();
-//		InputStream in = PropertiesUtil.class.getResourceAsStream("/client.properties");
-//		try {
-//			p.load(in);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//
-//		p.setProperty(key, value);//不能成功写入
-//	}
-//	
 //	public static String getValue() {
 //		File f = new File("client.txt");
 //		if(!f.exists()){
