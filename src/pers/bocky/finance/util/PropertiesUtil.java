@@ -2,7 +2,12 @@ package pers.bocky.finance.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 /*
 *1.在jar包代码中要使用绝对路径，路径以 / 开始。
@@ -12,32 +17,41 @@ import java.util.Properties;
 */
 public class PropertiesUtil {
 
+	public static Map<String, String> propertiesMap;
+	
 	private static String resourcePath = "/app.properties";
+	private static Properties properties;
 	
 	static {
 //		String userDir = System.getProperty("user.dir");
 //		resourcePath = userDir + resourcePath;
 		System.out.println("resourcePath > " + resourcePath);
+		
+		propertiesMap = PropertiesUtil.getKeyValues();
+		System.out.println("properties in system > " + propertiesMap);
+	}
+	
+	public static Map<String, String> getKeyValues() {
+		initProperties();
+		Map<String, String> propertiesMap = new HashMap<String, String>();
+		
+		Iterator<Entry<Object, Object>> it = properties.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<Object, Object> entry = it.next();
+			String key = (String) entry.getKey();
+			String value = (String) entry.getValue();
+			propertiesMap.put(key, value);
+		}
+		
+		return propertiesMap;
+	}
+	
+	public static Set<Object> getKeySet() {
+		return properties.keySet();
 	}
 	
 	public static String getValue(String key) {
-		Properties p = new Properties();
-		InputStream in = PropertiesUtil.class.getResourceAsStream(resourcePath);
-		try {
-			p.load(in);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-		return (String) p.get(key);
+		return (String) properties.get(key);
 	}
 	
 //	public static void setValue(String key, String value) {
@@ -87,4 +101,28 @@ public class PropertiesUtil {
 //		}
 //
 //	}
+	
+	private static void initProperties() {
+		if (properties == null) {
+			System.out.println("get a new properties...");
+			properties = new Properties();
+			InputStream in = PropertiesUtil.class.getResourceAsStream(resourcePath);
+			try {
+				properties.load(in);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (in != null) {
+					try {
+						in.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		} else {
+			System.out.println("properties exists");
+		}
+		
+	}
 }
