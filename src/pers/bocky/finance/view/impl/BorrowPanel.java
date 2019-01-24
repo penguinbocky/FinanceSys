@@ -95,7 +95,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		
 		final String[] COL_NAMES = {
 				"ID", "类型 ID", "类型", "来源", "数量", "备注", "发生时间", "最后更新于", "创建时间",
-				"已还", "剩余"
+				"已还", "未还"
 		};
 		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID"}
 				, new String[] {"类型", "来源", "数量", "已还", "剩余", "发生时间"}, new String[] {"备注"});
