@@ -59,7 +59,7 @@ public class DataGrid extends JTable {
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() == 2){
 					int row = DataGrid.this.getSelectedRow();
-					System.out.println(row);
+					System.out.println("DataGrid.mouseClicked on row index >" + row);
 				}
 			}
 			
@@ -126,8 +126,8 @@ public class DataGrid extends JTable {
 		}
 		
 //		Color old = getForeground();
-		final Color colorForYes = colorForFlag == null ? new Color(34, 151, 18) : colorForFlag;
-		final Color colorForNo = colorForElse == null ? new Color(232, 47, 58, 186) : colorForElse;
+		final Color colorForYes = colorForFlag == null ? new Color(74, 84, 89, 155) : colorForFlag;
+		final Color colorForNo = colorForElse == null ? new Color(180, 16, 2, 255) : colorForElse;
 		DefaultTableCellRenderer renderer = new DefaultTableCellRenderer() {
 			private static final long serialVersionUID = 1L;
 

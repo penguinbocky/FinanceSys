@@ -68,6 +68,7 @@ public class ReportDao extends BaseDao {
 			pstat.setString(3, String.join(",", list.stream().map(bean -> "" + bean.getTypeId()).collect(Collectors.toList()) ));
 			pstat.setString(4, "Customized selected types option for user when report calculations");
 			if (pstat.executeUpdate() == 1) {
+				System.out.println("ReportDao.saveFavReportOptions executeUpdate == 1");
 				response = DaoResponse.SAVE_SUCCESS;
 			} else {
 				response = DaoResponse.SAVE_ERROR;
