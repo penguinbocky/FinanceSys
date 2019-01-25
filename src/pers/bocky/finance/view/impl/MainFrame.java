@@ -10,6 +10,7 @@ import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -74,15 +75,16 @@ public class MainFrame extends JFrame {
 	}
 
 	private Container createRootContainer(List<WillBeInMainTabbed> tabbedPanels) {
+		List<String> allowedTabList = Arrays.asList(PropertiesUtil.getValueAsStringArray("ui.tabs"));
 		JTabbedPane tabbedPane = new JTabbedPane();
 		for (Iterator<WillBeInMainTabbed> iterator = tabbedPanels.iterator(); iterator.hasNext();) {
 			WillBeInMainTabbed willBeInTabbed = iterator.next();
-			if (!PropertiesUtil.getValueAsBoolean(willBeInTabbed.getTabTitle())) {
+			if (!allowedTabList.contains(willBeInTabbed.getTabTitle())) {
 				continue;
 			}
 			tabbedPane.addTab(willBeInTabbed.getTabTitle(), (Component) willBeInTabbed);
 		}
-		if (tabbedPane.getTabCount() <= 0) {
+		if (tabbedPane.getTabCount() == 0) {
 			tabbedPane.add(tabbedPanels.get(0).getTabTitle(), (Component) tabbedPanels.get(0));
 		}
 		//1 - Trigger first tab panel change event

@@ -49,6 +49,19 @@ public class PropertiesUtil {
 		return !pattern.matcher(value).matches();
 	}
 	
+	public static String[] getValueAsStringArrayBySep(String key, String sep) {
+		String value = getValueAsString(key);
+		if (value == null) {
+			return null;
+		}
+		return value.split(sep);
+	}
+	
+	public static String[] getValueAsStringArray(String key) {
+		String _sep = ",";
+		return getValueAsStringArrayBySep(key, _sep);
+	}
+	
 //	public static String getValue() {
 //		File f = new File("client.txt");
 //		if(!f.exists()){

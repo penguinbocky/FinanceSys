@@ -10,6 +10,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,6 +36,7 @@ import pers.bocky.finance.dao.LendDao;
 import pers.bocky.finance.dao.ReportDao;
 import pers.bocky.finance.dao.TypeDao;
 import pers.bocky.finance.util.DaoResponse;
+import pers.bocky.finance.util.PropertiesUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
 public class ReportPanel extends JPanel implements WillBeInMainTabbed {
@@ -43,14 +46,19 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 	private final String PANEL_TYPE = "统计";
 	private boolean hasMainUI;
 
+	//all categories definition for the system
 	private List<CategoryBean> categoryDefsList;
+	//category  - types mapping
 	private Map<Integer, List<TypeBean>> typeDefsMap;
+	//all time options used to calculation for the system
 	private List<TimeOption> timeOptionsList;
 
 	private CategoryBean selectedCategory = new CategoryBean(CategoryBean.CONSUME, "默认");
 	private TimeOption selectedTimeOption = TimeOption.TODAY;
 	private Optional<List<TypeBean>> selectedTypes;
-
+	//favorite types for a category cached to save DB connections in the run-time
+	private Map<Integer, List<Integer>> favTypesMap = new HashMap<Integer, List<Integer>>();
+	
 	private JPanel panelForCheckbox = new JPanel(new GridLayout(5, 0));
 	private JLabel resultText;
 	
@@ -114,9 +122,9 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 
 	private void tryCalculate() {
 		System.out.println("selected values:");
-		System.out.println(selectedTimeOption);
-		System.out.println(selectedCategory + "" + selectedCategory.getCategoryId());
-		System.out.println(selectedTypes);
+		System.out.println("	" + selectedTimeOption);
+		System.out.println("	" + selectedCategory + "" + selectedCategory.getCategoryId());
+		System.out.println("	" + selectedTypes);
 		System.out.println("tryCalculate selectedTypes.isPresent() > " + (selectedTypes.isPresent() ? selectedTypes.get() : "not present"));
 		double result = 0;
 		String tooltipText = null;
@@ -294,7 +302,12 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		panelForCheckbox.setBackground(new Color(208, 223, 239));
 		//Fetch all available types for UI to display.
 		selectedTypes = Optional.ofNullable(typeDefsMap.get(selectedCategory.getCategoryId()));
-		List<Integer> favTypeList = ReportDao.fetchFavoriteReportOptions(selectedCategory.getCategoryId()).stream().map(bean -> bean.getTypeId()).collect(Collectors.toList());
+		List<Integer> favTypeList;
+		if (!favTypesMap.containsKey(selectedCategory.getCategoryId())) {
+			System.out.println("there is no fav types cached for category id: " + selectedCategory.getCategoryId() + ", so will fetch from db and cache it");
+			favTypesMap.put(selectedCategory.getCategoryId(), ReportDao.fetchFavoriteReportOptions(selectedCategory.getCategoryId()).stream().map(bean -> bean.getTypeId()).collect(Collectors.toList()));
+		}
+		favTypeList = favTypesMap.get(selectedCategory.getCategoryId());
 		if (selectedTypes.isPresent()) {
 			selectedTypes.get().stream().forEach(typeBean -> {
 				JCheckBox checkBox = new JCheckBox(typeBean.getTypeName(), favTypeList.contains(typeBean.getTypeId()));
@@ -405,26 +418,51 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 	}
 
 	private List<TimeOption> loadAllTimeOptions() {
+		System.out.println("loadAllTimeOptions");
+		List<String> allowedList = Arrays.asList(PropertiesUtil.getValueAsStringArray("report.time.options"));
 		List<TimeOption> list = new ArrayList<>();
-		list.add(TimeOption.YESTERDAY);
-		list.add(TimeOption.TODAY);
-		list.add(TimeOption.AVG_DAY);
-		list.add(TimeOption.LAST_WEEK);
-		list.add(TimeOption.CURRENT_WEEK);
+		if (allowedList.contains("yesterday")) {
+			list.add(TimeOption.YESTERDAY);
+		}
+		if (allowedList.contains("today")) {
+			list.add(TimeOption.TODAY);
+		}
+		if (allowedList.contains("avg_day")) {
+			list.add(TimeOption.AVG_DAY);
+		}
+		if (allowedList.contains("last_week")) {
+			list.add(TimeOption.LAST_WEEK);
+		}
+		if (allowedList.contains("current_week")) {
+			list.add(TimeOption.CURRENT_WEEK);
+		}
+		if (allowedList.contains("avg_week")) {
 //		list.add(TimeOption.AVG_WEEK);
-		list.add(TimeOption.LATEST_30);
-		list.add(TimeOption.AVG_MONTH);
-		list.add(TimeOption.LAST_MONTH);
-		list.add(TimeOption.CURRENT_MONTH);
+		}
+		if (allowedList.contains("latest")) {
+			list.add(TimeOption.LATEST_30);
+		}
+		if (allowedList.contains("avg_month")) {
+			list.add(TimeOption.AVG_MONTH);
+		}
+		if (allowedList.contains("last_month")) {
+			list.add(TimeOption.LAST_MONTH);
+		}
+		if (allowedList.contains("current_month")) {
+			list.add(TimeOption.CURRENT_MONTH);
+		}
+		
 		return list;
 	}
 
 	private Map<Integer, List<TypeBean>> loadAllTypes() {
+		System.out.println("loadAllTypes");
 		List<TypeBean> list = TypeDao.fetchAllTypesAndCategories();
 		return list.stream().collect(Collectors.groupingBy(typeBean -> typeBean.getCategoryId()));
 	}
 
 	private List<CategoryBean> loadAllCategoryDefs() {
+		System.out.println("loadAllCategoryDefs");
 		return CategoryDao.fetchAllCategories();
 	}
 
