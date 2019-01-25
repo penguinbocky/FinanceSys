@@ -76,9 +76,9 @@ public class LendHistoryFrame extends JFrame {
 			v.add(bean.getLendHistoryId().toString());
 			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
-			v.add(bean.getOccurTs() != null ? DateUtil.timestamp2DateStr(bean.getOccurTs()) : null);
-			v.add(bean.getLastUpdateTs().toString());
-			v.add(bean.getAddTs().toString());
+			v.add(DateUtil.timestamp2Str(bean.getOccurTs()));
+			v.add(DateUtil.timestamp2Str(bean.getLastUpdateTs()));
+			v.add(DateUtil.timestamp2Str(bean.getAddTs()));
 			dataVectorList.add(v);
 		}
 		historyDatagrid.setData(dataVectorList);

@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 
 public class DateUtil {
 	public static Date string2Date(String dateStr, String format) {
@@ -21,21 +22,17 @@ public class DateUtil {
 		return date;
 	}
 	
-	public static String getCurrentDateString(String format){
+	public static String getCurrentDateAsString(String format){
 		Date date = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat(format == null ? "yyyy-MM-dd HH:mm:ss" : format);
 		return sdf.format(date);
 	}
 	
-	@SuppressWarnings("deprecation")
-	public static String timestamp2DateStr(Timestamp ts) {
-		int year = 1900 + ts.getYear();
-		int month = 1 + ts.getMonth();
-		int day = ts.getDate();
-		
-		return "" + year 
-				+ (month < 10 ? "-0" : "-") + month
-				+ (day < 10 ? "-0" : "-") + day;
+	public static String date2Str(Date ts) {
+		return Objects.isNull(ts) ? null : new SimpleDateFormat("yyyy-MM-dd").format(ts);
 	}
 	
+	public static String timestamp2Str(Timestamp ts) {
+		return date2Str(ts) ;
+	}
 }
