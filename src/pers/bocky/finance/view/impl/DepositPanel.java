@@ -225,7 +225,7 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(DepositPanel.this, NumberFormat.getNumberInstance().format(sumAmount()), "实际存款", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(DepositPanel.this, NumberFormat.getNumberInstance().format(sumAmount()), "本页账目总和", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
@@ -255,7 +255,7 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(DepositPanel.this, calNetDeposit(), "本页账目总和", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(DepositPanel.this, calNetDeposit(), "实际存款", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
