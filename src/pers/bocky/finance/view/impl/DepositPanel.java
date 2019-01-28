@@ -28,6 +28,7 @@ import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.component.DataGrid;
 import pers.bocky.finance.component.DateField;
 import pers.bocky.finance.component.FilterPanel;
+import pers.bocky.finance.dao.ConsumeDao;
 import pers.bocky.finance.dao.DepositDao;
 import pers.bocky.finance.dao.TypeDao;
 import pers.bocky.finance.listener.ButtonActionListener;
@@ -50,7 +51,8 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 	private JButton updateBtn;
 	private JButton deleteBtn;
 	private DateField dp;
-
+	private JButton calNetDepositBtn;
+	
 	private boolean hasMainUI;
 	
 	public DepositPanel() {
@@ -219,13 +221,11 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		dp = new DateField();
 		
 		JButton calBtn = new JButton("求和");
-		JLabel sumLabel = new JLabel("");
-		sumLabel.setForeground(Color.RED);
 		calBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				sumLabel.setText(NumberFormat.getNumberInstance().format(sumAmount()));
+				JOptionPane.showMessageDialog(DepositPanel.this, NumberFormat.getNumberInstance().format(sumAmount()), "实际存款", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
@@ -249,6 +249,16 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 			}
 		});
 		
+		calNetDepositBtn = new JButton("实际存款");
+		calNetDepositBtn.setToolTipText("实际存款为扣除【首付/房贷/动用固存】后的实际可支配余额");
+		calNetDepositBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(DepositPanel.this, calNetDeposit(), "本页账目总和", JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
+		
 		inputPanel.add(typeLabel);
 		inputPanel.add(typesDropdown);
 		inputPanel.add(sourceLabel);
@@ -263,8 +273,8 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		inputPanel.add(updateBtn);
 		inputPanel.add(deleteBtn);
 		
+		inputPanel.add(calNetDepositBtn);
 		inputPanel.add(calBtn);
-		inputPanel.add(sumLabel);
 		
 		panel.add(inputPanel);
 		
@@ -348,6 +358,17 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		typesDropdown.setModel(new DefaultComboBoxModel<TypeBean>(actions));
 	}
 
+	private double calNetDeposit() {
+		return ((double) Math.round(
+				(DepositDao.calculateAllDepositRecsAmount() 
+				- ConsumeDao.calculateAmountOfType(
+						TypeBean.CONSUME_FOR_PAY_LOAN, 
+						TypeBean.CONSUME_FOR_PAY_RELATIONSHIPS,
+						TypeBean.CONSUME_COSTING_DEPOSIT
+						)
+				) * 100)) / 100;
+	}
+	
 	@Override
 	public void loadDatagrid() {
 		List<DepositBean> list = DepositDao.fetchAllDepositRecs();

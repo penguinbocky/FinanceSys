@@ -51,6 +51,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 	private JButton deleteBtn;
 	private JButton payBackBtn;
 	private DateField dp;
+	private JButton calRemainingBorrowAmountFromRelationshipBtn;
 
 	private boolean hasMainUI;
 	
@@ -203,13 +204,11 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		dp = new DateField();
 		
 		JButton calBtn = new JButton("求和");
-		JLabel sumLabel = new JLabel("");
-		sumLabel.setForeground(Color.RED);
 		calBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				sumLabel.setText(NumberFormat.getNumberInstance().format(sumAmount()));
+				JOptionPane.showMessageDialog(BorrowPanel.this, NumberFormat.getNumberInstance().format(sumAmount()), "本页账目总和", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
@@ -243,6 +242,16 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 			}
 		});
 		
+		calRemainingBorrowAmountFromRelationshipBtn = new JButton("剩余欠款");
+		calRemainingBorrowAmountFromRelationshipBtn.setToolTipText("剩余欠款仅计算亲朋好友相关款项，不包括银行房贷");
+		calRemainingBorrowAmountFromRelationshipBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(BorrowPanel.this, calRemainingBorrowAmountFromRelationship(), "剩余欠款", JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
+		
 		inputPanel.add(typeLabel);
 		inputPanel.add(typesDropdown);
 		inputPanel.add(sourceLabel);
@@ -258,8 +267,8 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		inputPanel.add(deleteBtn);
 		inputPanel.add(payBackBtn);
 		
+		inputPanel.add(calRemainingBorrowAmountFromRelationshipBtn);
 		inputPanel.add(calBtn);
-		inputPanel.add(sumLabel);
 		
 		panel.add(inputPanel);
 		
@@ -366,6 +375,10 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		typesDropdown.setModel(new DefaultComboBoxModel<TypeBean>(actions));
 	}
 
+	private double calRemainingBorrowAmountFromRelationship() {
+		return BorrowDao.calAllBorrowAmountOfType(TypeBean.BORROW_FROM_RELATIONSHIPS) - BorrowDao.calAllBorrowHistoryAmountOfType(TypeBean.BORROW_FROM_RELATIONSHIPS);
+	}
+	
 	@Override
 	public void loadDatagrid() {
 		List<BorrowBean> list = BorrowDao.fetchAllBorrowRecs();

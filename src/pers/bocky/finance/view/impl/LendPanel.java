@@ -202,13 +202,11 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		dp = new DateField();
 		
 		JButton calBtn = new JButton("求和");
-		JLabel sumLabel = new JLabel("");
-		sumLabel.setForeground(Color.RED);
 		calBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				sumLabel.setText(NumberFormat.getNumberInstance().format(sumAmount()));
+				JOptionPane.showMessageDialog(LendPanel.this, NumberFormat.getNumberInstance().format(sumAmount()), "本页账目总和", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
@@ -258,7 +256,6 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		inputPanel.add(payBackBtn);
 		
 		inputPanel.add(calBtn);
-		inputPanel.add(sumLabel);
 		
 		panel.add(inputPanel);
 		
