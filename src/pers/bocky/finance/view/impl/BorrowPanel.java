@@ -12,8 +12,10 @@ import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -34,6 +36,7 @@ import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
+import pers.bocky.finance.util.PropertiesUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
 public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
@@ -248,7 +251,14 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(BorrowPanel.this, calRemainingBorrowAmountFromRelationship(), "剩余欠款", JOptionPane.INFORMATION_MESSAGE);
+				double result = calRemainingBorrowAmount();
+				if (result == -2) {
+					JOptionPane.showMessageDialog(BorrowPanel.this, "请检查配置文件中[cal.borrow.remainingdebt]项是否合法", "剩余欠款", JOptionPane.INFORMATION_MESSAGE);
+				} else if (result == -1) {
+					JOptionPane.showMessageDialog(BorrowPanel.this, "读取到type id为0的项", "剩余欠款", JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(BorrowPanel.this, result, "剩余欠款", JOptionPane.INFORMATION_MESSAGE);
+				}
 			}
 		});
 		
@@ -375,8 +385,26 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		typesDropdown.setModel(new DefaultComboBoxModel<TypeBean>(actions));
 	}
 
-	private double calRemainingBorrowAmountFromRelationship() {
-		return BorrowDao.calAllBorrowAmountOfType(TypeBean.BORROW_FROM_RELATIONSHIPS) - BorrowDao.calAllBorrowHistoryAmountOfType(TypeBean.BORROW_FROM_RELATIONSHIPS);
+	private double calRemainingBorrowAmount() {
+		final String KEY = "cal.borrow.remainingdebt.borrowids";
+		List<Integer> borrowTypeIdsList = null;
+		try {
+			borrowTypeIdsList = Arrays.asList(PropertiesUtil.getValueAsStringArray(KEY)).stream()
+					.map(str -> Integer.parseInt(str))
+					.collect(Collectors.toList());
+		} catch (Exception e) {
+			System.out.println("读取【实际存款】计算公式配置出错：格式不正确或者不合法的数字");
+			return -2;
+		}
+		boolean valid = borrowTypeIdsList.stream().allMatch(id -> id > 0);
+		if (!valid) {
+			return -1;
+		}
+		Integer[] borrowTypeIds = borrowTypeIdsList.toArray(new Integer[0]);
+		
+		//TODO
+		//Make calAllBorrowHistoryAmountOfType receive multiple parameters
+		return BorrowDao.calAllBorrowAmountOfType(borrowTypeIds[0]) - BorrowDao.calAllBorrowHistoryAmountOfType(borrowTypeIds[0]);
 	}
 	
 	@Override

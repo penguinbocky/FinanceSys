@@ -11,8 +11,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -35,6 +37,7 @@ import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
+import pers.bocky.finance.util.PropertiesUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
 public class DepositPanel extends JPanel implements WillBeInMainTabbed{
@@ -255,7 +258,15 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(DepositPanel.this, calNetDeposit(), "实际存款", JOptionPane.INFORMATION_MESSAGE);
+				double result = calNetDeposit();
+				if (result == -2) {
+					JOptionPane.showMessageDialog(DepositPanel.this, "请检查配置文件中[cal.realdeposit.excludedconsumetypeids]项是否合法", "实际存款", JOptionPane.INFORMATION_MESSAGE);
+				} else if (result == -1) {
+					JOptionPane.showMessageDialog(DepositPanel.this, "读取到type id为0的项", "实际存款", JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(DepositPanel.this, result, "实际存款", JOptionPane.INFORMATION_MESSAGE);
+				}
+				
 			}
 		});
 		
@@ -359,13 +370,25 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 	}
 
 	private double calNetDeposit() {
+		final String KEY = "cal.realdeposit.excludedconsumetypeids";
+		List<Integer> excludedConsumeTypeIdsList = null;
+		try {
+			excludedConsumeTypeIdsList = Arrays.asList(PropertiesUtil.getValueAsStringArray(KEY)).stream()
+					.map(str -> Integer.parseInt(str))
+					.collect(Collectors.toList());
+		} catch (Exception e) {
+			System.out.println("读取【实际存款】计算公式配置出错：格式不正确或者不合法的数字");
+			return -2;
+		}
+		boolean valid = excludedConsumeTypeIdsList.stream().allMatch(id -> id > 0);
+		if (!valid) {
+			return -1;
+		}
+		Integer[] excludedConsumeTypeIds = excludedConsumeTypeIdsList.toArray(new Integer[0]);
+		
 		return ((double) Math.round(
 				(DepositDao.calculateAllDepositRecsAmount() 
-				- ConsumeDao.calculateAmountOfType(
-						TypeBean.CONSUME_FOR_PAY_LOAN, 
-						TypeBean.CONSUME_FOR_PAY_RELATIONSHIPS,
-						TypeBean.CONSUME_COSTING_DEPOSIT
-						)
+				- ConsumeDao.calculateAmountOfType(excludedConsumeTypeIds)
 				) * 100)) / 100;
 	}
 	

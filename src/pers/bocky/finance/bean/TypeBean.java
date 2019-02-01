@@ -3,12 +3,6 @@ package pers.bocky.finance.bean;
 import java.sql.Timestamp;
 
 public class TypeBean {
-	public final static Integer BORROW_FROM_RELATIONSHIPS = 7;
-	public final static Integer BORROW_FROM_LOAN = 17;
-	public final static Integer CONSUME_FOR_PAY_LOAN = 14;
-	public final static Integer CONSUME_FOR_PAY_RELATIONSHIPS = 19;
-	public final static Integer CONSUME_COSTING_DEPOSIT = 39;
-	
 	private Integer typeId;
 	private Integer categoryId;
 	private String categoryName;

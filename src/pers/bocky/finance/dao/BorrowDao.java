@@ -239,7 +239,7 @@ public class BorrowDao extends BaseDao {
 		return sum;
 	}
 	
-	public static double calAllBorrowAmountOfType(Integer typeId){
+	public static double calAllBorrowAmountOfType(Integer... typeId){
 		return calculateAmountOfType(BorrowBean.CATEGORY_ID, typeId);
 	}
 	
