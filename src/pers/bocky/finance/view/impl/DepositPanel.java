@@ -253,7 +253,7 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		});
 		
 		calNetDepositBtn = new JButton("实际存款");
-		calNetDepositBtn.setToolTipText("实际存款为扣除【首付/房贷/动用固存】后的实际可支配余额");
+		calNetDepositBtn.setToolTipText("实际存款为扣除【首付/房贷/动用固存】后的实际可支配余额，请注意该值包含借出【本人本金】，若有出入请核对借出项.");
 		calNetDepositBtn.addActionListener(new ActionListener() {
 			
 			@Override
