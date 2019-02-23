@@ -12,6 +12,7 @@ import java.util.List;
 import pers.bocky.finance.bean.DepositBean;
 import pers.bocky.finance.component.Comparator;
 import pers.bocky.finance.util.DaoResponse;
+import pers.bocky.finance.util.DateUtil;
 import pers.bocky.finance.util.StringUtil;
 
 public class DepositDao extends BaseDao {
@@ -357,20 +358,20 @@ public class DepositDao extends BaseDao {
 		if (ts != null) {
 			switch (selectedComparator) {
 			case 等于:
-				sql.append(" and d.add_ts = '" + ts + "'");
+				sql.append(" and date_format(d.add_ts, '%Y-%m-%d') = '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 不等于:
-				sql.append(" AND d.add_ts <> '" + ts + "'");
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') <> '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 介于:
 				if (ts2.compareTo(new Date(0)) > 0) {
-					sql.append(" AND d.add_ts < '" + ts2 + "'");
+					sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') <= '" + DateUtil.truncTimestamp(ts2) + "'");
 				}
 			case 大于:
-				sql.append(" AND d.add_ts > '" + ts + "'");
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') > '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 小于:
-				sql.append(" AND d.add_ts < '" + ts + "'");
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') < '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			default:
 				break;
@@ -420,20 +421,20 @@ public class DepositDao extends BaseDao {
 		if (ts != null) {
 			switch (selectedComparator) {
 			case 等于:
-				sql.append(" and d.last_update_ts = '" + ts + "'");
+				sql.append(" and date_format(d.last_update_ts, '%Y-%m-%d') = date_format('" + ts + "', '%Y-%m-%d')");
 				break;
 			case 不等于:
-				sql.append(" AND d.last_update_ts <> '" + ts + "'");
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') <> '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 介于:
 				if (ts2.compareTo(new Date(0)) > 0) {
-					sql.append(" AND d.last_update_ts < '" + ts2 + "'");
+					sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') <= '" + DateUtil.truncTimestamp(ts2) + "'");
 				}
 			case 大于:
-				sql.append(" AND d.last_update_ts > '" + ts + "'");
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') > '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 小于:
-				sql.append(" AND d.last_update_ts < '" + ts + "'");
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') < '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			default:
 				break;
