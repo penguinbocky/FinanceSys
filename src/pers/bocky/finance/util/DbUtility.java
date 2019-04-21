@@ -27,16 +27,16 @@ public enum DbUtility {
 	private String url;
     private String userName;
     private String password;
-    private final String DB_NAME = "financial_sys";
-	
+    private final String DB_NAME = PropertiesUtil.getValueAsString("mysql.db") != null ? PropertiesUtil.getValueAsString("mysql.db") : "financial_sys";
+	private String host = PropertiesUtil.getValueAsString("host.ip") != null ? PropertiesUtil.getValueAsString("host.ip") : "localhost";
     private int connCount;
     
     private DbUtility(boolean useOracle) {
     	connCount = 0;
 		this.driver = useOracle ? JDBC_ORACLE : JDBC_MYSQL;
-		this.url = useOracle ? "jdbc:oracle:thin:@localhost:1521:BOCKYDB" : "jdbc:mysql://localhost:3306/" + DB_NAME;
-		this.userName = useOracle ? "bocky" : "root";
-		this.password = useOracle ? "123456" : "123456";
+		this.url = useOracle ? "jdbc:oracle:thin:@" + host + ":1521:BOCKYDB" : "jdbc:mysql://" + host + ":3306/" + DB_NAME;
+		this.userName = useOracle ? "bocky" : PropertiesUtil.getValueAsString("mysql.user") != null ? PropertiesUtil.getValueAsString("mysql.user") : "root";
+		this.password = useOracle ? "123456" : PropertiesUtil.getValueAsString("mysql.password") != null ? PropertiesUtil.getValueAsString("mysql.password") : "123456";
 		
 		try {
 			Class.forName(this.driver);//PropertiesUtil.getValue("dbDriver"));
@@ -84,7 +84,7 @@ public enum DbUtility {
 			String cmd = "cmd /c mysqldump -u" + this.userName 
 					+ " -p" + this.password 
 					+ " -t " + (dbName == null ? DB_NAME : dbName)//only data, no structure 
-					+ " > " + path + "/generated_by_java_" + DateUtil.getCurrentDateString("yy_MM_dd") + ".sql";
+					+ " > " + path + "/generated_by_java_" + DateUtil.getCurrentDateAsString("yy_MM_dd") + ".sql";
 			Process process = Runtime.getRuntime().exec(cmd);
 			br = new BufferedReader(new InputStreamReader(process.getErrorStream(), Charset.forName("gbk")));
 			sBuilder = new StringBuilder();

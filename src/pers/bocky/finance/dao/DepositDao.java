@@ -8,10 +8,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import pers.bocky.finance.bean.DepositBean;
 import pers.bocky.finance.component.Comparator;
 import pers.bocky.finance.util.DaoResponse;
+import pers.bocky.finance.util.DateUtil;
 import pers.bocky.finance.util.StringUtil;
 
 public class DepositDao extends BaseDao {
@@ -165,7 +167,7 @@ public class DepositDao extends BaseDao {
 		return list;
 	}
 	
-	public static List<DepositBean> fetchDepositRecsByAmount(Comparator selectedComparator, Integer amount){
+	public static List<DepositBean> fetchDepositRecsByAmount(Comparator selectedComparator, Double amount){
 		List<DepositBean> list = new ArrayList<DepositBean>();
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
@@ -357,20 +359,20 @@ public class DepositDao extends BaseDao {
 		if (ts != null) {
 			switch (selectedComparator) {
 			case 等于:
-				sql.append(" and d.add_ts = '" + ts + "'");
+				sql.append(" and date_format(d.add_ts, '%Y-%m-%d') = '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 不等于:
-				sql.append(" AND d.add_ts <> '" + ts + "'");
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') <> '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 介于:
 				if (ts2.compareTo(new Date(0)) > 0) {
-					sql.append(" AND d.add_ts < '" + ts2 + "'");
+					sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') <= '" + DateUtil.truncTimestamp(ts2) + "'");
 				}
 			case 大于:
-				sql.append(" AND d.add_ts > '" + ts + "'");
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') > '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 小于:
-				sql.append(" AND d.add_ts < '" + ts + "'");
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') < '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			default:
 				break;
@@ -420,20 +422,20 @@ public class DepositDao extends BaseDao {
 		if (ts != null) {
 			switch (selectedComparator) {
 			case 等于:
-				sql.append(" and d.last_update_ts = '" + ts + "'");
+				sql.append(" and date_format(d.last_update_ts, '%Y-%m-%d') = date_format('" + ts + "', '%Y-%m-%d')");
 				break;
 			case 不等于:
-				sql.append(" AND d.last_update_ts <> '" + ts + "'");
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') <> '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 介于:
 				if (ts2.compareTo(new Date(0)) > 0) {
-					sql.append(" AND d.last_update_ts < '" + ts2 + "'");
+					sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') <= '" + DateUtil.truncTimestamp(ts2) + "'");
 				}
 			case 大于:
-				sql.append(" AND d.last_update_ts > '" + ts + "'");
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') > '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 小于:
-				sql.append(" AND d.last_update_ts < '" + ts + "'");
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') < '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			default:
 				break;
@@ -559,31 +561,24 @@ public class DepositDao extends BaseDao {
 	}
 	
 	public static double calculateAllDepositRecsAmount(){
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) as sum"
-				+ " FROM deposit d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + DepositBean.CATEGORY_ID);
+		System.out.println("In calculateAllDepositRecsAmount >>> ");
+		return calculateAmountOfType(DepositBean.CATEGORY_ID);
+	}
+	
+	public static double calculateAmountOfLatestMonthOfType(Integer... typeId){
+		return calculateAmountOfLatestMonthOfType(DepositBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAvgMonthAmountOfType(Integer... typeId){
+		return calculateAvgMonthAmountOfType(DepositBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAmountFromThisMonthOfType(Integer... typeId) {
+		return calculateAmountFromThisMonthOfType(DepositBean.CATEGORY_ID, typeId);
+	}
 
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
+		return calculateAmountOfLastMonthOfType(DepositBean.CATEGORY_ID, typeId);
 	}
 	
 	/**
@@ -616,7 +611,7 @@ public class DepositDao extends BaseDao {
 			list = fetchDepositRecsByDesc(selectedComparator, _filterValue);
 			break;
 		case "数量":
-			list = fetchDepositRecsByAmount(selectedComparator, Integer.parseInt(_filterValue));
+			list = fetchDepositRecsByAmount(selectedComparator, Double.parseDouble(_filterValue));
 			break;
 		case "最后更新于":
 			list = fetchDepositRecsByLastUpdTs(selectedComparator, new Timestamp(Long.parseLong(_filterValue)), new Timestamp(Long.parseLong(_filterValue2)));
@@ -629,5 +624,33 @@ public class DepositDao extends BaseDao {
 		}
 		
 		return list;
+	}
+
+	public static double calculateAmountOfLastWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfLastWeekOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountFromThisWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountFromThisWeekOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountOfTodayOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfTodayOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAvgWeekAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAvgWeekAmountOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAvgDayAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAvgDayAmountOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateYesterdayAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfYesterdayOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
+	
+	public static Map<String, Double> getAmountGroupByMonth(Integer[] selectedTypeIds) {
+		return getAmountGroupByMonth(DepositBean.CATEGORY_ID, selectedTypeIds);
 	}
 }

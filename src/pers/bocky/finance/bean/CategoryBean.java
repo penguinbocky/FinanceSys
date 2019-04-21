@@ -3,12 +3,25 @@ package pers.bocky.finance.bean;
 import java.sql.Timestamp;
 
 public class CategoryBean {
-
+	public final static int DEPOSIT = 1;
+	public final static int CONSUME = 2;
+	public final static int BORROW = 3;
+	public final static int LEND = 4;
+	
 	private Integer categoryId;
 	private String categoryName;
 	private String description;
 	private Timestamp addTs;
 	private Timestamp lastUpdateTs;
+	
+	public CategoryBean() {
+		super();
+	}
+	public CategoryBean(Integer categoryId, String categoryName) {
+		super();
+		this.categoryId = categoryId;
+		this.categoryName = categoryName;
+	}
 	public Integer getCategoryId() {
 		return categoryId;
 	}
@@ -44,6 +57,29 @@ public class CategoryBean {
 	@Override
 	public String toString() {
 		return categoryName;
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((categoryId == null) ? 0 : categoryId.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CategoryBean other = (CategoryBean) obj;
+		if (categoryId == null) {
+			if (other.categoryId != null)
+				return false;
+		} else if (!categoryId.equals(other.categoryId))
+			return false;
+		return true;
 	}
 	
 	

@@ -15,6 +15,8 @@ public class BorrowBean {
 	private Timestamp addTs;
 	private Timestamp lastUpdateTs;
 	private Timestamp occurTs;
+	private Double paybackedAmt;
+	private Double leftAmt;
 	
 	public Integer getBorrowId() {
 		return borrowId;
@@ -71,6 +73,18 @@ public class BorrowBean {
 	}
 	public void setLastUpdateTs(Timestamp lastUpdateTs) {
 		this.lastUpdateTs = lastUpdateTs;
+	}
+	public Double getPaybackedAmt() {
+		return paybackedAmt;
+	}
+	public void setPaybackedAmt(Double paybackedAmt) {
+		this.paybackedAmt = paybackedAmt;
+	}
+	public Double getLeftAmt() {
+		return leftAmt;
+	}
+	public void setLeftAmt(Double leftAmt) {
+		this.leftAmt = leftAmt;
 	}
 	
 }

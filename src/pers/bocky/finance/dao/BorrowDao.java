@@ -18,12 +18,17 @@ public class BorrowDao extends BaseDao {
 		List<BorrowBean> list = new ArrayList<BorrowBean>();
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.borrow_id, d.type_id, t.type_name, d.from_who, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM borrow d, type_dfntn t, category_dfntn c"
+				"SELECT occur_ts, borrow_id, type_id, type_name, from_who, amount, description, add_ts, last_update_ts"
+				+ ", PAYBACKEDAMT, CASE WHEN PAYBACKEDAMT IS NULL THEN amount else (AMOUNT - PAYBACKEDAMT) end LEFTAMT"
+				+ " FROM ("
+				+ " SELECT d.occur_ts, d.borrow_id, d.type_id, t.type_name, d.from_who, d.amount, d.description, d.add_ts, d.last_update_ts, SUM(H.AMOUNT) PAYBACKEDAMT"
+				+ " FROM borrow d LEFT JOIN BORROW_HISTORY H ON D.BORROW_ID = H.BORROW_ID, type_dfntn t, category_dfntn c"
 				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
 				+ " AND d.type_id = t.type_id"
 				+ " AND t.category_id = c.category_id"
 				+ " AND c.category_id = " + BorrowBean.CATEGORY_ID
+				+ " GROUP BY D.BORROW_ID"
+				+ " ) TEMP"
 				+ " ORDER BY last_update_ts DESC");
 
 		try {
@@ -42,6 +47,8 @@ public class BorrowDao extends BaseDao {
 				bean.setAddTs(rs.getTimestamp("add_ts"));
 				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
 				bean.setOccurTs(rs.getTimestamp("occur_ts"));
+				bean.setPaybackedAmt(rs.getDouble("paybackedAmt"));
+				bean.setLeftAmt(rs.getDouble("leftAmt"));
 				list.add(bean);
 			}
 			pstat.close();
@@ -204,6 +211,7 @@ public class BorrowDao extends BaseDao {
 	}
 	
 	public static double calAllBorrowHistoryAmountOfType(Integer typeId){
+		System.out.println("In calAllBorrowHistoryAmountOfType >>> ");
 		double sum = 0;
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
@@ -231,35 +239,24 @@ public class BorrowDao extends BaseDao {
 		return sum;
 	}
 	
-	public static double calAllBorrowAmountOfType(Integer typeId){
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) sum"
-				+ " FROM borrow d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + BorrowBean.CATEGORY_ID);
+	public static double calAllBorrowAmountOfType(Integer... typeId){
+		return calculateAmountOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAmountOfLatestMonthOfType(Integer... typeId){
+		return calculateAmountOfLatestMonthOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAvgMonthAmountOfType(Integer... typeId){
+		return calculateAvgMonthAmountOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
+	
+	public static double calculateAmountFromThisMonthOfType(Integer... typeId) {
+		return calculateAmountFromThisMonthOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
 
-		if (typeId != null && typeId != 0) {
-			sql.append(" AND d.type_id = " + typeId);
-		}
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
+		return calculateAmountOfLastMonthOfType(BorrowBean.CATEGORY_ID, typeId);
 	}
 	
 	/**
@@ -272,6 +269,30 @@ public class BorrowDao extends BaseDao {
 		} else {
 			return true;
 		}
+	}
+
+	public static double calculateAmountOfLastWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfLastWeekOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountFromThisWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountFromThisWeekOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountOfTodayOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfTodayOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAvgWeekAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAvgWeekAmountOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAvgDayAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAvgDayAmountOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateYesterdayAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfYesterdayOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
 	}
 	
 }

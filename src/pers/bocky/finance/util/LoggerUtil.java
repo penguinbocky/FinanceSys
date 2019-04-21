@@ -2,6 +2,7 @@ package pers.bocky.finance.util;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.Date;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -10,7 +11,7 @@ import javax.swing.JTextArea;
 import pers.bocky.finance.bean.LogBean;
 
 public enum LoggerUtil {
-	SQLogger("SQL Logger", false);
+	SQLogger("SQL Logger", "on".equals(PropertiesUtil.getValueAsString("sql.debug.switch")));
 	
 	private JFrame frame;
 	private JTextArea output;
@@ -21,18 +22,25 @@ public enum LoggerUtil {
 		
 		if (debugMode) {
 			frame = new JFrame(type);
-			frame.setSize(800, 200);
+			frame.setSize(800, 400);
 			
 			output = new JTextArea();
 			output.setLineWrap(true);
 			output.setWrapStyleWord(true);
-//			output.setForeground(Color.GREEN);
-//			output.setBackground(Color.BLACK);
+			output.setForeground(new Color(63, 169, 36, 255));
+			output.setBackground(Color.BLACK);
 			output.setEditable(false);
-//			output.setFont(new Font("华文中宋", Font.PLAIN, 13));
+			output.setFont(new Font("Microsoft Yahei", Font.PLAIN, 11));
 			
 			JScrollPane scrollPane = new JScrollPane(output);
 			frame.add(scrollPane);
+		}
+	}
+	
+	public void log(String log) {
+		if (debugMode) {
+			System.out.println(new Date().toString() + " > " + log);
+			logToPanel(new LogBean(log, new Date()));
 		}
 	}
 	
@@ -46,6 +54,6 @@ public enum LoggerUtil {
 		if (!frame.isVisible()) {
 			frame.setVisible(true);
 		}
-		output.append("[" + log.getDate().toGMTString() + "] >>> " + log.getInfo() + "\n");
+		output.append("[" + log.getDate() + "] > " + log.getInfo() + "\n");
 	}
 }

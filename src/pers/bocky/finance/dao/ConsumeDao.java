@@ -8,11 +8,13 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import pers.bocky.finance.bean.ConsumeBean;
 import pers.bocky.finance.bean.LogBean;
 import pers.bocky.finance.component.Comparator;
 import pers.bocky.finance.util.DaoResponse;
+import pers.bocky.finance.util.DateUtil;
 import pers.bocky.finance.util.StringUtil;
 
 public class ConsumeDao extends BaseDao {
@@ -296,7 +298,7 @@ public class ConsumeDao extends BaseDao {
 		return list;
 	}
 	
-	public static List<ConsumeBean> fetchConsumeRecsByAmount(Comparator selectedComparator, Integer amount){
+	public static List<ConsumeBean> fetchConsumeRecsByAmount(Comparator selectedComparator, Double amount){
 		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
@@ -371,20 +373,20 @@ public class ConsumeDao extends BaseDao {
 		if (ts != null) {
 			switch (selectedComparator) {
 			case 等于:
-				sql.append(" and d.last_update_ts = '" + ts + "'");
+				sql.append(" and date_format(d.last_update_ts, '%Y-%m-%d') = '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 不等于:
-				sql.append(" AND d.last_update_ts <> '" + ts + "'");
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') <> '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 介于:
 				if (ts2.compareTo(new Date(0)) > 0) {
-					sql.append(" AND d.last_update_ts <= '" + ts2 + "'");
+					sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') <= '" + DateUtil.truncTimestamp(ts2) + "'");
 				}
 			case 大于:
-				sql.append(" AND d.last_update_ts > '" + ts + "'");
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') > '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 小于:
-				sql.append(" AND d.last_update_ts < '" + ts + "'");
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') < '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			default:
 				break;
@@ -437,20 +439,20 @@ public class ConsumeDao extends BaseDao {
 		if (ts != null) {
 			switch (selectedComparator) {
 			case 等于:
-				sql.append(" and d.add_ts = '" + ts + "'");
+				sql.append(" and date_format(d.add_ts, '%Y-%m-%d') = '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 不等于:
-				sql.append(" AND d.add_ts <> '" + ts + "'");
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') <> '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 介于:
 				if (ts2.compareTo(new Date(0)) > 0) {
-					sql.append(" AND d.add_ts <= '" + ts2 + "'");
+					sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') <= '" + DateUtil.truncTimestamp(ts2) + "'");
 				}
 			case 大于:
-				sql.append(" AND d.add_ts > '" + ts + "'");
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') > '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			case 小于:
-				sql.append(" AND d.add_ts < '" + ts + "'");
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') < '" + DateUtil.truncTimestamp(ts) + "'");
 				break;
 			default:
 				break;
@@ -576,196 +578,23 @@ public class ConsumeDao extends BaseDao {
 	}
 	
 	public static double calculateAmountOfType(Integer... typeId){
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) as sum"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
-
-		if (typeId.length > 0) {
-			sql.append(" AND ( d.type_id = " + typeId[0]);
-			for (int i = 1; i < typeId.length; i++) {
-				Integer type = typeId[i];
-				sql.append(" or d.type_id = " + type);
-			}
-			sql.append(" ) ");
-		}
-		
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+		return calculateAmountOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 	
 	public static double calculateAmountOfLatestMonthOfType(Integer... typeId){
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) as sum"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
-
-		if (typeId != null && typeId.length > 0) {
-			sql.append(" AND ( d.type_id = " + typeId[0]);
-			for (int i = 1; i < typeId.length; i++) {
-				Integer type = typeId[i];
-				sql.append(" or d.type_id = " + type);
-			}
-			sql.append(" ) ");
-		}
-		
-		sql.append(" AND occur_ts >= date_sub(CURRENT_TIMESTAMP, interval 30 day)");
-		
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+		return calculateAmountOfLatestMonthOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 	
 	public static double calculateAvgMonthAmountOfType(Integer... typeId){
-		double avg = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer("select avg(sum) avg from (" + 
-				"SELECT date_format(occur_ts, '%Y-%m'), sum(d.amount) as sum"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
-
-		if (typeId != null && typeId.length > 0) {
-			sql.append(" AND ( d.type_id = " + typeId[0]);
-			for (int i = 1; i < typeId.length; i++) {
-				Integer type = typeId[i];
-				sql.append(" or d.type_id = " + type);
-			}
-			sql.append(" ) ");
-		}
-		sql.append(" AND date_format(occur_ts, '%Y-%m') != '2018-05' ");
-		sql.append(" AND date_format(occur_ts, '%Y-%m') != '2018-06' ");
-		sql.append(" AND date_format(occur_ts, '%Y-%m') != date_format(now(), '%Y-%m') ");
-		sql.append(" group by date_format(occur_ts, '%Y-%m')) temp");
-		
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				avg = rs.getDouble("avg");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return avg;
+		return calculateAvgMonthAmountOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 	
 	public static double calculateAmountFromThisMonthOfType(Integer... typeId) {
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) as sum"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
-
-		if (typeId != null && typeId.length > 0) {
-			sql.append(" AND ( d.type_id = " + typeId[0]);
-			for (int i = 1; i < typeId.length; i++) {
-				Integer type = typeId[i];
-				sql.append(" or d.type_id = " + type);
-			}
-			sql.append(" ) ");
-		}
-		sql.append(" AND date_format(occur_ts, '%Y-%m') = date_format(now(), '%Y-%m')");
-		
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+		return calculateAmountFromThisMonthOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 
 	public static double calculateAmountOfLastMonthhOfType(Integer... typeId) {
-		double sum = 0;
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT sum(d.amount) as sum"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
-
-		if (typeId != null && typeId.length > 0) {
-			sql.append(" AND ( d.type_id = " + typeId[0]);
-			for (int i = 1; i < typeId.length; i++) {
-				Integer type = typeId[i];
-				sql.append(" or d.type_id = " + type);
-			}
-			sql.append(" ) ");
-		}
-		sql.append(" AND date_format(occur_ts, '%Y-%m') = date_format(date_sub(CURRENT_TIMESTAMP, interval 1 month), '%Y-%m')");
-		
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
-			
-			if(rs != null && rs.next()){
-				sum = rs.getDouble("sum");
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return sum;
+		return calculateAmountOfLastMonthOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 
 	/**
@@ -798,7 +627,7 @@ public class ConsumeDao extends BaseDao {
 			list = fetchConsumeRecsByDesc(selectedComparator, _filterValue);
 			break;
 		case "数量":
-			list = fetchConsumeRecsByAmount(selectedComparator, Integer.parseInt(_filterValue));
+			list = fetchConsumeRecsByAmount(selectedComparator, Double.parseDouble(_filterValue));
 			break;
 		case "最后更新于":
 			list = fetchConsumeRecsByLastUpdTs(selectedComparator, new Timestamp(Long.parseLong(_filterValue)), new Timestamp(Long.parseLong(_filterValue2)));
@@ -811,6 +640,34 @@ public class ConsumeDao extends BaseDao {
 		}
 		
 		return list;
+	}
+
+	public static double calculateAmountOfLastWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfLastWeekOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountFromThisWeekOfType(Integer[] selectedTypeIds) {
+		return calculateAmountFromThisWeekOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAmountOfTodayOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfTodayOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAvgWeekAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAvgWeekAmountOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateAvgDayAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAvgDayAmountOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static double calculateYesterdayAmountOfType(Integer[] selectedTypeIds) {
+		return calculateAmountOfYesterdayOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
+	
+	public static Map<String, Double> getAmountGroupByMonth(Integer[] selectedTypeIds) {
+		return getAmountGroupByMonth(ConsumeBean.CATEGORY_ID, selectedTypeIds);
 	}
 	
 }

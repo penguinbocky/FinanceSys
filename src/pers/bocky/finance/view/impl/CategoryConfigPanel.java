@@ -70,8 +70,8 @@ public class CategoryConfigPanel extends JPanel implements WillBeInConfigTabbed{
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
-		final String[] COL_NAMES = {"whatever", "whatever", "类别ID", "类别名称", "类别描述", "最后更新于", "创建时间"};
-		datagrid = new DataGrid(COL_NAMES);
+		final String[] COL_NAMES = {"类别ID", "类别名称", "类别描述", "最后更新于", "创建时间"};
+		datagrid = new DataGrid(COL_NAMES, null, null, null);
 		scrollPane.setViewportView(datagrid);
 		
 		loadDatagrid();
@@ -116,8 +116,6 @@ public class CategoryConfigPanel extends JPanel implements WillBeInConfigTabbed{
 		for (int i = 0; i < list.size(); i++) {
 			CategoryBean bean = list.get(i);
 			Vector<String> v = new Vector<String>();
-			v.add(bean.getCategoryId().toString());//Dummy one
-			v.add(bean.getCategoryId().toString());//Dummy one
 			v.add(bean.getCategoryId().toString());
 			v.add(bean.getCategoryName());
 			v.add(bean.getDescription());

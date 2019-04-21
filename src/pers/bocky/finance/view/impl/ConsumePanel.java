@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -17,13 +18,10 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.Popup;
-import javax.swing.PopupFactory;
 
 import pers.bocky.finance.bean.ConsumeBean;
 import pers.bocky.finance.bean.TypeBean;
@@ -36,8 +34,6 @@ import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
-import pers.bocky.finance.util.NumberUtil;
-import pers.bocky.finance.util.StringUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
 public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
@@ -99,7 +95,8 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
 		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "去向", "数量", "备注", "发生时间", "最后更新于", "创建时间"};
-		datagrid = new DataGrid(COL_NAMES);
+		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID"}
+		, new String[] {"类型", "去向", "数量"}, new String[] {"备注"});
 		
 		JPanel p1 = new JPanel();
 		p1.add(new JLabel("更新"));
@@ -107,8 +104,8 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		JPanel p2 = new JPanel();
 		p2.add(new JLabel("删除"));
 		p2.setForeground(Color.MAGENTA);
-		JList<String> items = new JList<String>(new String[]{new String("更新"), new String("删除")});
-		PopupFactory popupFactory = PopupFactory.getSharedInstance();
+//		JList<String> items = new JList<String>(new String[]{new String("更新"), new String("删除")});
+//		PopupFactory popupFactory = PopupFactory.getSharedInstance();
 		datagrid.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -120,11 +117,11 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 					if (e.getButton() == MouseEvent.BUTTON1) {
 						fillFields(datagrid, selectedRowIndex);
 					} else if (e.getButton() == MouseEvent.BUTTON3) {
-						Popup pop = popupFactory.getPopup(datagrid, items, e.getXOnScreen(), e.getYOnScreen());
-						pop.show();
-						
-						String depositId = datagrid.getValueAt(selectedRowIndex, 0).toString();
-						System.out.println("depositId > " + depositId);
+//						Popup pop = popupFactory.getPopup(datagrid, items, e.getXOnScreen(), e.getYOnScreen());
+//						pop.show();
+//						
+//						String depositId = datagrid.getValueAt(selectedRowIndex, 0).toString();
+//						System.out.println("depositId > " + depositId);
 					}
 				}
 			}
@@ -146,7 +143,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 			
 			typesDropdown.setSelectedIndex(getDropdownIndexByTypeId(Integer.parseInt(typeId)));
 			destField.setText(dest);
-			amountField.setText(amount);
+			amountField.setText(amount.replaceAll(",", ""));
 			descField.setText(desc);
 			if (occurTs != null && !"".equals(occurTs)) {
 				dp.fillFields(occurTs.substring(0, 4), occurTs.substring(5, 7), occurTs.substring(8, 10));
@@ -210,13 +207,11 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		dp = new DateField();
 		
 		JButton calBtn = new JButton("求和");
-		JLabel sumLabel = new JLabel("");
-		sumLabel.setForeground(Color.RED);
 		calBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				sumLabel.setText(StringUtil.subZeroAndDot(sumAmount()));
+				JOptionPane.showMessageDialog(ConsumePanel.this, NumberFormat.getNumberInstance().format(sumAmount()), "本页账目总和", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
@@ -255,8 +250,6 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		inputPanel.add(deleteBtn);
 		
 		inputPanel.add(calBtn);
-		inputPanel.add(sumLabel);
-		
 		
 		panel.add(inputPanel);
 		
@@ -325,18 +318,18 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		List<Double> doubleList = new ArrayList<Double>();
 		for (int row = 0; row < size; row++) {
 			String amountStr = (String) datagrid.getValueAt(row, 4);
-			double amount = Double.parseDouble(amountStr);
+			double amount = Double.parseDouble(amountStr.replaceAll(",", ""));
 			doubleList.add(amount);
 		}
 		
-		return NumberUtil.sum(doubleList);
+		return doubleList.stream().reduce((acc, ele) -> acc += ele).orElse(0d);
 	}
 	
 	/**
 	 * 
 	 */
 	private void loadTypeDropDown() {
-		List<TypeBean> list = TypeDao.fetchTypeByCategory(ConsumeBean.CATEGORY_ID);
+		List<TypeBean> list = TypeDao.fetchTypeBy(ConsumeBean.CATEGORY_ID, null);
 		final TypeBean[] actions = list.toArray(new TypeBean[0]);
 		typesDropdown.setModel(new DefaultComboBoxModel<TypeBean>(actions));
 	}
@@ -359,11 +352,11 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 			v.add(bean.getTypeId().toString());
 			v.add(bean.getTypeName());
 			v.add(bean.getDest());
-			v.add(StringUtil.subZeroAndDot(bean.getAmount()));
+			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
-			v.add(bean.getOccurTs() != null ? DateUtil.timestamp2DateStr(bean.getOccurTs()) : null);
-			v.add(bean.getLastUpdateTs().toString());
-			v.add(bean.getAddTs().toString());
+			v.add(DateUtil.date2Str(bean.getOccurTs()));
+			v.add(DateUtil.date2Str(bean.getLastUpdateTs()));
+			v.add(DateUtil.date2Str(bean.getAddTs()));
 			dataVectorList.add(v);
 		}
 		datagrid.setData(dataVectorList);

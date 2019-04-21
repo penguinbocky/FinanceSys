@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.util.DaoResponse;
@@ -13,17 +14,21 @@ import pers.bocky.finance.util.StringUtil;
 
 public class TypeDao extends BaseDao {
 	
-	public static List<TypeBean> fetchAllTypes(){
-		return fetchTypeByCategory(null);
-	}
-	
-	public static List<TypeBean> fetchTypeByCategory(Integer categoryId){
+	/**
+	 * Fetch type(s) by specific condition, any condition as null will be ignored during selecting data from database.
+	 * @param categoryId
+	 * @param typeName
+	 * @return
+	 */
+	public static List<TypeBean> fetchTypeBy(Integer categoryId, String typeName){
 		List<TypeBean> list = new ArrayList<TypeBean>();
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer("select * from type_dfntn where active_flg = 'Y'");
 		if (categoryId != null) {
 			sql.append(" and category_id = " + categoryId);
-		} else {
+		} else if (!StringUtil.isEmpty(typeName)) {
+			sql.append(" and type_name = '" + typeName + "'");
+		}else {
 			sql.append(" order by last_update_ts desc");
 		}
 		
@@ -50,6 +55,11 @@ public class TypeDao extends BaseDao {
 			dbUtil.close(con);
 		}
 		return list;
+	}
+	
+	public static List<TypeBean> fetchTypeByName(String typeName, Integer excludedTypeId){
+		List<TypeBean> list = fetchTypeBy(null, typeName);
+		return list.stream().filter(bean -> bean.getTypeId() != excludedTypeId).collect(Collectors.toList());
 	}
 	
 	public static List<TypeBean> fetchAllTypesAndCategories(){
@@ -91,6 +101,10 @@ public class TypeDao extends BaseDao {
 	
 	public static DaoResponse saveNewType(TypeBean bean){
 		if (!doValidation(bean)) return DaoResponse.VALIDATION_ERROR;
+		List<TypeBean> existingTypes = fetchTypeByName(bean.getTypeName(), null);
+		if (existingTypes != null && existingTypes.size() > 0) {
+			return DaoResponse.EXISTED;
+		}
 		
 		DaoResponse response = DaoResponse.SAVE_ERROR;
 		Connection con = dbUtil.getCon();
@@ -127,6 +141,68 @@ public class TypeDao extends BaseDao {
 		} else {
 			return true;
 		}
+	}
+	
+	public static DaoResponse updateRecord(TypeBean bean){
+		if (!doValidation(bean)) return DaoResponse.VALIDATION_ERROR;
+		List<TypeBean> existingTypes = fetchTypeByName(bean.getTypeName(), bean.getTypeId());
+		if (existingTypes != null && existingTypes.size() > 0) {
+			return DaoResponse.EXISTED;
+		}
+		
+		DaoResponse responseCode = DaoResponse.UPDATE_ERROR;
+		Connection con = dbUtil.getCon();
+		StringBuffer sql = new StringBuffer(
+				"update type_dfntn set type_name = ?, description = ?, last_update_ts = now()"
+				+ " where type_id = ?");
+		
+		try {
+			PreparedStatement pstat = con.prepareStatement(sql.toString());
+			pstat.setString(1, bean.getTypeName());
+			pstat.setString(2, bean.getDescription());
+//			pstat.setInt(3, bean.getCategoryId());
+			pstat.setInt(3, bean.getTypeId());
+			if (pstat.executeUpdate() == 1) {
+				System.out.println("TypeDao.updateRecord result == 1");
+				responseCode = DaoResponse.UPDATE_SUCCESS;
+			}
+			pstat.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(con);
+		}
+
+		return responseCode;
+	}
+	
+	public static DaoResponse deleteRecord(TypeBean bean) {
+		return deleteRecord(bean, false);
+	}
+	
+	public static DaoResponse deleteRecord(TypeBean bean, boolean realDelete){
+		if (bean.getTypeId() == null || bean.getTypeId() < 0) return DaoResponse.VALIDATION_ERROR;
+		
+		DaoResponse response = DaoResponse.DELETE_ERROR;
+		Connection con = dbUtil.getCon();
+		StringBuffer sql = new StringBuffer(
+				realDelete ? "delete from type_dfntn where type_id = ?" : "update type_dfntn set active_flg = 'N' where type_id = ?");
+		
+		try {
+			PreparedStatement pstat = con.prepareStatement(sql.toString());
+			pstat.setInt(1, bean.getTypeId());
+			if (pstat.executeUpdate() == 1) {
+				System.out.println("TypeDao.deleteRecord result == 1");
+				response = DaoResponse.DELETE_SUCCESS;
+			}
+			pstat.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(con);
+		}
+
+		return response;
 	}
 	
 }

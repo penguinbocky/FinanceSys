@@ -32,7 +32,7 @@ CREATE TABLE `borrow` (
   `occur_ts` timestamp NULL DEFAULT NULL,
   `add_ts` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`borrow_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
 /*Table structure for table `borrow_history` */
 
@@ -48,7 +48,7 @@ CREATE TABLE `borrow_history` (
   `occur_ts` timestamp NULL DEFAULT NULL,
   `add_ts` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`borrow_history_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
 /*Table structure for table `category_dfntn` */
 
@@ -62,7 +62,7 @@ CREATE TABLE `category_dfntn` (
   `active_flg` char(1) NOT NULL DEFAULT 'Y',
   `add_ts` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
 /*Table structure for table `consume` */
 
@@ -79,7 +79,7 @@ CREATE TABLE `consume` (
   `occur_ts` timestamp NULL DEFAULT NULL,
   `add_ts` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`consume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
 /*Table structure for table `deposit` */
 
@@ -96,7 +96,7 @@ CREATE TABLE `deposit` (
   `occur_ts` timestamp NULL DEFAULT NULL,
   `add_ts` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`deposit_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
 /*Table structure for table `lend` */
 
@@ -113,7 +113,7 @@ CREATE TABLE `lend` (
   `occur_ts` timestamp NULL DEFAULT NULL,
   `add_ts` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`lend_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
 /*Table structure for table `lend_history` */
 
@@ -129,7 +129,23 @@ CREATE TABLE `lend_history` (
   `occur_ts` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `add_ts` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`lend_history_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
+
+/*Table structure for table `lk_ref` */
+
+DROP TABLE IF EXISTS `lk_ref`;
+
+CREATE TABLE `lk_ref` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ref_type` varchar(500) NOT NULL,
+  `ref_key` varchar(500) NOT NULL,
+  `ref_value` varchar(1000) NOT NULL,
+  `ref_desc` varchar(10000) DEFAULT NULL,
+  `last_update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `active_flg` char(1) NOT NULL DEFAULT 'Y',
+  `add_ts` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `tb_msg` */
 
@@ -154,7 +170,7 @@ CREATE TABLE `type_dfntn` (
   `active_flg` char(1) NOT NULL DEFAULT 'Y',
   `add_ts` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`type_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
 /* Procedure structure for procedure `getAllRec` */
 

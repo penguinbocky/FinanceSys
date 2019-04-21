@@ -9,19 +9,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
@@ -35,8 +36,7 @@ import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
-import pers.bocky.finance.util.NumberUtil;
-import pers.bocky.finance.util.StringUtil;
+import pers.bocky.finance.util.PropertiesUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
 public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
@@ -54,6 +54,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 	private JButton deleteBtn;
 	private JButton payBackBtn;
 	private DateField dp;
+	private JButton calRemainingBorrowAmountFromRelationshipBtn;
 
 	private boolean hasMainUI;
 	
@@ -81,36 +82,11 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(129, 195, 230));
 		
-		JCheckBox checkStatus = new JCheckBox("显示状态", true);
-		checkStatus.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (checkStatus.isSelected()) {
-					System.out.println("checked");
-				} else {
-					System.out.println("unchecked");
-				}
-			}
-		});
-		
-		JRadioButton orderByUptsAsc = new JRadioButton("按更新时间升序排序");
-		JRadioButton orderByUptsDesc = new JRadioButton("按更新时间降序排序");
-		JRadioButton orderByAtsAsc = new JRadioButton("按添加时间升序排序");
-		JRadioButton orderByAtsDesc = new JRadioButton("按添加时间降序排序");
-		ButtonGroup bGroup = new ButtonGroup();
-		bGroup.add(orderByUptsAsc);
-		bGroup.add(orderByUptsDesc);
-		bGroup.add(orderByAtsAsc);
-		bGroup.add(orderByAtsDesc);
-		
 		JButton refresh = new JButton("刷新");
 		refresh.setActionCommand("refreshDataGrid");
 		refresh.addActionListener(new ButtonActionListener(this));
 		JLabel filterLabel = new JLabel("请选择过滤条件：");
 		
-		panel.add(orderByUptsAsc);panel.add(orderByAtsAsc);
-		panel.add(checkStatus);
 		panel.add(refresh);
 		panel.add(filterLabel);
 		
@@ -121,9 +97,13 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
-		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "来源", "数量", "备注", "发生时间", "最后更新于", "创建时间"};
-		datagrid = new DataGrid(COL_NAMES);
-		
+		final String[] COL_NAMES = {
+				"ID", "类型 ID", "类型", "来源", "数量", "备注", "发生时间", "最后更新于", "创建时间",
+				"已还", "未还"
+		};
+		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID"}
+				, new String[] {"类型", "来源", "数量", "已还", "剩余", "发生时间"}, new String[] {"备注"});
+		datagrid.setRowColor(4, 9, (a, b) -> (new BigDecimal(a.replaceAll(",", "")).compareTo(new BigDecimal(b.replaceAll(",", ""))) <= 0));
 		datagrid.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -163,7 +143,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 			
 			typesDropdown.setSelectedIndex(getDropdownIndexByTypeId(Integer.parseInt(typeId)));
 			fromWhoField.setText(source);
-			amountField.setText(amount);
+			amountField.setText(amount.replaceAll(",", ""));
 			descField.setText(desc);
 			if (occurTs != null && !"".equals(occurTs)) {
 				dp.fillFields(occurTs.substring(0, 4), occurTs.substring(5, 7), occurTs.substring(8, 10));
@@ -227,13 +207,11 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		dp = new DateField();
 		
 		JButton calBtn = new JButton("求和");
-		JLabel sumLabel = new JLabel("");
-		sumLabel.setForeground(Color.RED);
 		calBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				sumLabel.setText(StringUtil.subZeroAndDot(sumAmount()));
+				JOptionPane.showMessageDialog(BorrowPanel.this, NumberFormat.getNumberInstance().format(sumAmount()), "本页账目总和", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
@@ -267,6 +245,23 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 			}
 		});
 		
+		calRemainingBorrowAmountFromRelationshipBtn = new JButton("剩余欠款");
+		calRemainingBorrowAmountFromRelationshipBtn.setToolTipText("剩余欠款仅计算亲朋好友相关款项，不包括银行房贷");
+		calRemainingBorrowAmountFromRelationshipBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				double result = calRemainingBorrowAmount();
+				if (result == -2) {
+					JOptionPane.showMessageDialog(BorrowPanel.this, "请检查配置文件中[cal.borrow.remainingdebt]项是否合法", "剩余欠款", JOptionPane.INFORMATION_MESSAGE);
+				} else if (result == -1) {
+					JOptionPane.showMessageDialog(BorrowPanel.this, "读取到type id为0的项", "剩余欠款", JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(BorrowPanel.this, result, "剩余欠款", JOptionPane.INFORMATION_MESSAGE);
+				}
+			}
+		});
+		
 		inputPanel.add(typeLabel);
 		inputPanel.add(typesDropdown);
 		inputPanel.add(sourceLabel);
@@ -282,8 +277,8 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		inputPanel.add(deleteBtn);
 		inputPanel.add(payBackBtn);
 		
+		inputPanel.add(calRemainingBorrowAmountFromRelationshipBtn);
 		inputPanel.add(calBtn);
-		inputPanel.add(sumLabel);
 		
 		panel.add(inputPanel);
 		
@@ -307,6 +302,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		if (BorrowDao.savePaybackHistory(bean)) {
 			clearInput();
 			datagrid.clearSelection();
+			loadDatagrid();//To refresh pay-backed/left amount
 			JOptionPane.showMessageDialog(this, "偿还成功");
 		} else {
 			JOptionPane.showMessageDialog(this, "偿还失败");
@@ -376,19 +372,41 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		List<Double> doubleList = new ArrayList<Double>();
 		for (int row = 0; row < size; row++) {
 			String amountStr = (String) datagrid.getValueAt(row, 4);
-			double amount = Double.parseDouble(amountStr);
+			double amount = Double.parseDouble(amountStr.replaceAll(",", ""));
 			doubleList.add(amount);
 		}
 		
-		return NumberUtil.sum(doubleList);
+		return doubleList.stream().reduce((acc, ele) -> acc += ele).orElse(0d);
 	}
 	
 	private void loadTypeDropDown() {
-		List<TypeBean> list = TypeDao.fetchTypeByCategory(BorrowBean.CATEGORY_ID);
+		List<TypeBean> list = TypeDao.fetchTypeBy(BorrowBean.CATEGORY_ID, null);
 		final TypeBean[] actions = list.toArray(new TypeBean[0]);
 		typesDropdown.setModel(new DefaultComboBoxModel<TypeBean>(actions));
 	}
 
+	private double calRemainingBorrowAmount() {
+		final String KEY = "cal.borrow.remainingdebt.borrowids";
+		List<Integer> borrowTypeIdsList = null;
+		try {
+			borrowTypeIdsList = Arrays.asList(PropertiesUtil.getValueAsStringArray(KEY)).stream()
+					.map(str -> Integer.parseInt(str))
+					.collect(Collectors.toList());
+		} catch (Exception e) {
+			System.out.println("读取【实际存款】计算公式配置出错：格式不正确或者不合法的数字");
+			return -2;
+		}
+		boolean valid = borrowTypeIdsList.stream().allMatch(id -> id > 0);
+		if (!valid) {
+			return -1;
+		}
+		Integer[] borrowTypeIds = borrowTypeIdsList.toArray(new Integer[0]);
+		
+		//TODO
+		//Make calAllBorrowHistoryAmountOfType receive multiple parameters
+		return BorrowDao.calAllBorrowAmountOfType(borrowTypeIds[0]) - BorrowDao.calAllBorrowHistoryAmountOfType(borrowTypeIds[0]);
+	}
+	
 	@Override
 	public void loadDatagrid() {
 		List<BorrowBean> list = BorrowDao.fetchAllBorrowRecs();
@@ -400,11 +418,13 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 			v.add(bean.getTypeId().toString());
 			v.add(bean.getTypeName());
 			v.add(bean.getFromWho());
-			v.add(StringUtil.subZeroAndDot(bean.getAmount()));
+			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
-			v.add(bean.getOccurTs() != null ? DateUtil.timestamp2DateStr(bean.getOccurTs()) : null);
-			v.add(bean.getLastUpdateTs().toString());
-			v.add(bean.getAddTs().toString());
+			v.add(DateUtil.timestamp2Str(bean.getOccurTs()));
+			v.add(DateUtil.timestamp2Str(bean.getLastUpdateTs()));
+			v.add(DateUtil.timestamp2Str(bean.getAddTs()));
+			v.add(NumberFormat.getNumberInstance().format(bean.getPaybackedAmt()));
+			v.add(NumberFormat.getNumberInstance().format(bean.getLeftAmt()));
 			dataVectorList.add(v);
 		}
 		datagrid.setData(dataVectorList);

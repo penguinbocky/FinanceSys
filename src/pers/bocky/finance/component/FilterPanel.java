@@ -19,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import pers.bocky.finance.bean.BorrowBean;
 import pers.bocky.finance.bean.ConsumeBean;
 import pers.bocky.finance.bean.DepositBean;
 import pers.bocky.finance.bean.FilterBean;
@@ -75,6 +76,7 @@ public class FilterPanel extends JPanel {
 		initAvailableFilters();
 		initOkBtn();
 		configFilter();
+		setOpaque(false);
 	}
 
 	private void initOkBtn() {
@@ -194,30 +196,21 @@ public class FilterPanel extends JPanel {
 		if (selectedFilter.getType().equalsIgnoreCase("date")) {
 			Date tempDate = new Date();
 			if (lastComparator.compareTo(Comparator.介于) == 0) {
-				if ("发生时间".equals(selectedFilter.getFilterName())) {
-					filterValueOfDateTime = getDatePicker(
-							new Date(tempDate.getYear(), tempDate.getMonth(), tempDate.getDate() - 1), false);
-					filterValueOfDateTime2 = getDatePicker(
-							new Date(tempDate.getYear(), tempDate.getMonth(), tempDate.getDate()), false);
-				} else {
-					filterValueOfDateTime = getDatePicker(new Date(tempDate.getTime() - 24 * 3600 * 1000), true);
-					filterValueOfDateTime2 = getDatePicker(tempDate, true);
-				}
+				filterValueOfDateTime = getDatePicker(
+						new Date(tempDate.getYear(), tempDate.getMonth(), tempDate.getDate() - 1), false);
+				filterValueOfDateTime2 = getDatePicker(
+						new Date(tempDate.getYear(), tempDate.getMonth(), tempDate.getDate()), false);
 				add(filterValueOfDateTime);
 				add(new JLabel(" --到-- "));
 				add(filterValueOfDateTime2);
 			} else {
-				if ("发生时间".equals(selectedFilter.getFilterName())) {
-					filterValueOfDateTime = getDatePicker(
-							new Date(tempDate.getYear(), tempDate.getMonth(), tempDate.getDate()), false);
-				} else {
-					filterValueOfDateTime = getDatePicker(tempDate, true);
-				}
+				filterValueOfDateTime = getDatePicker(
+						new Date(tempDate.getYear(), tempDate.getMonth(), tempDate.getDate()), false);
 				add(filterValueOfDateTime);
 			}
 		} else if (selectedFilter.getType().equalsIgnoreCase("type")) {
 			filterValueOfTypes = new JComboBox<TypeBean>();
-			List<TypeBean> list = TypeDao.fetchTypeByCategory(categoryId);
+			List<TypeBean> list = TypeDao.fetchTypeBy(categoryId, null);
 			final TypeBean[] actions = list.toArray(new TypeBean[0]);
 			filterValueOfTypes.setModel(new DefaultComboBoxModel<TypeBean>(actions));
 			add(filterValueOfTypes);
@@ -273,7 +266,7 @@ public class FilterPanel extends JPanel {
 			b = new FilterBean();
 			b.setFilterId(id++);
 			b.setType("String");
-			b.setFilterName(categoryId == DepositBean.CATEGORY_ID ? "来源" : "去向");
+			b.setFilterName((categoryId == DepositBean.CATEGORY_ID || categoryId == BorrowBean.CATEGORY_ID) ? "来源" : "去向");
 			filterList.add(b);
 			
 			b = new FilterBean();
