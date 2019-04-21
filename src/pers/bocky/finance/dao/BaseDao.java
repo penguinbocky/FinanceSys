@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import pers.bocky.finance.bean.CategoryBean;
 import pers.bocky.finance.util.DbUtility;
@@ -691,6 +693,73 @@ public class BaseDao {
 			dbUtil.close(con);
 		}
 		return sum;
+	}
+	
+	protected static Map<String, Double> getAmountGroupByMonth(int categoryId, Integer... typeId) {
+		System.out.println("getAmountGroupByMonth for categoryId: " + categoryId + ", and typeId: " + typeId);
+		double sum = 0;
+		String month = null;
+		Connection con = dbUtil.getCon();
+		String tableName = null;
+		switch (categoryId) {
+		case CategoryBean.DEPOSIT:
+			tableName = "deposit";
+			break;
+		case CategoryBean.CONSUME:
+			tableName = "consume";
+			break;
+		case CategoryBean.BORROW:
+			tableName = "borrow";
+			break;
+		case CategoryBean.LEND:
+			tableName = "lend";
+			break;
+
+		default:
+			tableName = "consume";
+			break;
+		}
+		StringBuffer sql = new StringBuffer(
+				"SELECT sum(d.amount) as sum, date_format(occur_ts, '%y/%m') month"
+				+ " FROM"
+				+ " " + tableName
+				+ " d, type_dfntn t, category_dfntn c"
+				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
+				+ " AND d.type_id = t.type_id"
+				+ " AND t.category_id = c.category_id"
+				+ " AND c.category_id = " + categoryId);
+
+		if (typeId != null && typeId.length > 0) {
+			sql.append(" AND ( d.type_id = " + typeId[0]);
+			for (int i = 1; i < typeId.length; i++) {
+				Integer type = typeId[i];
+				sql.append(" or d.type_id = " + type);
+			}
+			sql.append(" ) ");
+		}
+		sql.append(" group by date_format(occur_ts, '%Y-%m') order by date_format(occur_ts, '%Y-%m')");
+		logger.log(sql.toString());
+		Map<String, Double> map = null;
+		try {
+			PreparedStatement pstat = con.prepareStatement(sql.toString());
+			ResultSet rs = pstat.executeQuery();
+			
+			if(rs != null){
+				map = new LinkedHashMap<>();
+				while (rs.next()) {
+					sum = rs.getDouble("sum");
+					month = rs.getString("month");
+					map.put(month, sum);
+				}
+			}
+			pstat.close();
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(con);
+		}
+		return map;
 	}
 	
 }

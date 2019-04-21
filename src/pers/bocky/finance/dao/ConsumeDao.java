@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import pers.bocky.finance.bean.ConsumeBean;
 import pers.bocky.finance.bean.LogBean;
@@ -663,6 +664,10 @@ public class ConsumeDao extends BaseDao {
 
 	public static double calculateYesterdayAmountOfType(Integer[] selectedTypeIds) {
 		return calculateAmountOfYesterdayOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
+	
+	public static Map<String, Double> getAmountGroupByMonth(Integer[] selectedTypeIds) {
+		return getAmountGroupByMonth(ConsumeBean.CATEGORY_ID, selectedTypeIds);
 	}
 	
 }

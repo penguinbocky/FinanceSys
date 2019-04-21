@@ -4,5 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.7-bin.jar"/>
 	<classpathentry kind="lib" path="lib/datepicker.jar"/>
+	<classpathentry kind="lib" path="lib/jcommon-1.0.23.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.19.jar" sourcepath="C:/Users/bocky/.m2/repository/org/jfree/jfreechart/1.0.19/jfreechart-1.0.19-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
