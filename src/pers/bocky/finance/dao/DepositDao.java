@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import pers.bocky.finance.bean.DepositBean;
 import pers.bocky.finance.component.Comparator;
@@ -647,5 +648,9 @@ public class DepositDao extends BaseDao {
 
 	public static double calculateYesterdayAmountOfType(Integer[] selectedTypeIds) {
 		return calculateAmountOfYesterdayOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
+	
+	public static Map<String, Double> getAmountGroupByMonth(Integer[] selectedTypeIds) {
+		return getAmountGroupByMonth(DepositBean.CATEGORY_ID, selectedTypeIds);
 	}
 }

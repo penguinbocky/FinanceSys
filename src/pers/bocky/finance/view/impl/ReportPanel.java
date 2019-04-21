@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
@@ -16,14 +18,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.SwingUtilities;
 
 import pers.bocky.finance.bean.CategoryBean;
 import pers.bocky.finance.bean.TimeOption;
 import pers.bocky.finance.bean.TypeBean;
+import pers.bocky.finance.component.LineChart;
 import pers.bocky.finance.dao.BorrowDao;
 import pers.bocky.finance.dao.CategoryDao;
 import pers.bocky.finance.dao.ConsumeDao;
@@ -57,6 +62,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 	
 	private JPanel panelForCheckbox = new JPanel(new GridLayout(5, 0));
 	private JLabel resultText;
+	private JButton showChartBtn;
 	
 	public ReportPanel() {
 		super();
@@ -373,8 +379,29 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		resultText = new JLabel();
 		resultText.setForeground(Color.RED);
 
+		showChartBtn = new JButton("查看趋势图");
+		showChartBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SwingUtilities.invokeLater(new Runnable() {
+					
+					@Override
+					public void run() {
+						new LineChart("报表"
+								, "所选" + selectedCategory + "项的变化趋势"
+								, selectedCategory.getCategoryName()
+								, getDataMapByCategory()
+								).showChart();
+						
+					}
+				});
+			}
+		});
+		
 		panelForBtn.add(new JLabel("统计结果："), BorderLayout.WEST);
 		panelForBtn.add(resultText, BorderLayout.CENTER);
+		panelForBtn.add(showChartBtn, BorderLayout.EAST);
 		
 		layoutPanel.add(panelForRadios2);
 		layoutPanel.add(panelForBtn);
@@ -456,6 +483,18 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 	@Override
 	public boolean hasMainUI() {
 		return hasMainUI;
+	}
+
+	private Map<String, Double> getDataMapByCategory() {
+		String categoryName = selectedCategory.getCategoryName();
+		Integer[] selected = selectedTypes.get().stream().map(bean -> bean.getTypeId()).toArray(Integer[]::new);
+		switch (categoryName) {
+		case "收入":
+			return DepositDao.getAmountGroupByMonth(selected);
+		case "支出":
+		default:
+			return ConsumeDao.getAmountGroupByMonth(selected);
+		}
 	}
 
 }
