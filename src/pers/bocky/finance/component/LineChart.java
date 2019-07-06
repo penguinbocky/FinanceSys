@@ -39,7 +39,7 @@ public class LineChart extends JFrame {
 		ChartFactory.setChartTheme(mChartTheme);
 
 		JFreeChart lineChart = ChartFactory.createLineChart(chartTitle, "时间(年/月)", "数量(元)",
-				createCategoryDataset(category, dataMap), PlotOrientation.VERTICAL, true, true, false);
+		createCategoryDataset(category, dataMap), PlotOrientation.VERTICAL, true, true, false);
 		lineChart.setBackgroundPaint(new Color(208, 223, 239));
 		
 		CategoryPlot plot = (CategoryPlot) lineChart.getPlot();
