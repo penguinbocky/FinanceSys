@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import pers.bocky.finance.bean.BorrowBean;
 import pers.bocky.finance.bean.ConsumeBean;
 import pers.bocky.finance.bean.LogBean;
 import pers.bocky.finance.component.Comparator;
@@ -668,6 +669,10 @@ public class ConsumeDao extends BaseDao {
 	
 	public static Map<String, Double> getAmountGroupByMonth(Integer[] selectedTypeIds) {
 		return getAmountGroupByMonth(ConsumeBean.CATEGORY_ID, selectedTypeIds);
+	}
+	
+	public static double calculateForCustomizedAmountOfType(Integer[] selectedTypeIds) {
+		return calculateForCustomizedPeriodAmountOfType(ConsumeBean.CATEGORY_ID, selectedTypeIds);
 	}
 	
 }

@@ -695,6 +695,66 @@ public class BaseDao {
 		return sum;
 	}
 	
+	protected static double calculateForCustomizedPeriodAmountOfType(int categoryId, Integer... typeId) {
+		System.out.println("calculating customized for categoryId: " + categoryId + ", and typeId: " + typeId);
+		double sum = 0;
+		Connection con = dbUtil.getCon();
+		String tableName = null;
+		switch (categoryId) {
+		case CategoryBean.DEPOSIT:
+			tableName = "deposit";
+			break;
+		case CategoryBean.CONSUME:
+			tableName = "consume";
+			break;
+		case CategoryBean.BORROW:
+			tableName = "borrow";
+			break;
+		case CategoryBean.LEND:
+			tableName = "lend";
+			break;
+
+		default:
+			tableName = "consume";
+			break;
+		}
+		StringBuffer sql = new StringBuffer(
+				"SELECT sum(d.amount) as sum"
+				+ " FROM"
+				+ " " + tableName
+				+ " d, type_dfntn t, category_dfntn c"
+				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
+				+ " AND d.type_id = t.type_id"
+				+ " AND t.category_id = c.category_id"
+				+ " AND c.category_id = " + categoryId);
+
+		if (typeId != null && typeId.length > 0) {
+			sql.append(" AND ( d.type_id = " + typeId[0]);
+			for (int i = 1; i < typeId.length; i++) {
+				Integer type = typeId[i];
+				sql.append(" or d.type_id = " + type);
+			}
+			sql.append(" ) ");
+		}
+		sql.append(" AND occur_ts >= (select ref_value from lk_ref where ref_type='CREDIT_CARD_PERIOD' and ref_key='FROM') and occur_ts <= (select ref_value from lk_ref where ref_type='CREDIT_CARD_PERIOD' and ref_key='TO') ");
+		logger.log(sql.toString());
+		try {
+			PreparedStatement pstat = con.prepareStatement(sql.toString());
+			ResultSet rs = pstat.executeQuery();
+			
+			if(rs != null && rs.next()){
+				sum = rs.getDouble("sum");
+			}
+			pstat.close();
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(con);
+		}
+		return sum;
+	}
+	
 	protected static Map<String, Double> getAmountGroupByMonth(int categoryId, Integer... typeId) {
 		System.out.println("getAmountGroupByMonth for categoryId: " + categoryId + ", and typeId: " + typeId);
 		double sum = 0;

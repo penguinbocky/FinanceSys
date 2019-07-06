@@ -162,6 +162,8 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 				case YESTERDAY:
 					result = DepositDao.calculateYesterdayAmountOfType(selectedTypeIds);
 					break;
+				case CUSTOMIZED:
+					result = DepositDao.calculateForCustomizedAmountOfType(selectedTypeIds);
 				default:
 					tooltipText = "存款项不支持此统计类型";
 					break;
@@ -199,6 +201,8 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 				case YESTERDAY:
 					result = ConsumeDao.calculateYesterdayAmountOfType(selectedTypeIds);
 					break;
+				case CUSTOMIZED:
+					result = ConsumeDao.calculateForCustomizedAmountOfType(selectedTypeIds);
 				default:
 					tooltipText = "存款项不支持此统计类型";
 					break;
@@ -236,6 +240,8 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 				case YESTERDAY:
 					result = BorrowDao.calculateYesterdayAmountOfType(selectedTypeIds);
 					break;
+				case CUSTOMIZED:
+					result = BorrowDao.calculateForCustomizedAmountOfType(selectedTypeIds);
 				default:
 					tooltipText = "借入项不支持此统计类型";
 					break;
@@ -273,6 +279,8 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 				case YESTERDAY:
 					result = LendDao.calculateYesterdayAmountOfType(selectedTypeIds);
 					break;
+				case CUSTOMIZED:
+					result = LendDao.calculateForCustomizedAmountOfType(selectedTypeIds);
 				default:
 					tooltipText = "借出项不支持此统计类型";
 					break;
@@ -359,6 +367,7 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 			JRadioButton radioButton = new JRadioButton(timeOption.getTimeOptionName(),
 					timeOption == selectedTimeOption);
 			radioButton.setOpaque(false);
+			radioButton.setToolTipText(timeOption == TimeOption.CUSTOMIZED ? "自定义的计算周期，每月按需在数据库修改，默认为信用卡周期" : "");
 			panel.add(radioButton);
 			panelForRadios2.add(panel);
 			bg2.add(radioButton);
@@ -453,6 +462,9 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		}
 		if (allowedList.contains("current_month")) {
 			list.add(TimeOption.CURRENT_MONTH);
+		}
+		if (allowedList.contains("customized")) {
+			list.add(TimeOption.CUSTOMIZED);
 		}
 		
 		return list;

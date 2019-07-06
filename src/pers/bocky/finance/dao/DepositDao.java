@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import pers.bocky.finance.bean.ConsumeBean;
 import pers.bocky.finance.bean.DepositBean;
 import pers.bocky.finance.component.Comparator;
 import pers.bocky.finance.util.DaoResponse;
@@ -652,5 +653,9 @@ public class DepositDao extends BaseDao {
 	
 	public static Map<String, Double> getAmountGroupByMonth(Integer[] selectedTypeIds) {
 		return getAmountGroupByMonth(DepositBean.CATEGORY_ID, selectedTypeIds);
+	}
+	
+	public static double calculateForCustomizedAmountOfType(Integer[] selectedTypeIds) {
+		return calculateForCustomizedPeriodAmountOfType(DepositBean.CATEGORY_ID, selectedTypeIds);
 	}
 }

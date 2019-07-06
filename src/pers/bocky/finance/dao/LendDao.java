@@ -268,4 +268,8 @@ public class LendDao extends BaseDao {
 		return calculateAmountOfYesterdayOfType(LendBean.CATEGORY_ID, selectedTypeIds);
 	}
 	
+	public static double calculateForCustomizedAmountOfType(Integer[] selectedTypeIds) {
+		return calculateForCustomizedPeriodAmountOfType(LendBean.CATEGORY_ID, selectedTypeIds);
+	}
+	
 }

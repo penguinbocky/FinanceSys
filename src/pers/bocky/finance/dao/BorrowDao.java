@@ -9,6 +9,7 @@ import java.util.List;
 
 import pers.bocky.finance.bean.BorrowBean;
 import pers.bocky.finance.bean.BorrowHistoryBean;
+import pers.bocky.finance.bean.LendBean;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.StringUtil;
 
@@ -293,6 +294,10 @@ public class BorrowDao extends BaseDao {
 
 	public static double calculateYesterdayAmountOfType(Integer[] selectedTypeIds) {
 		return calculateAmountOfYesterdayOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
+	}
+	
+	public static double calculateForCustomizedAmountOfType(Integer[] selectedTypeIds) {
+		return calculateForCustomizedPeriodAmountOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
 	}
 	
 }
