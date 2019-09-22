@@ -37,6 +37,7 @@ import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
+import pers.bocky.finance.util.NumberUtil;
 import pers.bocky.finance.util.PropertiesUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
@@ -228,7 +229,7 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(DepositPanel.this, NumberFormat.getNumberInstance().format(sumAmount()), "本页账目总和", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(DepositPanel.this, NumberFormat.getNumberInstance().format(NumberUtil.sumAmount(datagrid)), "(选中/全部)账目总和", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
@@ -345,21 +346,6 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		checkForButtons();
 	}
 	
-	protected double sumAmount() {
-		if (datagrid == null || datagrid.getModel().getRowCount() < 1) {
-			return 0;
-		}
-		int size = datagrid.getModel().getRowCount();
-		List<Double> doubleList = new ArrayList<Double>();
-		for (int row = 0; row < size; row++) {
-			String amountStr = (String) datagrid.getValueAt(row, 4);
-			double amount = Double.parseDouble(amountStr.replaceAll(",", ""));
-			doubleList.add(amount);
-		}
-		
-		return doubleList.stream().reduce((acc, ele) -> acc += ele).orElse(0d);
-	}
-
 	/**
 	 * 
 	 */
