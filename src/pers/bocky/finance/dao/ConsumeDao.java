@@ -34,16 +34,20 @@ public class ConsumeDao extends BaseDao {
 	}
 	
 	public static List<ConsumeBean> fetchAllConsumeRecs(){
-		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
-		Connection con = dbUtil.getCon();
 		StringBuffer sql = getPreSql().append(" ORDER BY last_update_ts DESC");
-	
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
+		return getRecListBySql(sql.toString());
+	}
+
+	private static List<ConsumeBean> getRecListBySql(String sql) {
+		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
+		Connection con = dbUtil.getCon();
+	
 		PreparedStatement pstat = null;
 		ResultSet rs = null;
 		try {
-			pstat = con.prepareStatement(sql.toString());
+			pstat = con.prepareStatement(sql);
 			rs = pstat.executeQuery();
 			
 			while(rs != null && rs.next()){
@@ -56,10 +60,8 @@ public class ConsumeDao extends BaseDao {
 		}
 		return list;
 	}
-
-	public static List<ConsumeBean> fetchRecsByType(Comparator selectedComparator, Integer typeId){
-		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
-		Connection con = dbUtil.getCon();
+	
+	private static List<ConsumeBean> fetchRecsByType(Comparator selectedComparator, Integer typeId){
 		StringBuffer sql = getPreSql();
 
 		if (typeId != null && typeId != 0) {
@@ -78,26 +80,10 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<ConsumeBean> fetchConsumeRecsByOccurDate(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
-		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
-		Connection con = dbUtil.getCon();
+	private static List<ConsumeBean> fetchConsumeRecsByOccurDate(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
@@ -127,26 +113,10 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<ConsumeBean> fetchConsumeRecsByDest(Comparator selectedComparator, String dest){
-		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
-		Connection con = dbUtil.getCon();
+	private static List<ConsumeBean> fetchConsumeRecsByDest(Comparator selectedComparator, String dest){
 		StringBuffer sql = getPreSql();
 
 		if (dest != null && !"".equals(dest)) {
@@ -168,26 +138,10 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<ConsumeBean> fetchConsumeRecsByDesc(Comparator selectedComparator, String desc){
-		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
-		Connection con = dbUtil.getCon();
+	private static List<ConsumeBean> fetchConsumeRecsByDesc(Comparator selectedComparator, String desc){
 		StringBuffer sql = getPreSql();
 
 		if (desc != null && !"".equals(desc)) {
@@ -209,26 +163,10 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<ConsumeBean> fetchConsumeRecsByAmount(Comparator selectedComparator, Double amount){
-		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
-		Connection con = dbUtil.getCon();
+	private static List<ConsumeBean> fetchConsumeRecsByAmount(Comparator selectedComparator, Double amount){
 		StringBuffer sql = getPreSql();
 
 		if (amount != null) {
@@ -253,26 +191,10 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<ConsumeBean> fetchConsumeRecsByLastUpdTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
-		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
-		Connection con = dbUtil.getCon();
+	private static List<ConsumeBean> fetchConsumeRecsByLastUpdTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
@@ -302,26 +224,10 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<ConsumeBean> fetchConsumeRecsByCreatedTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
-		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
-		Connection con = dbUtil.getCon();
+	private static List<ConsumeBean> fetchConsumeRecsByCreatedTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
@@ -351,21 +257,7 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	public static DaoResponse saveNewConsume(ConsumeBean bean){
 		if (!doValidation(bean)) return DaoResponse.VALIDATION_ERROR;

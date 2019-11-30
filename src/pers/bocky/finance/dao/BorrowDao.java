@@ -36,14 +36,19 @@ public class BorrowDao extends BaseDao {
 	}
 	
 	public static List<BorrowBean> fetchAllBorrowRecs(){
-		List<BorrowBean> list = new ArrayList<BorrowBean>();
-		Connection con = dbUtil.getCon();
 		StringBuffer sql = getPreSql().append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
 
+		return getRecListBySql(sql.toString());
+	}
+	
+	private static List<BorrowBean> getRecListBySql(String sql) {
+		List<BorrowBean> list = new ArrayList<BorrowBean>();
+		Connection con = dbUtil.getCon();
+	
 		PreparedStatement pstat = null;
 		ResultSet rs = null;
 		try {
-			pstat = con.prepareStatement(sql.toString());
+			pstat = con.prepareStatement(sql);
 			rs = pstat.executeQuery();
 			
 			while(rs != null && rs.next()){
@@ -57,9 +62,7 @@ public class BorrowDao extends BaseDao {
 		return list;
 	}
 	
-	public static List<BorrowBean> fetchRecsByType(Comparator selectedComparator, Integer typeId){
-		List<BorrowBean> list = new ArrayList<BorrowBean>();
-		Connection con = dbUtil.getCon();
+	private static List<BorrowBean> fetchRecsByType(Comparator selectedComparator, Integer typeId){
 		StringBuffer sql = getPreSql();
 
 		if (typeId != null && typeId != 0) {
@@ -76,26 +79,10 @@ public class BorrowDao extends BaseDao {
 		}
 		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<BorrowBean> fetchRecsBySource(Comparator selectedComparator, String dest){
-		List<BorrowBean> list = new ArrayList<BorrowBean>();
-		Connection con = dbUtil.getCon();
+	private static List<BorrowBean> fetchRecsBySource(Comparator selectedComparator, String dest){
 		StringBuffer sql = getPreSql();
 
 		if (dest != null && !"".equals(dest)) {
@@ -115,26 +102,10 @@ public class BorrowDao extends BaseDao {
 		}
 		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<BorrowBean> fetchRecsByAmount(Comparator selectedComparator, Double amount){
-		List<BorrowBean> list = new ArrayList<BorrowBean>();
-		Connection con = dbUtil.getCon();
+	private static List<BorrowBean> fetchRecsByAmount(Comparator selectedComparator, Double amount){
 		StringBuffer sql = getPreSql();
 
 		if (amount != null) {
@@ -157,26 +128,10 @@ public class BorrowDao extends BaseDao {
 		}
 		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<BorrowBean> fetchRecsByDesc(Comparator selectedComparator, String desc){
-		List<BorrowBean> list = new ArrayList<BorrowBean>();
-		Connection con = dbUtil.getCon();
+	private static List<BorrowBean> fetchRecsByDesc(Comparator selectedComparator, String desc){
 		StringBuffer sql = getPreSql();
 
 		if (desc != null && !"".equals(desc)) {
@@ -196,26 +151,10 @@ public class BorrowDao extends BaseDao {
 		}
 		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<BorrowBean> fetchRecsByOccurDate(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
-		List<BorrowBean> list = new ArrayList<BorrowBean>();
-		Connection con = dbUtil.getCon();
+	private static List<BorrowBean> fetchRecsByOccurDate(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
@@ -242,26 +181,10 @@ public class BorrowDao extends BaseDao {
 			
 		}
 		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<BorrowBean> fetchRecsByCreatedTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
-		List<BorrowBean> list = new ArrayList<BorrowBean>();
-		Connection con = dbUtil.getCon();
+	private static List<BorrowBean> fetchRecsByCreatedTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
@@ -288,26 +211,10 @@ public class BorrowDao extends BaseDao {
 			
 		}
 		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<BorrowBean> fetchRecsByLastUpdTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
-		List<BorrowBean> list = new ArrayList<BorrowBean>();
-		Connection con = dbUtil.getCon();
+	private static List<BorrowBean> fetchRecsByLastUpdTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
@@ -334,21 +241,7 @@ public class BorrowDao extends BaseDao {
 			
 		}
 		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
 	public static DaoResponse saveNewBorrow(BorrowBean bean){

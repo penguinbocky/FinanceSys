@@ -33,14 +33,19 @@ public class DepositDao extends BaseDao {
 	}
 	
 	public static List<DepositBean> fetchAllDepositRecs(){
-		List<DepositBean> list = new ArrayList<DepositBean>();
-		Connection con = dbUtil.getCon();
 		StringBuffer sql = getPreSql().append(" ORDER BY last_update_ts DESC");
 
+		return getRecListBySql(sql.toString());
+	}
+	
+	private static List<DepositBean> getRecListBySql(String sql) {
+		List<DepositBean> list = new ArrayList<DepositBean>();
+		Connection con = dbUtil.getCon();
+	
 		PreparedStatement pstat = null;
 		ResultSet rs = null;
 		try {
-			pstat = con.prepareStatement(sql.toString());
+			pstat = con.prepareStatement(sql);
 			rs = pstat.executeQuery();
 			
 			while(rs != null && rs.next()){
@@ -53,12 +58,10 @@ public class DepositDao extends BaseDao {
 		}
 		return list;
 	}
-	
-	public static List<DepositBean> fetchRecsByType(Comparator selectedComparator, Integer typeId){
-		List<DepositBean> list = new ArrayList<DepositBean>();
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = getPreSql();
 
+	private static List<DepositBean> fetchRecsByType(Comparator selectedComparator, Integer typeId){
+		StringBuffer sql = getPreSql();
+		
 		if (typeId != null && typeId != 0) {
 			switch (selectedComparator) {
 			case 等于:
@@ -73,26 +76,10 @@ public class DepositDao extends BaseDao {
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
-	
-	public static List<DepositBean> fetchDepositRecsBySource(Comparator selectedComparator, String source){
-		List<DepositBean> list = new ArrayList<DepositBean>();
-		Connection con = dbUtil.getCon();
+
+	private static List<DepositBean> fetchDepositRecsBySource(Comparator selectedComparator, String source){
 		StringBuffer sql = getPreSql();
 		
 		if (source != null && !"".equals(source)) {
@@ -112,26 +99,10 @@ public class DepositDao extends BaseDao {
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<DepositBean> fetchDepositRecsByAmount(Comparator selectedComparator, Double amount){
-		List<DepositBean> list = new ArrayList<DepositBean>();
-		Connection con = dbUtil.getCon();
+	private static List<DepositBean> fetchDepositRecsByAmount(Comparator selectedComparator, Double amount){
 		StringBuffer sql = getPreSql();
 
 		if (amount != null) {
@@ -154,26 +125,10 @@ public class DepositDao extends BaseDao {
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<DepositBean> fetchDepositRecsByDesc(Comparator selectedComparator, String desc){
-		List<DepositBean> list = new ArrayList<DepositBean>();
-		Connection con = dbUtil.getCon();
+	private static List<DepositBean> fetchDepositRecsByDesc(Comparator selectedComparator, String desc){
 		StringBuffer sql = getPreSql();
 
 		if (desc != null && !"".equals(desc)) {
@@ -193,26 +148,10 @@ public class DepositDao extends BaseDao {
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
 		
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<DepositBean> fetchDepositRecsByOccurDate(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
-		List<DepositBean> list = new ArrayList<DepositBean>();
-		Connection con = dbUtil.getCon();
+	private static List<DepositBean> fetchDepositRecsByOccurDate(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
@@ -239,26 +178,11 @@ public class DepositDao extends BaseDao {
 			
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+		
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<DepositBean> fetchDepositRecsByCreatedTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
-		List<DepositBean> list = new ArrayList<DepositBean>();
-		Connection con = dbUtil.getCon();
+	private static List<DepositBean> fetchDepositRecsByCreatedTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
@@ -285,26 +209,11 @@ public class DepositDao extends BaseDao {
 			
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+
+		return getRecListBySql(sql.toString());
 	}
 	
-	public static List<DepositBean> fetchDepositRecsByLastUpdTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
-		List<DepositBean> list = new ArrayList<DepositBean>();
-		Connection con = dbUtil.getCon();
+	private static List<DepositBean> fetchDepositRecsByLastUpdTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
@@ -331,21 +240,8 @@ public class DepositDao extends BaseDao {
 			
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
-		PreparedStatement pstat = null;
-		ResultSet rs = null;
-		try {
-			pstat = con.prepareStatement(sql.toString());
-			rs = pstat.executeQuery();
-			
-			while(rs != null && rs.next()){
-				list.add(buildFrom(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(pstat, rs, con);
-		}
-		return list;
+
+		return getRecListBySql(sql.toString());
 	}
 	
 	public static DaoResponse saveNewDeposit(DepositBean bean){
