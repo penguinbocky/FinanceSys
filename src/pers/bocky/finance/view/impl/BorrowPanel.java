@@ -30,6 +30,7 @@ import pers.bocky.finance.bean.BorrowBean;
 import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.component.DataGrid;
 import pers.bocky.finance.component.DateField;
+import pers.bocky.finance.component.FilterPanel;
 import pers.bocky.finance.dao.BorrowDao;
 import pers.bocky.finance.dao.TypeDao;
 import pers.bocky.finance.listener.ButtonActionListener;
@@ -90,6 +91,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		
 		panel.add(refresh);
 		panel.add(filterLabel);
+		panel.add(new FilterPanel(this, BorrowBean.CATEGORY_ID));
 		
 		return panel;
 	}
@@ -396,6 +398,13 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 	@Override
 	public void loadDatagrid() {
 		List<BorrowBean> list = BorrowDao.fetchAllBorrowRecs();
+		loadDatagrid(list);
+	}
+
+	public boolean loadDatagrid(List<BorrowBean> list) {
+		if (list == null) {
+			return false;
+		}
 		List<Vector<String>> dataVectorList = new ArrayList<Vector<String>>();
 		for (int i = 0; i < list.size(); i++) {
 			BorrowBean bean = list.get(i);
@@ -414,6 +423,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 			dataVectorList.add(v);
 		}
 		datagrid.setData(dataVectorList);
+		return true;
 	}
 
 	public BorrowBean formSaveBean() {

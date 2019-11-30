@@ -4,60 +4,349 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import pers.bocky.finance.bean.BorrowBean;
 import pers.bocky.finance.bean.BorrowHistoryBean;
-import pers.bocky.finance.bean.LendBean;
+import pers.bocky.finance.component.Comparator;
 import pers.bocky.finance.util.DaoResponse;
+import pers.bocky.finance.util.DateUtil;
 import pers.bocky.finance.util.StringUtil;
 
 public class BorrowDao extends BaseDao {
+	private final static String preSql = "SELECT occur_ts, borrow_id, type_id, type_name, from_who, amount, description, add_ts, last_update_ts"
+			+ ", PAYBACKEDAMT, CASE WHEN PAYBACKEDAMT IS NULL THEN amount else (AMOUNT - PAYBACKEDAMT) end LEFTAMT"
+			+ " FROM ("
+			+ " SELECT d.occur_ts, d.borrow_id, d.type_id, t.type_name, d.from_who, d.amount, d.description, d.add_ts, d.last_update_ts, SUM(H.AMOUNT) PAYBACKEDAMT"
+			+ " FROM borrow d LEFT JOIN BORROW_HISTORY H ON D.BORROW_ID = H.BORROW_ID, type_dfntn t, category_dfntn c"
+			+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
+			+ " AND d.type_id = t.type_id"
+			+ " AND t.category_id = c.category_id"
+			+ " AND c.category_id = " + BorrowBean.CATEGORY_ID;
+	
+	private static StringBuffer getPreSql() {
+		return new StringBuffer(preSql);
+	}
+	
+	private static BorrowBean buildFrom(ResultSet rs) throws SQLException {
+		return new BorrowBean().buildFrom(rs);
+	}
 	
 	public static List<BorrowBean> fetchAllBorrowRecs(){
 		List<BorrowBean> list = new ArrayList<BorrowBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT occur_ts, borrow_id, type_id, type_name, from_who, amount, description, add_ts, last_update_ts"
-				+ ", PAYBACKEDAMT, CASE WHEN PAYBACKEDAMT IS NULL THEN amount else (AMOUNT - PAYBACKEDAMT) end LEFTAMT"
-				+ " FROM ("
-				+ " SELECT d.occur_ts, d.borrow_id, d.type_id, t.type_name, d.from_who, d.amount, d.description, d.add_ts, d.last_update_ts, SUM(H.AMOUNT) PAYBACKEDAMT"
-				+ " FROM borrow d LEFT JOIN BORROW_HISTORY H ON D.BORROW_ID = H.BORROW_ID, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + BorrowBean.CATEGORY_ID
-				+ " GROUP BY D.BORROW_ID"
-				+ " ) TEMP"
-				+ " ORDER BY last_update_ts DESC");
+		StringBuffer sql = getPreSql().append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
 
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			BorrowBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new BorrowBean();
-				bean.setBorrowId(rs.getInt("borrow_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setFromWho(rs.getString("from_who"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				bean.setPaybackedAmt(rs.getDouble("paybackedAmt"));
-				bean.setLeftAmt(rs.getDouble("leftAmt"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
+		}
+		return list;
+	}
+	
+	public static List<BorrowBean> fetchRecsByType(Comparator selectedComparator, Integer typeId){
+		List<BorrowBean> list = new ArrayList<BorrowBean>();
+		Connection con = dbUtil.getCon();
+		StringBuffer sql = getPreSql();
+
+		if (typeId != null && typeId != 0) {
+			switch (selectedComparator) {
+			case 等于:
+				sql.append(" AND d.type_id = " + typeId);
+				break;
+			case 不等于:
+				sql.append(" AND d.type_id <> " + typeId);
+				break;
+			default:
+				break;
+			}
+		}
+		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
+		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
+		try {
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
+			
+			while(rs != null && rs.next()){
+				list.add(buildFrom(rs));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(pstat, rs, con);
+		}
+		return list;
+	}
+	
+	public static List<BorrowBean> fetchRecsBySource(Comparator selectedComparator, String dest){
+		List<BorrowBean> list = new ArrayList<BorrowBean>();
+		Connection con = dbUtil.getCon();
+		StringBuffer sql = getPreSql();
+
+		if (dest != null && !"".equals(dest)) {
+			switch (selectedComparator) {
+			case 等于:
+				sql.append(" AND d.from_who = '" + dest + "'");
+				break;
+			case 不等于:
+				sql.append(" AND d.from_who <> '" + dest + "'");
+				break;
+			case 包含:
+				sql.append(" AND d.from_who like '%" + dest + "%'");
+				break;
+			default:
+				break;
+			}
+		}
+		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
+		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
+		try {
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
+			
+			while(rs != null && rs.next()){
+				list.add(buildFrom(rs));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(pstat, rs, con);
+		}
+		return list;
+	}
+	
+	public static List<BorrowBean> fetchRecsByAmount(Comparator selectedComparator, Double amount){
+		List<BorrowBean> list = new ArrayList<BorrowBean>();
+		Connection con = dbUtil.getCon();
+		StringBuffer sql = getPreSql();
+
+		if (amount != null) {
+			switch (selectedComparator) {
+			case 等于:
+				sql.append(" AND d.amount = " + amount);
+				break;
+			case 不等于:
+				sql.append(" AND d.amount <> " + amount);
+				break;
+			case 大于:
+				sql.append(" AND d.amount > " + amount);
+				break;
+			case 小于:
+				sql.append(" AND d.amount < " + amount);
+				break;
+			default:
+				break;
+			}
+		}
+		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
+		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
+		try {
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
+			
+			while(rs != null && rs.next()){
+				list.add(buildFrom(rs));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(pstat, rs, con);
+		}
+		return list;
+	}
+	
+	public static List<BorrowBean> fetchRecsByDesc(Comparator selectedComparator, String desc){
+		List<BorrowBean> list = new ArrayList<BorrowBean>();
+		Connection con = dbUtil.getCon();
+		StringBuffer sql = getPreSql();
+
+		if (desc != null && !"".equals(desc)) {
+			switch (selectedComparator) {
+			case 等于:
+				sql.append(" AND d.description = '" + desc + "'");
+				break;
+			case 不等于:
+				sql.append(" AND d.description <> '" + desc + "'");
+				break;
+			case 包含:
+				sql.append(" AND d.description like '%" + desc + "%'");
+				break;
+			default:
+				break;
+			}
+		}
+		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
+		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
+		try {
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
+			
+			while(rs != null && rs.next()){
+				list.add(buildFrom(rs));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(pstat, rs, con);
+		}
+		return list;
+	}
+	
+	public static List<BorrowBean> fetchRecsByOccurDate(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
+		List<BorrowBean> list = new ArrayList<BorrowBean>();
+		Connection con = dbUtil.getCon();
+		StringBuffer sql = getPreSql();
+
+		if (ts != null) {
+			switch (selectedComparator) {
+			case 等于:
+				sql.append(" and d.occur_ts = '" + ts + "'");
+				break;
+			case 不等于:
+				sql.append(" AND d.occur_ts <> '" + ts + "'");
+				break;
+			case 介于:
+				if (ts2.compareTo(new Date(0)) > 0) {
+					sql.append(" AND d.occur_ts <= '" + ts2 + "'");
+				}
+			case 大于:
+				sql.append(" AND d.occur_ts > '" + ts + "'");
+				break;
+			case 小于:
+				sql.append(" AND d.occur_ts < '" + ts + "'");
+				break;
+			default:
+				break;
+			}
+			
+		}
+		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
+		try {
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
+			
+			while(rs != null && rs.next()){
+				list.add(buildFrom(rs));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(pstat, rs, con);
+		}
+		return list;
+	}
+	
+	public static List<BorrowBean> fetchRecsByCreatedTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
+		List<BorrowBean> list = new ArrayList<BorrowBean>();
+		Connection con = dbUtil.getCon();
+		StringBuffer sql = getPreSql();
+
+		if (ts != null) {
+			switch (selectedComparator) {
+			case 等于:
+				sql.append(" and date_format(d.add_ts, '%Y-%m-%d') = '" + DateUtil.truncTimestamp(ts) + "'");
+				break;
+			case 不等于:
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') <> '" + DateUtil.truncTimestamp(ts) + "'");
+				break;
+			case 介于:
+				if (ts2.compareTo(new Date(0)) > 0) {
+					sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') <= '" + DateUtil.truncTimestamp(ts2) + "'");
+				}
+			case 大于:
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') > '" + DateUtil.truncTimestamp(ts) + "'");
+				break;
+			case 小于:
+				sql.append(" AND date_format(d.add_ts, '%Y-%m-%d') < '" + DateUtil.truncTimestamp(ts) + "'");
+				break;
+			default:
+				break;
+			}
+			
+		}
+		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
+		try {
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
+			
+			while(rs != null && rs.next()){
+				list.add(buildFrom(rs));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(pstat, rs, con);
+		}
+		return list;
+	}
+	
+	public static List<BorrowBean> fetchRecsByLastUpdTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
+		List<BorrowBean> list = new ArrayList<BorrowBean>();
+		Connection con = dbUtil.getCon();
+		StringBuffer sql = getPreSql();
+
+		if (ts != null) {
+			switch (selectedComparator) {
+			case 等于:
+				sql.append(" and date_format(d.last_update_ts, '%Y-%m-%d') = date_format('" + ts + "', '%Y-%m-%d')");
+				break;
+			case 不等于:
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') <> '" + DateUtil.truncTimestamp(ts) + "'");
+				break;
+			case 介于:
+				if (ts2.compareTo(new Date(0)) > 0) {
+					sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') <= '" + DateUtil.truncTimestamp(ts2) + "'");
+				}
+			case 大于:
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') > '" + DateUtil.truncTimestamp(ts) + "'");
+				break;
+			case 小于:
+				sql.append(" AND date_format(d.last_update_ts, '%Y-%m-%d') < '" + DateUtil.truncTimestamp(ts) + "'");
+				break;
+			default:
+				break;
+			}
+			
+		}
+		sql.append(" GROUP BY d.borrow_id ) TEMP ORDER BY last_update_ts DESC");
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
+		try {
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
+			
+			while(rs != null && rs.next()){
+				list.add(buildFrom(rs));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -86,7 +375,7 @@ public class BorrowDao extends BaseDao {
 		} finally {
 			dbUtil.close(con);
 		}
-
+	
 		return response;
 	}
 
@@ -272,6 +561,39 @@ public class BorrowDao extends BaseDao {
 		}
 	}
 
+	public static List<BorrowBean> getRecByFilter(String filterName, Comparator selectedComparator, String _filterValue, String _filterValue2) {
+		List<BorrowBean> list = new ArrayList<BorrowBean>();
+		
+		_filterValue2 = _filterValue2 == null ? "0" : _filterValue2;
+		switch (filterName) {
+		case "类型":
+			list = fetchRecsByType(selectedComparator, new Integer(_filterValue));
+			break;
+		case "发生时间":
+			list = fetchRecsByOccurDate(selectedComparator, new Timestamp(Long.parseLong(_filterValue)), new Timestamp(Long.parseLong(_filterValue2)));
+			break;
+		case "来源":
+			list = fetchRecsBySource(selectedComparator, _filterValue);
+			break;
+		case "备注":
+			list = fetchRecsByDesc(selectedComparator, _filterValue);
+			break;
+		case "数量":
+			list = fetchRecsByAmount(selectedComparator, Double.parseDouble(_filterValue));
+			break;
+		case "最后更新于":
+			list = fetchRecsByLastUpdTs(selectedComparator, new Timestamp(Long.parseLong(_filterValue)), new Timestamp(Long.parseLong(_filterValue2)));
+			break;
+		case "创建时间":
+			list = fetchRecsByCreatedTs(selectedComparator, new Timestamp(Long.parseLong(_filterValue)), new Timestamp(Long.parseLong(_filterValue2)));
+			break;
+		default:
+			break;
+		}
+		
+		return list;
+	}
+	
 	public static double calculateAmountOfLastWeekOfType(Integer[] selectedTypeIds) {
 		return calculateAmountOfLastWeekOfType(BorrowBean.CATEGORY_ID, selectedTypeIds);
 	}

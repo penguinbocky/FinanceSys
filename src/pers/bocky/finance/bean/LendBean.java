@@ -1,8 +1,10 @@
 package pers.bocky.finance.bean;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class LendBean {
+public class LendBean extends BaseBean {
 	//The number is mapped to the id in database category_dfntn.
 	public final static int CATEGORY_ID = 4;
 	
@@ -85,6 +87,27 @@ public class LendBean {
 	}
 	public void setLeftAmt(Double leftAmt) {
 		this.leftAmt = leftAmt;
+	}
+
+	@Override
+	public LendBean buildFrom(ResultSet rs) throws SQLException {
+		clear();
+		setLendId(rs.getInt("lend_id"));
+		setTypeId(rs.getInt("type_id"));
+		setTypeName(rs.getString("type_name"));
+		setToWho(rs.getString("to_who"));
+		setAmount(rs.getDouble("amount"));
+		setDescription(rs.getString("description"));
+		setAddTs(rs.getTimestamp("add_ts"));
+		setLastUpdateTs(rs.getTimestamp("last_update_ts"));
+		setOccurTs(rs.getTimestamp("occur_ts"));
+		setPaybackedAmt(rs.getDouble("paybackedAmt"));
+		setLeftAmt(rs.getDouble("leftAmt"));
+		return this;
+	}
+	
+	private void clear() {
+		//
 	}
 	
 }

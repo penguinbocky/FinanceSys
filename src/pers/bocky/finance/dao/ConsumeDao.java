@@ -18,59 +18,49 @@ import pers.bocky.finance.util.DateUtil;
 import pers.bocky.finance.util.StringUtil;
 
 public class ConsumeDao extends BaseDao {
+	private final static String preSql = "SELECT d.occur_ts, d.consume_id, d.type_id, t.type_name, d.dest, d.amount, d.description, d.add_ts, d.last_update_ts"
+			+ " FROM consume d, type_dfntn t, category_dfntn c"
+			+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
+			+ " AND d.type_id = t.type_id"
+			+ " AND t.category_id = c.category_id"
+			+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID;
+	
+	private static StringBuffer getPreSql() {
+		return new StringBuffer(preSql);
+	}
+	
+	private static ConsumeBean buildFrom(ResultSet rs) throws SQLException {
+		return new ConsumeBean().buildFrom(rs);
+	}
 	
 	public static List<ConsumeBean> fetchAllConsumeRecs(){
 		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.consume_id, d.type_id, t.type_name, d.dest, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID
-				+ " ORDER BY last_update_ts DESC");
+		StringBuffer sql = getPreSql().append(" ORDER BY last_update_ts DESC");
 	
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			ConsumeBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new ConsumeBean();
-				bean.setConsumeId(rs.getInt("consume_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setDest(rs.getString("dest"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
 
-	public static List<ConsumeBean> fetchConsumeRecsByType(Comparator selectedComparator, Integer typeId){
+	public static List<ConsumeBean> fetchRecsByType(Comparator selectedComparator, Integer typeId){
 		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.consume_id, d.type_id, t.type_name, d.dest, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (typeId != null && typeId != 0) {
 			switch (selectedComparator) {
@@ -88,30 +78,19 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			ConsumeBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new ConsumeBean();
-				bean.setConsumeId(rs.getInt("consume_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setDest(rs.getString("dest"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -119,13 +98,7 @@ public class ConsumeDao extends BaseDao {
 	public static List<ConsumeBean> fetchConsumeRecsByOccurDate(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.consume_id, d.type_id, t.type_name, d.dest, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
 			switch (selectedComparator) {
@@ -154,30 +127,19 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			ConsumeBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new ConsumeBean();
-				bean.setConsumeId(rs.getInt("consume_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setDest(rs.getString("dest"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -185,13 +147,7 @@ public class ConsumeDao extends BaseDao {
 	public static List<ConsumeBean> fetchConsumeRecsByDest(Comparator selectedComparator, String dest){
 		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.consume_id, d.type_id, t.type_name, d.dest, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (dest != null && !"".equals(dest)) {
 			switch (selectedComparator) {
@@ -212,30 +168,19 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			ConsumeBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new ConsumeBean();
-				bean.setConsumeId(rs.getInt("consume_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setDest(rs.getString("dest"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -243,13 +188,7 @@ public class ConsumeDao extends BaseDao {
 	public static List<ConsumeBean> fetchConsumeRecsByDesc(Comparator selectedComparator, String desc){
 		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.consume_id, d.type_id, t.type_name, d.dest, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (desc != null && !"".equals(desc)) {
 			switch (selectedComparator) {
@@ -270,30 +209,19 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			ConsumeBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new ConsumeBean();
-				bean.setConsumeId(rs.getInt("consume_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setDest(rs.getString("dest"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -301,13 +229,7 @@ public class ConsumeDao extends BaseDao {
 	public static List<ConsumeBean> fetchConsumeRecsByAmount(Comparator selectedComparator, Double amount){
 		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.consume_id, d.type_id, t.type_name, d.dest, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (amount != null) {
 			switch (selectedComparator) {
@@ -331,30 +253,19 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			ConsumeBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new ConsumeBean();
-				bean.setConsumeId(rs.getInt("consume_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setDest(rs.getString("dest"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -362,13 +273,7 @@ public class ConsumeDao extends BaseDao {
 	public static List<ConsumeBean> fetchConsumeRecsByLastUpdTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.consume_id, d.type_id, t.type_name, d.dest, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
 			switch (selectedComparator) {
@@ -397,30 +302,19 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			ConsumeBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new ConsumeBean();
-				bean.setConsumeId(rs.getInt("consume_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setDest(rs.getString("dest"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -428,13 +322,7 @@ public class ConsumeDao extends BaseDao {
 	public static List<ConsumeBean> fetchConsumeRecsByCreatedTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		List<ConsumeBean> list = new ArrayList<ConsumeBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.consume_id, d.type_id, t.type_name, d.dest, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM consume d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + ConsumeBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
 			switch (selectedComparator) {
@@ -463,30 +351,19 @@ public class ConsumeDao extends BaseDao {
 		
 		logger.log(new LogBean(sql.toString(), new Date()));
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			ConsumeBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new ConsumeBean();
-				bean.setConsumeId(rs.getInt("consume_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setDest(rs.getString("dest"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -615,7 +492,7 @@ public class ConsumeDao extends BaseDao {
 		_filterValue2 = _filterValue2 == null ? "0" : _filterValue2;
 		switch (filterName) {
 		case "类型":
-			list = fetchConsumeRecsByType(selectedComparator, new Integer(_filterValue));
+			list = fetchRecsByType(selectedComparator, new Integer(_filterValue));
 			break;
 		case "发生时间":
 			list = fetchConsumeRecsByOccurDate(selectedComparator, new Timestamp(Long.parseLong(_filterValue)), new Timestamp(Long.parseLong(_filterValue2)));

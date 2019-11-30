@@ -23,13 +23,18 @@ import pers.bocky.finance.bean.BorrowBean;
 import pers.bocky.finance.bean.ConsumeBean;
 import pers.bocky.finance.bean.DepositBean;
 import pers.bocky.finance.bean.FilterBean;
+import pers.bocky.finance.bean.LendBean;
 import pers.bocky.finance.bean.TypeBean;
+import pers.bocky.finance.dao.BorrowDao;
 import pers.bocky.finance.dao.ConsumeDao;
 import pers.bocky.finance.dao.DepositDao;
+import pers.bocky.finance.dao.LendDao;
 import pers.bocky.finance.dao.TypeDao;
 import pers.bocky.finance.view.WillBeInTabbed;
+import pers.bocky.finance.view.impl.BorrowPanel;
 import pers.bocky.finance.view.impl.ConsumePanel;
 import pers.bocky.finance.view.impl.DepositPanel;
+import pers.bocky.finance.view.impl.LendPanel;
 
 public class FilterPanel extends JPanel {
 
@@ -115,12 +120,12 @@ public class FilterPanel extends JPanel {
 				case ConsumeBean.CATEGORY_ID:
 					((ConsumePanel) panel).loadDatagrid(ConsumeDao.getRecByFilter(filterName, (Comparator) comparatorDropdown.getSelectedItem(), _filterValue, _filterValue2));				
 					break;
-//				case LendBean.CATEGORY_ID:
-//					((LendPanel) panel).loadDatagrid(DepositDao.getRecByFilter(filterName, (Comparator) comparatorDropdown.getSelectedItem(), _filterValue));
-//					break;
-//				case BorrowBean.CATEGORY_ID:
-//					((BorderPane) panel).loadDatagrid(DepositDao.getRecByFilter(filterName, (Comparator) comparatorDropdown.getSelectedItem(), _filterValue));
-//					break;
+				case LendBean.CATEGORY_ID:
+					((LendPanel) panel).loadDatagrid(LendDao.getRecByFilter(filterName, (Comparator) comparatorDropdown.getSelectedItem(), _filterValue, _filterValue2));
+					break;
+				case BorrowBean.CATEGORY_ID:
+					((BorrowPanel) panel).loadDatagrid(BorrowDao.getRecByFilter(filterName, (Comparator) comparatorDropdown.getSelectedItem(), _filterValue, _filterValue2));
+					break;
 
 				default:
 					break;
@@ -256,7 +261,9 @@ public class FilterPanel extends JPanel {
 		FilterBean b = null;
 		int id = 0;
 		if (categoryId == DepositBean.CATEGORY_ID
-				|| categoryId == ConsumeBean.CATEGORY_ID) {
+				|| categoryId == ConsumeBean.CATEGORY_ID
+				|| categoryId == LendBean.CATEGORY_ID
+				|| categoryId == BorrowBean.CATEGORY_ID) {
 			b = new FilterBean();
 			b.setFilterId(id++);
 			b.setType("type");

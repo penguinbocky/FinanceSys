@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import pers.bocky.finance.bean.ConsumeBean;
 import pers.bocky.finance.bean.DepositBean;
 import pers.bocky.finance.component.Comparator;
 import pers.bocky.finance.util.DaoResponse;
@@ -18,57 +17,47 @@ import pers.bocky.finance.util.DateUtil;
 import pers.bocky.finance.util.StringUtil;
 
 public class DepositDao extends BaseDao {
+	private final static String preSql = "SELECT d.occur_ts, d.deposit_id, d.type_id, t.type_name, d.source, d.amount, d.description, d.add_ts, d.last_update_ts"
+			+ " FROM deposit d, type_dfntn t, category_dfntn c"
+			+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
+			+ " AND d.type_id = t.type_id"
+			+ " AND t.category_id = c.category_id"
+			+ " AND c.category_id = " + DepositBean.CATEGORY_ID;
+	
+	private static StringBuffer getPreSql() {
+		return new StringBuffer(preSql);
+	}
+	
+	private static DepositBean buildFrom(ResultSet rs) throws SQLException {
+		return new DepositBean().buildFrom(rs);
+	}
 	
 	public static List<DepositBean> fetchAllDepositRecs(){
 		List<DepositBean> list = new ArrayList<DepositBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.deposit_id, d.type_id, t.type_name, d.source, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM deposit d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + DepositBean.CATEGORY_ID
-				+ " ORDER BY last_update_ts DESC");
+		StringBuffer sql = getPreSql().append(" ORDER BY last_update_ts DESC");
 
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			DepositBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new DepositBean();
-				bean.setDepositId(rs.getInt("deposit_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setSource(rs.getString("source"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
 	
-	public static List<DepositBean> fetchDepositRecsByType(Comparator selectedComparator, Integer typeId){
+	public static List<DepositBean> fetchRecsByType(Comparator selectedComparator, Integer typeId){
 		List<DepositBean> list = new ArrayList<DepositBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.deposit_id, d.type_id, t.type_name, d.source, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM deposit d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + DepositBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (typeId != null && typeId != 0) {
 			switch (selectedComparator) {
@@ -84,30 +73,19 @@ public class DepositDao extends BaseDao {
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			DepositBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new DepositBean();
-				bean.setDepositId(rs.getInt("deposit_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setSource(rs.getString("source"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -115,14 +93,8 @@ public class DepositDao extends BaseDao {
 	public static List<DepositBean> fetchDepositRecsBySource(Comparator selectedComparator, String source){
 		List<DepositBean> list = new ArrayList<DepositBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.deposit_id, d.type_id, t.type_name, d.source, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM deposit d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + DepositBean.CATEGORY_ID);
-
+		StringBuffer sql = getPreSql();
+		
 		if (source != null && !"".equals(source)) {
 			switch (selectedComparator) {
 			case 等于:
@@ -140,30 +112,19 @@ public class DepositDao extends BaseDao {
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			DepositBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new DepositBean();
-				bean.setDepositId(rs.getInt("deposit_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setSource(rs.getString("source"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -171,13 +132,7 @@ public class DepositDao extends BaseDao {
 	public static List<DepositBean> fetchDepositRecsByAmount(Comparator selectedComparator, Double amount){
 		List<DepositBean> list = new ArrayList<DepositBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.deposit_id, d.type_id, t.type_name, d.source, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM deposit d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + DepositBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (amount != null) {
 			switch (selectedComparator) {
@@ -199,30 +154,19 @@ public class DepositDao extends BaseDao {
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			DepositBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new DepositBean();
-				bean.setDepositId(rs.getInt("deposit_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setSource(rs.getString("source"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -230,13 +174,7 @@ public class DepositDao extends BaseDao {
 	public static List<DepositBean> fetchDepositRecsByDesc(Comparator selectedComparator, String desc){
 		List<DepositBean> list = new ArrayList<DepositBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.deposit_id, d.type_id, t.type_name, d.source, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM deposit d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + DepositBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (desc != null && !"".equals(desc)) {
 			switch (selectedComparator) {
@@ -255,30 +193,19 @@ public class DepositDao extends BaseDao {
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
 		
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			DepositBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new DepositBean();
-				bean.setDepositId(rs.getInt("deposit_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setSource(rs.getString("source"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -286,13 +213,7 @@ public class DepositDao extends BaseDao {
 	public static List<DepositBean> fetchDepositRecsByOccurDate(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		List<DepositBean> list = new ArrayList<DepositBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.deposit_id, d.type_id, t.type_name, d.source, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM deposit d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + DepositBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
 			switch (selectedComparator) {
@@ -318,30 +239,19 @@ public class DepositDao extends BaseDao {
 			
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			DepositBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new DepositBean();
-				bean.setDepositId(rs.getInt("deposit_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setSource(rs.getString("source"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -349,13 +259,7 @@ public class DepositDao extends BaseDao {
 	public static List<DepositBean> fetchDepositRecsByCreatedTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		List<DepositBean> list = new ArrayList<DepositBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.deposit_id, d.type_id, t.type_name, d.source, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM deposit d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + DepositBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
 			switch (selectedComparator) {
@@ -381,30 +285,19 @@ public class DepositDao extends BaseDao {
 			
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			DepositBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new DepositBean();
-				bean.setDepositId(rs.getInt("deposit_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setSource(rs.getString("source"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -412,13 +305,7 @@ public class DepositDao extends BaseDao {
 	public static List<DepositBean> fetchDepositRecsByLastUpdTs(Comparator selectedComparator, Timestamp ts, Timestamp ts2){
 		List<DepositBean> list = new ArrayList<DepositBean>();
 		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.occur_ts, d.deposit_id, d.type_id, t.type_name, d.source, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM deposit d, type_dfntn t, category_dfntn c"
-				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
-				+ " AND d.type_id = t.type_id"
-				+ " AND t.category_id = c.category_id"
-				+ " AND c.category_id = " + DepositBean.CATEGORY_ID);
+		StringBuffer sql = getPreSql();
 
 		if (ts != null) {
 			switch (selectedComparator) {
@@ -444,30 +331,19 @@ public class DepositDao extends BaseDao {
 			
 		}
 		sql.append(" ORDER BY last_update_ts DESC");
+		PreparedStatement pstat = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			ResultSet rs = pstat.executeQuery();
+			pstat = con.prepareStatement(sql.toString());
+			rs = pstat.executeQuery();
 			
-			DepositBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new DepositBean();
-				bean.setDepositId(rs.getInt("deposit_id"));
-				bean.setTypeId(rs.getInt("type_id"));
-				bean.setTypeName(rs.getString("type_name"));
-				bean.setSource(rs.getString("source"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
+				list.add(buildFrom(rs));
 			}
-			pstat.close();
-			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			dbUtil.close(con);
+			dbUtil.close(pstat, rs, con);
 		}
 		return list;
 	}
@@ -600,7 +476,7 @@ public class DepositDao extends BaseDao {
 		_filterValue2 = _filterValue2 == null ? "0" : _filterValue2;
 		switch (filterName) {
 		case "类型":
-			list = fetchDepositRecsByType(selectedComparator, new Integer(_filterValue));
+			list = fetchRecsByType(selectedComparator, new Integer(_filterValue));
 			break;
 		case "发生时间":
 			list = fetchDepositRecsByOccurDate(selectedComparator, new Timestamp(Long.parseLong(_filterValue)), new Timestamp(Long.parseLong(_filterValue2)));

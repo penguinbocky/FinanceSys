@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
@@ -65,6 +67,30 @@ public enum DbUtility {
 		return con;
 	}
 
+	public void close(PreparedStatement pstat) {
+		if (pstat != null) {
+			try {
+				pstat.close();
+				System.out.println("PreparedStatement关闭成功。");
+			} catch (SQLException e) {
+				e.printStackTrace();
+				System.out.println("PreparedStatement关闭失败。");
+			}
+		}
+	}
+	
+	public void close(ResultSet rs) {
+		if (rs != null) {
+			try {
+				rs.close();
+				System.out.println("ResultSet关闭成功。");
+			} catch (SQLException e) {
+				e.printStackTrace();
+				System.out.println("ResultSet关闭失败。");
+			}
+		}
+	}
+	
 	public void close(Connection con) {
 		if (con != null) {
 			try {
@@ -75,6 +101,12 @@ public enum DbUtility {
 				System.out.println("数据库关闭失败。");
 			}
 		}
+	}
+	
+	public void close(PreparedStatement pstat, ResultSet rs, Connection con) {
+		close(pstat);
+		close(rs);
+		close(con);
 	}
 	
 	public boolean dumpDB(String dbName, String path) {
