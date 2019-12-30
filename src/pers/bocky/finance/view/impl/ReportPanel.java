@@ -501,6 +501,10 @@ public class ReportPanel extends JPanel implements WillBeInMainTabbed {
 		String categoryName = selectedCategory.getCategoryName();
 		Integer[] selected = selectedTypes.get().stream().map(bean -> bean.getTypeId()).toArray(Integer[]::new);
 		switch (categoryName) {
+		case "借入":
+			return BorrowDao.getAmountGroupByMonth(selected);
+		case "借出":
+			return LendDao.getAmountGroupByMonth(selected);
 		case "收入":
 			return DepositDao.getAmountGroupByMonth(selected);
 		case "支出":

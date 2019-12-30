@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import pers.bocky.finance.bean.LendBean;
 import pers.bocky.finance.bean.LendHistoryBean;
@@ -486,6 +487,10 @@ public class LendDao extends BaseDao {
 	
 	public static double calculateForCustomizedAmountOfType(Integer[] selectedTypeIds) {
 		return calculateForCustomizedPeriodAmountOfType(LendBean.CATEGORY_ID, selectedTypeIds);
+	}
+
+	public static Map<String, Double> getAmountGroupByMonth(Integer[] selectedTypeIds) {
+		return getAmountGroupByMonth(LendBean.CATEGORY_ID, selectedTypeIds);
 	}
 	
 }
