@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import pers.bocky.finance.bean.BorrowBean;
-import pers.bocky.finance.bean.HistoryBean;
 import pers.bocky.finance.component.Comparator;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
@@ -359,43 +358,6 @@ public class BorrowDao extends BaseDao {
 		}
 
 		return success;
-	}
-	
-	public static List<HistoryBean> fetchAllBorrowHistoryRecs(HistoryBean param){
-		List<HistoryBean> list = new ArrayList<HistoryBean>();
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.history_id, d.occur_ts, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM borrow b, history d"
-				+ " WHERE b.active_flg = 'Y' AND b.active_flg = 'Y'"
-				+ " AND b.borrow_id = d.id"
-				+ " AND D.CATEGORY_ID = " + BorrowBean.CATEGORY_ID
-				+ " AND b.borrow_id = ?");
-
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			pstat.setInt(1, param.getId());
-			ResultSet rs = pstat.executeQuery();
-			
-			HistoryBean bean = null;
-			while(rs != null && rs.next()){
-				bean = new HistoryBean();
-				bean.setHistoryId(rs.getInt("history_id"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return list;
 	}
 	
 	public static double calAllBorrowHistoryAmountOfType(Integer typeId){
