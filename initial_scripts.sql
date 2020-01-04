@@ -209,3 +209,8 @@ insert  into `category_dfntn`(`category_id`,`category_name`,`description`,`last_
 /*Data for the table `tb_msg` */
 
 insert  into `tb_msg`(`msg_id`,`msg_content`,`active_flg`) values (1,'大的类别，不应该在页面上可改，因为影响到tab的数量，但目前程序未禁止（更新：已禁止）','N'),(2,'时间显示在系统制作之前的记录可能并不准确，某些数据仅供参考','Y'),(3,'偿还欠款的支出条目也应该记录在对应的\'借入\'偿还历史中','Y'),(4,'信用卡、花呗的还款可以不记入支出项(最好记入，以便核对)，因为其由对应日常消费等支出构成','N'),(5,'即使有公积金按月转账入账，也应该完整记录每月房贷的准确支出','N'),(6,'<ul><li>条目一</li><li style=\'color: yellow\'>条目二</li></ul>','N'),(7,'2018/6/22，存款和支出面板已开始支持filters','N'),(8,'对账说明：<ul style=\'color: yellow\'>\r\n<li>存款为固定储蓄（非总收入），但可用于支付房贷支出等;<br/>\r\n鉴于此：<i><b>实际存款 = 存款TAB总和 - 支出TAB特定类型（偿还房贷+首付）</b></i>\r\n</li>\r\n<li>存款已扣除每月预留的生活支出;<br/>\r\n故：<i><b>总收入 = 存款TAB总和 + 支出TAB特定类型（日常消费+特殊消费=花呗+信用卡）</b></i>\r\n</li>\r\n<li>若有特殊支出动用固定存款，应记录在特定的支出类型中（尚未建立，如\'动用固存的支出\'）;</li>\r\n</ul>','Y'),(9,'待实现的需求：<ul style=\'color: yellow\'>\r\n<li>FilterPanel支持多个Filter</li>\r\n<li>借入借出账目的结清状态，status[\'Not started\', \'In progress\', \'Complete\']</li>\r\n<li>目前按照更新时间排序，需要增加排序选择项</li>\r\n</ul>','Y');
+
+/* Customized lookup data insert */
+INSERT INTO `financial_sys`.`lk_ref`(`id`,`ref_type`,`ref_key`,`ref_value`,`ref_desc`,`last_update_ts`,`active_flg`,`add_ts`) VALUES ( NULL,'CREDIT_CARD_PERIOD','FROM','2019-04-08','Start date for credit card period',CURRENT_TIMESTAMP,'Y',NOW());
+INSERT INTO `financial_sys`.`lk_ref`(`id`,`ref_type`,`ref_key`,`ref_value`,`ref_desc`,`last_update_ts`,`active_flg`,`add_ts`) VALUES ( NULL,'CREDIT_CARD_PERIOD','TO','2019-05-08','End date for credit card period',CURRENT_TIMESTAMP,'Y',NOW());
+

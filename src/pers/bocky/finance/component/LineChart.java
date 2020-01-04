@@ -33,13 +33,13 @@ public class LineChart extends JFrame {
 		super(applicationTitle);
 
 		StandardChartTheme mChartTheme = new StandardChartTheme("CN");
-		mChartTheme.setLargeFont(new Font("Microsoft Yahei", Font.PLAIN, 20));
-		mChartTheme.setExtraLargeFont(new Font("Microsoft Yahei", Font.PLAIN, 16));
-		mChartTheme.setRegularFont(new Font("Microsoft Yahei", Font.PLAIN, 16));
+		mChartTheme.setLargeFont(new Font("Microsoft Yahei", Font.PLAIN, 16));
+		mChartTheme.setExtraLargeFont(new Font("Microsoft Yahei", Font.PLAIN, 26));
+		mChartTheme.setRegularFont(new Font("Microsoft Yahei", Font.PLAIN, 12));
 		ChartFactory.setChartTheme(mChartTheme);
 
-		JFreeChart lineChart = ChartFactory.createLineChart(chartTitle, "时间", "数量",
-				createCategoryDataset(category, dataMap), PlotOrientation.VERTICAL, true, true, false);
+		JFreeChart lineChart = ChartFactory.createLineChart(chartTitle, "时间(年/月)", "数量(元)",
+		createCategoryDataset(category, dataMap), PlotOrientation.VERTICAL, true, true, false);
 		lineChart.setBackgroundPaint(new Color(208, 223, 239));
 		
 		CategoryPlot plot = (CategoryPlot) lineChart.getPlot();

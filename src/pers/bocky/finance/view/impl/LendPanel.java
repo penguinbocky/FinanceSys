@@ -28,12 +28,14 @@ import pers.bocky.finance.bean.LendBean;
 import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.component.DataGrid;
 import pers.bocky.finance.component.DateField;
+import pers.bocky.finance.component.FilterPanel;
 import pers.bocky.finance.dao.LendDao;
 import pers.bocky.finance.dao.TypeDao;
 import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
+import pers.bocky.finance.util.NumberUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
 public class LendPanel extends JPanel implements WillBeInMainTabbed{
@@ -85,6 +87,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		
 		panel.add(refresh);
 		panel.add(filterLabel);
+		panel.add(new FilterPanel(this, LendBean.CATEGORY_ID));
 		
 		return panel;
 	}
@@ -206,7 +209,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(LendPanel.this, NumberFormat.getNumberInstance().format(sumAmount()), "本页账目总和", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(LendPanel.this, NumberFormat.getNumberInstance().format(NumberUtil.sumAmount(datagrid)), "(选中/全部)账目总和", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
@@ -341,21 +344,6 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		checkForButtons();
 	}
 	
-	protected double sumAmount() {
-		if (datagrid == null || datagrid.getModel().getRowCount() < 1) {
-			return 0;
-		}
-		int size = datagrid.getModel().getRowCount();
-		List<Double> doubleList = new ArrayList<Double>();
-		for (int row = 0; row < size; row++) {
-			String amountStr = (String) datagrid.getValueAt(row, 4);
-			double amount = Double.parseDouble(amountStr.replaceAll(",", ""));
-			doubleList.add(amount);
-		}
-		
-		return doubleList.stream().reduce((acc, ele) -> acc += ele).orElse(0d);
-	}
-	
 	private void loadTypeDropDown() {
 		List<TypeBean> list = TypeDao.fetchTypeBy(LendBean.CATEGORY_ID, null);
 		final TypeBean[] actions = list.toArray(new TypeBean[0]);
@@ -365,6 +353,13 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 	@Override
 	public void loadDatagrid() {
 		List<LendBean> list = LendDao.fetchAllLendRecs();
+		loadDatagrid(list);
+	}
+	
+	public boolean loadDatagrid(List<LendBean> list) {
+		if (list == null) {
+			return false;
+		}
 		List<Vector<String>> dataVectorList = new ArrayList<Vector<String>>();
 		for (int i = 0; i < list.size(); i++) {
 			LendBean bean = list.get(i);
@@ -383,6 +378,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			dataVectorList.add(v);
 		}
 		datagrid.setData(dataVectorList);
+		return true;
 	}
 
 	public LendBean formSaveBean() {

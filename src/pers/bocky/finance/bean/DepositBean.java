@@ -1,8 +1,10 @@
 package pers.bocky.finance.bean;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class DepositBean {
+public class DepositBean extends BaseBean {
 	//The number is mapped to the id in database category_dfntn.
 	public final static int CATEGORY_ID = 1;
 	
@@ -77,6 +79,19 @@ public class DepositBean {
 	public String toString() {
 		return "DepositBean [depositId=" + depositId + ", typeId=" + typeId + ", source=" + source + ", amount="
 				+ amount + ", description=" + description + ", addTs=" + addTs + "]";
+	}
+	@Override
+	public DepositBean buildFrom(ResultSet rs) throws SQLException {
+		setDepositId(rs.getInt("deposit_id"));
+		setTypeId(rs.getInt("type_id"));
+		setTypeName(rs.getString("type_name"));
+		setSource(rs.getString("source"));
+		setAmount(rs.getDouble("amount"));
+		setDescription(rs.getString("description"));
+		setAddTs(rs.getTimestamp("add_ts"));
+		setLastUpdateTs(rs.getTimestamp("last_update_ts"));
+		setOccurTs(rs.getTimestamp("occur_ts"));
+		return this;
 	}
 	
 }

@@ -1,8 +1,10 @@
 package pers.bocky.finance.bean;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class ConsumeBean {
+public class ConsumeBean extends BaseBean {
 	//The number is mapped to the id in database category_dfntn.
 	public final static int CATEGORY_ID = 2;
 	
@@ -71,6 +73,19 @@ public class ConsumeBean {
 	}
 	public void setLastUpdateTs(Timestamp lastUpdateTs) {
 		this.lastUpdateTs = lastUpdateTs;
+	}
+	@Override
+	public ConsumeBean buildFrom(ResultSet rs) throws SQLException {
+		setConsumeId(rs.getInt("consume_id"));
+		setTypeId(rs.getInt("type_id"));
+		setTypeName(rs.getString("type_name"));
+		setDest(rs.getString("dest"));
+		setAmount(rs.getDouble("amount"));
+		setDescription(rs.getString("description"));
+		setAddTs(rs.getTimestamp("add_ts"));
+		setLastUpdateTs(rs.getTimestamp("last_update_ts"));
+		setOccurTs(rs.getTimestamp("occur_ts"));
+		return this;
 	}
 	
 }
