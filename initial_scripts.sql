@@ -34,22 +34,6 @@ CREATE TABLE `borrow` (
   PRIMARY KEY (`borrow_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
-/*Table structure for table `borrow_history` */
-
-DROP TABLE IF EXISTS `borrow_history`;
-
-CREATE TABLE `borrow_history` (
-  `borrow_history_id` int(11) NOT NULL AUTO_INCREMENT,
-  `borrow_id` int(11) NOT NULL,
-  `amount` double NOT NULL,
-  `description` varchar(1000) DEFAULT NULL,
-  `last_update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `active_flg` char(1) NOT NULL DEFAULT 'Y',
-  `occur_ts` timestamp NULL DEFAULT NULL,
-  `add_ts` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`borrow_history_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
-
 /*Table structure for table `category_dfntn` */
 
 DROP TABLE IF EXISTS `category_dfntn`;
@@ -98,6 +82,23 @@ CREATE TABLE `deposit` (
   PRIMARY KEY (`deposit_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
+/*Table structure for table `history` */
+
+DROP TABLE IF EXISTS `history`;
+
+CREATE TABLE `history` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_id` int(11) NOT NULL,
+  `id` int(11) NOT NULL COMMENT 'primary key in each table',
+  `amount` double NOT NULL,
+  `description` varchar(1000) DEFAULT NULL,
+  `last_update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `active_flg` char(1) NOT NULL DEFAULT 'Y',
+  `occur_ts` timestamp NULL DEFAULT NULL,
+  `add_ts` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`history_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
+
 /*Table structure for table `lend` */
 
 DROP TABLE IF EXISTS `lend`;
@@ -115,11 +116,11 @@ CREATE TABLE `lend` (
   PRIMARY KEY (`lend_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
-/*Table structure for table `lend_history` */
+/*Table structure for table `lend_history_deprecated` */
 
-DROP TABLE IF EXISTS `lend_history`;
+DROP TABLE IF EXISTS `lend_history_deprecated`;
 
-CREATE TABLE `lend_history` (
+CREATE TABLE `lend_history_deprecated` (
   `lend_history_id` int(11) NOT NULL AUTO_INCREMENT,
   `lend_id` int(11) NOT NULL,
   `amount` double NOT NULL,
@@ -200,7 +201,6 @@ DELIMITER ;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
 
 /*Data for the table `category_dfntn` */
 
