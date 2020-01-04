@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import pers.bocky.finance.bean.LendBean;
-import pers.bocky.finance.bean.LendHistoryBean;
+import pers.bocky.finance.bean.HistoryBean;
 import pers.bocky.finance.component.Comparator;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
@@ -22,7 +22,8 @@ public class LendDao extends BaseDao {
 			+ ", paybackedAmt, CASE WHEN PAYBACKEDAMT IS NULL THEN amount else (amount - paybackedAmt) end leftAmt"
 			+ " FROM ("
 			+ " SELECT d.occur_ts, d.lend_id, d.type_id, t.type_name, d.to_who, d.amount, d.description, d.add_ts, d.last_update_ts, SUM(h.amount) paybackedAmt"
-			+ " FROM lend d LEFT JOIN LEND_HISTORY H ON D.LEND_ID = H.LEND_ID, type_dfntn t, category_dfntn c"
+			+ " FROM lend d LEFT JOIN (select * from history where category_id = " + LendBean.CATEGORY_ID
+			+ " ) H ON D.LEND_ID = H.ID, type_dfntn t, category_dfntn c"
 			+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
 			+ " AND d.type_id = t.type_id"
 			+ " AND t.category_id = c.category_id"
@@ -343,14 +344,15 @@ public class LendDao extends BaseDao {
 		boolean success = false;
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"insert into lend_history(lend_id, amount, description, add_ts, occur_ts) values(?, ?, ?, now(), ?)");
+				"insert into history(category_id, id, amount, description, add_ts, occur_ts) values(?, ?, ?, ?, now(), ?)");
 		
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			pstat.setInt(1, bean.getLendId());
-			pstat.setDouble(2, bean.getAmount());
-			pstat.setString(3, bean.getDescription());
-			pstat.setTimestamp(4, bean.getOccurTs());
+			pstat.setInt(1, LendBean.CATEGORY_ID);
+			pstat.setInt(2, bean.getLendId());
+			pstat.setDouble(3, bean.getAmount());
+			pstat.setString(4, bean.getDescription());
+			pstat.setTimestamp(5, bean.getOccurTs());
 			pstat.executeUpdate();
 			pstat.close();
 			success = true;
@@ -364,25 +366,26 @@ public class LendDao extends BaseDao {
 		return success;
 	}
 	
-	public static List<LendHistoryBean> fetchAllLendHistoryRecs(LendHistoryBean param){
-		List<LendHistoryBean> list = new ArrayList<LendHistoryBean>();
+	public static List<HistoryBean> fetchAllLendHistoryRecs(HistoryBean param){
+		List<HistoryBean> list = new ArrayList<HistoryBean>();
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"SELECT d.lend_history_id, d.occur_ts, d.last_update_ts, d.amount, d.description, d.add_ts"
-				+ " FROM lend b, lend_history d"
+				"SELECT d.history_id, d.occur_ts, d.last_update_ts, d.amount, d.description, d.add_ts"
+				+ " FROM lend b, history d"
 				+ " WHERE b.active_flg = 'Y' AND b.active_flg = 'Y'"
-				+ " AND b.lend_id = d.lend_id"
+				+ " AND b.lend_id = id"
+				+ " AND D.CATEGORY_ID = " + LendBean.CATEGORY_ID
 				+ " AND b.lend_id = ?");
 
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			pstat.setInt(1, param.getLendId());
+			pstat.setInt(1, param.getId());
 			ResultSet rs = pstat.executeQuery();
 			
-			LendHistoryBean bean = null;
+			HistoryBean bean = null;
 			while(rs != null && rs.next()){
-				bean = new LendHistoryBean();
-				bean.setLendHistoryId(rs.getInt("lend_history_id"));
+				bean = new HistoryBean();
+				bean.setHistoryId(rs.getInt("history_id"));
 				bean.setAmount(rs.getDouble("amount"));
 				bean.setDescription(rs.getString("description"));
 				bean.setAddTs(rs.getTimestamp("add_ts"));

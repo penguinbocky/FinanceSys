@@ -123,6 +123,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 //						
 //						String depositId = datagrid.getValueAt(selectedRowIndex, 0).toString();
 //						System.out.println("depositId > " + depositId);
+						startHistoryFrame();
 					}
 				}
 			}
@@ -134,7 +135,13 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		return scrollPane;
 	}
 
-	protected void fillFields(DataGrid datagrid, int selectedRowIndex) {
+	private void startHistoryFrame() {
+		int selectedRowIndex = datagrid.getSelectedRow();
+		String idStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
+		new HistoryFrame(ConsumeBean.CATEGORY_ID, Integer.parseInt(idStr));
+	}
+
+	private void fillFields(DataGrid datagrid, int selectedRowIndex) {
 		if (datagrid != null && selectedRowIndex > -1) {
 			String typeId = (String) datagrid.getValueAt(selectedRowIndex, 1);
 			String dest = (String) datagrid.getValueAt(selectedRowIndex, 3);
@@ -257,7 +264,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		return panel;
 	}
 
-	protected void updateRecord() {
+	private void updateRecord() {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
@@ -273,7 +280,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		bean.setAmount(Double.parseDouble(amountField.getText().trim()));
 		bean.setDescription(descField.getText().trim());
 		bean.setOccurTs(dp.getResultAsTimestamp());
-		if (ConsumeDao.updateRecord(bean) == DaoResponse.UPDATE_SUCCESS) {
+		if (ConsumeDao.saveHistoryAndUpdateRecord(bean) == DaoResponse.UPDATE_SUCCESS) {
 			clearInput();
 			datagrid.clearSelection();
 			loadDatagrid();
@@ -284,7 +291,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		checkForButtons();
 	}
 	
-	protected void deleteRecord() {
+	private void deleteRecord() {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要删除的记录");
@@ -341,8 +348,8 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
 			v.add(DateUtil.date2Str(bean.getOccurTs()));
-			v.add(DateUtil.date2Str(bean.getLastUpdateTs()));
-			v.add(DateUtil.date2Str(bean.getAddTs()));
+			v.add(DateUtil.timestamp2Str(bean.getLastUpdateTs()));
+			v.add(DateUtil.timestamp2Str(bean.getAddTs()));
 			dataVectorList.add(v);
 		}
 		datagrid.setData(dataVectorList);
@@ -364,7 +371,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		return bean;
 	}
 	
-	protected void checkForButtons() {
+	private void checkForButtons() {
 		if (datagrid.getSelectedRow() == -1) {
 			updateBtn.setEnabled(false);
 			deleteBtn.setEnabled(false);

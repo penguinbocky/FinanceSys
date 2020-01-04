@@ -4,10 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import pers.bocky.finance.bean.CategoryBean;
+import pers.bocky.finance.bean.HistoryBean;
 import pers.bocky.finance.util.DbUtility;
 import pers.bocky.finance.util.LoggerUtil;
 
@@ -820,6 +823,69 @@ public class BaseDao {
 			dbUtil.close(con);
 		}
 		return map;
+	}
+
+	public static List<HistoryBean> fetchHistoryRecs(HistoryBean paramBean) {
+		List<HistoryBean> list = new ArrayList<HistoryBean>();
+		Connection con = dbUtil.getCon();
+		String tableName = null;
+		String idConverter = null;
+		switch (paramBean.getCategoryId()) {
+		case CategoryBean.DEPOSIT:
+			tableName = "deposit";
+			idConverter = "deposit_id";
+			break;
+		case CategoryBean.CONSUME:
+			tableName = "consume";
+			idConverter = "consume_id";
+			break;
+		case CategoryBean.BORROW:
+			tableName = "borrow";
+			idConverter = "borrow_id";
+			break;
+		case CategoryBean.LEND:
+			tableName = "lend";
+			idConverter = "lend_id";
+			break;
+
+		default:
+			tableName = "consume";
+			idConverter = "consume_id";
+			break;
+		}
+		StringBuffer sql = new StringBuffer(
+				"SELECT d.history_id, d.occur_ts, d.amount, d.description, d.add_ts, d.last_update_ts"
+				+ " FROM " + tableName + " b, history d"
+				+ " WHERE b.active_flg = 'Y' AND b.active_flg = 'Y'"
+				+ " AND b." + idConverter + " = d.id"
+				+ " AND D.active_flg = 'Y'"
+				+ " AND D.CATEGORY_ID = " + paramBean.getCategoryId()
+				+ " AND b." + idConverter + " = ?");
+
+		try {
+			PreparedStatement pstat = con.prepareStatement(sql.toString());
+			pstat.setInt(1, paramBean.getId());
+			ResultSet rs = pstat.executeQuery();
+			
+			HistoryBean bean = null;
+			while(rs != null && rs.next()){
+				bean = new HistoryBean();
+				bean.setHistoryId(rs.getInt("history_id"));
+				bean.setAmount(rs.getDouble("amount"));
+				bean.setDescription(rs.getString("description"));
+				bean.setAddTs(rs.getTimestamp("add_ts"));
+				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
+				bean.setOccurTs(rs.getTimestamp("occur_ts"));
+				list.add(bean);
+			}
+			pstat.close();
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(con);
+		}
+		return list;
 	}
 	
 }

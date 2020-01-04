@@ -133,7 +133,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		int selectedRowIndex = datagrid.getSelectedRow();
 		String borrowIdStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
 //		BorrowHistoryFrame.getSingletonById(Integer.parseInt(borrowIdStr));
-		new BorrowHistoryFrame(Integer.parseInt(borrowIdStr));
+		new HistoryFrame(BorrowBean.CATEGORY_ID, Integer.parseInt(borrowIdStr));
 	}
 
 	protected void fillFields(DataGrid datagrid, int selectedRowIndex) {
@@ -415,7 +415,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 			v.add(bean.getFromWho());
 			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
-			v.add(DateUtil.timestamp2Str(bean.getOccurTs()));
+			v.add(DateUtil.date2Str(bean.getOccurTs()));
 			v.add(DateUtil.timestamp2Str(bean.getLastUpdateTs()));
 			v.add(DateUtil.timestamp2Str(bean.getAddTs()));
 			v.add(NumberFormat.getNumberInstance().format(bean.getPaybackedAmt()));

@@ -128,10 +128,10 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 	protected void startHistoryFrame() {
 		int selectedRowIndex = datagrid.getSelectedRow();
 		String lendIdStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
-		new LendHistoryFrame(Integer.parseInt(lendIdStr));
+		new HistoryFrame(LendBean.CATEGORY_ID, Integer.parseInt(lendIdStr));
 	}
 	
-	protected void fillFields(DataGrid datagrid, int selectedRowIndex) {
+	private void fillFields(DataGrid datagrid, int selectedRowIndex) {
 		if (datagrid != null && selectedRowIndex > -1) {
 			String typeId = (String) datagrid.getValueAt(selectedRowIndex, 1);
 			String dest = (String) datagrid.getValueAt(selectedRowIndex, 3);
@@ -265,7 +265,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		return panel;
 	}
 
-	protected void payback() {
+	private void payback() {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要偿还的款项");
@@ -290,7 +290,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		checkForButtons();
 	}
 	
-	protected void updateRecord() {
+	private void updateRecord() {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
@@ -317,7 +317,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		checkForButtons();
 	}
 	
-	protected void deleteRecord() {
+	private void deleteRecord() {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要删除的记录");
@@ -370,7 +370,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			v.add(bean.getToWho());
 			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
-			v.add(DateUtil.timestamp2Str(bean.getOccurTs()));
+			v.add(DateUtil.date2Str(bean.getOccurTs()));
 			v.add(DateUtil.timestamp2Str(bean.getLastUpdateTs()));
 			v.add(DateUtil.timestamp2Str(bean.getAddTs()));
 			v.add(NumberFormat.getNumberInstance().format(bean.getPaybackedAmt()));
