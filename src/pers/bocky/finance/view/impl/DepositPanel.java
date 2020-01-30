@@ -228,7 +228,7 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		JLabel descLabel = new JLabel("备注");
 		descField = new JTextField();
 		
-		JLabel occurTsLabel = new JLabel("实际发生时间(yyyy MM dd)");
+		JLabel occurTsLabel = new JLabel("实际发生时间");
 		dp = new DateField();
 		
 		JButton calBtn = new JButton("求和");

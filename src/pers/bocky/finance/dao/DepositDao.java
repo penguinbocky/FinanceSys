@@ -278,7 +278,7 @@ public class DepositDao extends BaseDao {
 		if (!doValidation(bean)) return DaoResponse.VALIDATION_ERROR;
 		
 		DaoResponse responseCode = DaoResponse.UPDATE_ERROR;
-		DepositBean curBean = (DepositBean) fetchAllDepositRecs().stream().filter(rec -> rec.getDepositId() == bean.getDepositId()).toArray()[0];
+		DepositBean curBean = (DepositBean) fetchAllDepositRecs().stream().filter(rec -> rec.getDepositId().equals(bean.getDepositId())).toArray()[0];
 		if (DaoResponse.SAVE_SUCCESS != saveAsHistory(curBean)) return responseCode;
 		
 		Connection con = dbUtil.getCon();
