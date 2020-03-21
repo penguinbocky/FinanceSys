@@ -19,6 +19,7 @@ import pers.bocky.finance.util.StringUtil;
 
 public class ConsumeDao extends BaseDao {
 	private final static String preSql = "SELECT d.occur_ts, d.consume_id, d.type_id, t.type_name, d.dest, d.amount, d.description, d.add_ts, d.last_update_ts"
+			+ ", (SELECT COUNT(1) FROM history h WHERE h.category_id = t.category_id AND h.id = d.consume_id) has_history"
 			+ " FROM consume d, type_dfntn t, category_dfntn c"
 			+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
 			+ " AND d.type_id = t.type_id"
@@ -326,7 +327,7 @@ public class ConsumeDao extends BaseDao {
 		
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"update consume set type_id = ?, dest = ?, amount = ?, description = ?, occur_ts = ?, last_update_ts = now()"
+				"update consume set type_id = ?, dest = ?, amount = ?, description = ?, last_update_ts = now()"
 				+ " where consume_id = ?");
 		
 		try {
@@ -335,8 +336,8 @@ public class ConsumeDao extends BaseDao {
 			pstat.setString(2, bean.getDest());
 			pstat.setDouble(3, bean.getAmount());
 			pstat.setString(4, bean.getDescription());
-			pstat.setTimestamp(5, bean.getOccurTs());
-			pstat.setInt(6, bean.getConsumeId());
+//			pstat.setTimestamp(5, bean.getOccurTs());
+			pstat.setInt(5, bean.getConsumeId());
 			if (pstat.executeUpdate() == 1) {
 				System.out.println("ConsumeDao.updateRecord result == 1");
 				response = DaoResponse.UPDATE_SUCCESS;

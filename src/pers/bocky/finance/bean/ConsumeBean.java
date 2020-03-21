@@ -17,6 +17,7 @@ public class ConsumeBean extends BaseBean {
 	private Timestamp addTs;
 	private Timestamp lastUpdateTs;
 	private Timestamp occurTs;
+	private boolean hasHistory;
 	
 	public Integer getConsumeId() {
 		return consumeId;
@@ -74,6 +75,13 @@ public class ConsumeBean extends BaseBean {
 	public void setLastUpdateTs(Timestamp lastUpdateTs) {
 		this.lastUpdateTs = lastUpdateTs;
 	}
+	
+	public boolean hasHistory() {
+		return hasHistory;
+	}
+	public void setHasHistory(boolean hasHistory) {
+		this.hasHistory = hasHistory;
+	}
 	@Override
 	public ConsumeBean buildFrom(ResultSet rs) throws SQLException {
 		setConsumeId(rs.getInt("consume_id"));
@@ -85,6 +93,7 @@ public class ConsumeBean extends BaseBean {
 		setAddTs(rs.getTimestamp("add_ts"));
 		setLastUpdateTs(rs.getTimestamp("last_update_ts"));
 		setOccurTs(rs.getTimestamp("occur_ts"));
+		setHasHistory(rs.getBoolean("has_history"));
 		return this;
 	}
 	

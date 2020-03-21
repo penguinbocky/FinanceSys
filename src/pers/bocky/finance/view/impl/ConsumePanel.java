@@ -13,6 +13,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.function.Function;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -22,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import pers.bocky.finance.bean.ConsumeBean;
 import pers.bocky.finance.bean.TypeBean;
@@ -95,8 +97,8 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
-		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "去向", "数量", "备注", "发生时间", "最后更新于", "创建时间"};
-		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID"}
+		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "去向", "数量", "备注", "发生时间", "最后更新于", "创建时间", "Has_History"};
+		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID", "Has_History"}
 		, new String[] {"类型", "去向", "数量"}, new String[] {"备注"});
 		
 		JPanel p1 = new JPanel();
@@ -107,6 +109,17 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		p2.setForeground(Color.MAGENTA);
 //		JList<String> items = new JList<String>(new String[]{new String("更新"), new String("删除")});
 //		PopupFactory popupFactory = PopupFactory.getSharedInstance();
+		
+		Function<DefaultTableCellRenderer, ?> fnForYes = (e) -> {
+			e.setForeground(Color.GRAY);
+			return true;
+		};
+		
+		Function<DefaultTableCellRenderer, ?> fnForElse = (e) -> {
+			e.setForeground(Color.BLACK);
+			return true;
+		};
+		datagrid.setRowStyleByCondition(9, (a) -> ("true".equals(a)), fnForYes, fnForElse);
 		datagrid.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -117,7 +130,8 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 				if (selectedRowIndex != -1) {
 					if (e.getButton() == MouseEvent.BUTTON1) {
 						fillFields(datagrid, selectedRowIndex);
-					} else if (e.getButton() == MouseEvent.BUTTON3) {
+					} else if (e.getButton() == MouseEvent.BUTTON3
+							&& "true".equals(datagrid.getValueAt(selectedRowIndex, 9))) {
 //						Popup pop = popupFactory.getPopup(datagrid, items, e.getXOnScreen(), e.getYOnScreen());
 //						pop.show();
 //						
@@ -350,6 +364,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 			v.add(DateUtil.date2Str(bean.getOccurTs()));
 			v.add(DateUtil.timestamp2Str(bean.getLastUpdateTs()));
 			v.add(DateUtil.timestamp2Str(bean.getAddTs()));
+			v.add("" + bean.hasHistory());
 			dataVectorList.add(v);
 		}
 		datagrid.setData(dataVectorList);

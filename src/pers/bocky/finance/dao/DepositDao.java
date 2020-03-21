@@ -18,6 +18,7 @@ import pers.bocky.finance.util.StringUtil;
 
 public class DepositDao extends BaseDao {
 	private final static String preSql = "SELECT d.occur_ts, d.deposit_id, d.type_id, t.type_name, d.source, d.amount, d.description, d.add_ts, d.last_update_ts"
+			+ ", (SELECT COUNT(1) FROM history h WHERE h.category_id = t.category_id AND h.id = d.deposit_id) has_history"
 			+ " FROM deposit d, type_dfntn t, category_dfntn c"
 			+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
 			+ " AND d.type_id = t.type_id"
@@ -283,7 +284,7 @@ public class DepositDao extends BaseDao {
 		
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"update deposit set type_id = ?, source = ?, amount = ?, description = ?, occur_ts = ?, last_update_ts = now()"
+				"update deposit set type_id = ?, source = ?, amount = ?, description = ?, last_update_ts = now()"
 				+ " where deposit_id = ?");
 		
 		try {
@@ -292,8 +293,8 @@ public class DepositDao extends BaseDao {
 			pstat.setString(2, bean.getSource());
 			pstat.setDouble(3, bean.getAmount());
 			pstat.setString(4, bean.getDescription());
-			pstat.setTimestamp(5, bean.getOccurTs());
-			pstat.setInt(6, bean.getDepositId());
+//			pstat.setTimestamp(5, bean.getOccurTs());
+			pstat.setInt(5, bean.getDepositId());
 			if (pstat.executeUpdate() == 1) {
 				System.out.println("DepositDao.updateRecord result == 1");
 				responseCode = DaoResponse.UPDATE_SUCCESS;
