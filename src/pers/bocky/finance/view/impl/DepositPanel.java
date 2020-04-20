@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -257,12 +256,17 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		
 		updateBtn = new JButton("更新");
 		updateBtn.setEnabled(false);
-		updateBtn.addActionListener(new ActionListener() {
-			
+		updateBtn.addMouseListener(new MouseAdapter() {
+
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				updateRecord();
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					updateRecord(true);
+				} else {
+					updateRecord(false);
+				}
 			}
+			
 		});
 		
 		deleteBtn = new JButton("删除");
@@ -315,12 +319,17 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		return panel;
 	}
 
-	private void updateRecord() {
+	private void updateRecord(boolean forceUpdate) {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
 			return;
 		}
+		if ((!forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将会以填入的数量值作为最终值覆盖前次数量值，且发生时间不变，确定要更新吗？(右键可更新所有值)"))
+				|| (forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将更新包括发生时间在内的改变值，确定要更新吗？"))) {
+			return;
+		}
+		
 		int depositId = Integer.parseInt(
 				datagrid.getValueAt(selectedRow, 0).toString()
 				);
@@ -331,7 +340,8 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		bean.setAmount(Double.parseDouble(amountField.getText().trim()));
 		bean.setDescription(descField.getText().trim());
 		bean.setOccurTs(dp.getResultAsTimestamp());
-		if (DepositDao.saveHistoryAndUpdateRecord(bean) == DaoResponse.UPDATE_SUCCESS) {
+		if ((!forceUpdate && DepositDao.saveHistoryAndUpdateRecord(bean) == DaoResponse.UPDATE_SUCCESS)
+				|| (forceUpdate && DepositDao.updateRecord(bean) == DaoResponse.UPDATE_SUCCESS)) {
 			clearInput();
 			datagrid.clearSelection();
 			loadDatagrid();

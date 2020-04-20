@@ -275,6 +275,37 @@ public class DepositDao extends BaseDao {
 		return response;
 	}
 
+	public static DaoResponse updateRecord(DepositBean bean){
+		if (!doValidation(bean)) return DaoResponse.VALIDATION_ERROR;
+		
+		DaoResponse responseCode = DaoResponse.UPDATE_ERROR;
+		Connection con = dbUtil.getCon();
+		StringBuffer sql = new StringBuffer(
+				"update deposit set type_id = ?, source = ?, amount = ?, description = ?, occur_ts = ?, last_update_ts = now()"
+				+ " where deposit_id = ?");
+		
+		try {
+			PreparedStatement pstat = con.prepareStatement(sql.toString());
+			pstat.setInt(1, bean.getTypeId());
+			pstat.setString(2, bean.getSource());
+			pstat.setDouble(3, bean.getAmount());
+			pstat.setString(4, bean.getDescription());
+			pstat.setTimestamp(5, bean.getOccurTs());
+			pstat.setInt(6, bean.getDepositId());
+			if (pstat.executeUpdate() == 1) {
+				System.out.println("DepositDao.updateRecord result == 1");
+				responseCode = DaoResponse.UPDATE_SUCCESS;
+			}
+			pstat.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(con);
+		}
+
+		return responseCode;
+	}
+	
 	public static DaoResponse saveHistoryAndUpdateRecord(DepositBean bean){
 		if (!doValidation(bean)) return DaoResponse.VALIDATION_ERROR;
 		

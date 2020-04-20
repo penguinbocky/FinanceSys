@@ -318,6 +318,37 @@ public class ConsumeDao extends BaseDao {
 		return response;
 	}
 	
+	public static DaoResponse updateRecord(ConsumeBean bean){
+		if (!doValidation(bean)) return DaoResponse.VALIDATION_ERROR;
+		
+		DaoResponse response = DaoResponse.UPDATE_ERROR;
+		Connection con = dbUtil.getCon();
+		StringBuffer sql = new StringBuffer(
+				"update consume set type_id = ?, dest = ?, amount = ?, description = ?, occur_ts = ?, last_update_ts = now()"
+				+ " where consume_id = ?");
+		
+		try {
+			PreparedStatement pstat = con.prepareStatement(sql.toString());
+			pstat.setInt(1, bean.getTypeId());
+			pstat.setString(2, bean.getDest());
+			pstat.setDouble(3, bean.getAmount());
+			pstat.setString(4, bean.getDescription());
+			pstat.setTimestamp(5, bean.getOccurTs());
+			pstat.setInt(6, bean.getConsumeId());
+			if (pstat.executeUpdate() == 1) {
+				System.out.println("ConsumeDao.updateRecord result == 1");
+				response = DaoResponse.UPDATE_SUCCESS;
+			}
+			pstat.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(con);
+		}
+
+		return response;
+	}
+	
 	public static DaoResponse saveHistoryAndUpdateRecord(ConsumeBean bean){
 		if (!doValidation(bean)) return DaoResponse.VALIDATION_ERROR;
 		

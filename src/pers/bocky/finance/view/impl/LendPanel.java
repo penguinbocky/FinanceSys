@@ -296,6 +296,10 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
 			return;
 		}
+		if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将更新包括发生时间在内的改变值，确定要更新吗？")) {
+			return;
+		}
+		
 		int id = Integer.parseInt(
 				datagrid.getValueAt(selectedRow, 0).toString()
 				);
