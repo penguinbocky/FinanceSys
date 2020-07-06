@@ -96,6 +96,7 @@ CREATE TABLE `history` (
   `active_flg` char(1) NOT NULL DEFAULT 'Y',
   `occur_ts` timestamp NULL DEFAULT NULL,
   `add_ts` timestamp NULL DEFAULT NULL,
+  `history_type` varchar(20) NOT NULL DEFAULT 'UPDATE_AMOUNT',
   PRIMARY KEY (`history_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 

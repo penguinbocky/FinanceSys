@@ -27,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import pers.bocky.finance.bean.BorrowBean;
+import pers.bocky.finance.bean.HistoryType;
 import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.component.DataGrid;
 import pers.bocky.finance.component.DateField;
@@ -133,7 +134,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		int selectedRowIndex = datagrid.getSelectedRow();
 		String borrowIdStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
 //		BorrowHistoryFrame.getSingletonById(Integer.parseInt(borrowIdStr));
-		new HistoryFrame(BorrowBean.CATEGORY_ID, Integer.parseInt(borrowIdStr));
+		new HistoryFrame(BorrowBean.CATEGORY_ID, Integer.parseInt(borrowIdStr), HistoryType.UPDATE_AMOUNT);
 	}
 
 	protected void fillFields(DataGrid datagrid, int selectedRowIndex) {
@@ -319,7 +320,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
 			return;
 		}
-		if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将更新包括发生时间在内的改变值，确定要更新吗？")) {
+		if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将更新包括发生时间在内的改变值，但不会产生历史记录，确定要更新吗？")) {
 			return;
 		}
 		

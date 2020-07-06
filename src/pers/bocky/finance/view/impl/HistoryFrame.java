@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 
 import pers.bocky.finance.bean.BorrowBean;
 import pers.bocky.finance.bean.HistoryBean;
+import pers.bocky.finance.bean.HistoryType;
 import pers.bocky.finance.bean.LendBean;
 import pers.bocky.finance.component.DataGrid;
 import pers.bocky.finance.dao.BaseDao;
@@ -37,13 +38,13 @@ public class HistoryFrame extends JFrame {
 		HEIGHT = (int) (BASE_HEIGHT * d.getHeight() / 768);
 	}
 	
-	public HistoryFrame(int categoryId, int id) throws HeadlessException {
+	public HistoryFrame(int categoryId, int id, HistoryType historyType) throws HeadlessException {
 		super();
 		
 		String title = null;
 		switch (categoryId) {
 		case BorrowBean.CATEGORY_ID: title = "借款还款历史"; break;
-		case LendBean.CATEGORY_ID: title = "欠款还款历史"; break;
+		case LendBean.CATEGORY_ID: if (historyType == HistoryType.UPDATE_AMOUNT) title = "更新历史"; else title = "欠款还款历史"; break;
 		default: title = "历史记录";
 		}
 		setTitle(title);
@@ -59,7 +60,7 @@ public class HistoryFrame extends JFrame {
 		});
 		setResizable(true);
 		getContentPane().setBackground(Color.GRAY);
-		add(getHistoryPanel(categoryId, id));
+		add(getHistoryPanel(categoryId, id, historyType));
 		start();
 	}
 
@@ -67,7 +68,7 @@ public class HistoryFrame extends JFrame {
 		setVisible(true);;
 	}
 
-	protected JScrollPane getHistoryPanel(int categoryId, int id) {
+	protected JScrollPane getHistoryPanel(int categoryId, int id, HistoryType historyType) {
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
@@ -77,6 +78,7 @@ public class HistoryFrame extends JFrame {
 		HistoryBean paramBean = new HistoryBean();
 		paramBean.setId(id);
 		paramBean.setCategoryId(categoryId);
+		paramBean.setHistoryType(historyType);
 		List<HistoryBean> list = BaseDao.fetchHistoryRecs(paramBean);
 		List<Vector<String>> dataVectorList = new ArrayList<Vector<String>>();
 		for (int i = 0; i < list.size(); i++) {

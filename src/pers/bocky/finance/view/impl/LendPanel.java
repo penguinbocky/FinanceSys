@@ -14,6 +14,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.function.Function;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -24,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import pers.bocky.finance.bean.HistoryType;
 import pers.bocky.finance.bean.LendBean;
 import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.component.DataGrid;
@@ -127,8 +129,9 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 
 	protected void startHistoryFrame() {
 		int selectedRowIndex = datagrid.getSelectedRow();
+		int selectedColumnIndex = datagrid.getSelectedColumn();
 		String lendIdStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
-		new HistoryFrame(LendBean.CATEGORY_ID, Integer.parseInt(lendIdStr));
+		new HistoryFrame(LendBean.CATEGORY_ID, Integer.parseInt(lendIdStr), selectedColumnIndex == 9 ? HistoryType.PAY_BACK : HistoryType.UPDATE_AMOUNT);
 	}
 	
 	private void fillFields(DataGrid datagrid, int selectedRowIndex) {
@@ -213,14 +216,29 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			}
 		});
 		
-		updateBtn = new JButton("更新");
-		updateBtn.setEnabled(false);
-		updateBtn.addActionListener(new ActionListener() {
+		JButton calUnPaidbackBtn = new JButton("未还项本金求和");
+		calUnPaidbackBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				updateRecord();
+				Function<Integer, Boolean> predict = (row) -> Double.parseDouble(((String) datagrid.getValueAt(row, 9)).replaceAll(",", "")) == 0;
+				JOptionPane.showMessageDialog(LendPanel.this, NumberFormat.getNumberInstance().format(NumberUtil.sumAmount(datagrid, 4, predict)), "未偿还账目的本金总和", JOptionPane.INFORMATION_MESSAGE);
 			}
+		});
+		
+		updateBtn = new JButton("更新");
+		updateBtn.setEnabled(false);
+		updateBtn.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					updateRecord(true);
+				} else {
+					updateRecord(false);
+				}
+			}
+			
 		});
 		
 		deleteBtn = new JButton("删除");
@@ -257,8 +275,8 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		inputPanel.add(updateBtn);
 		inputPanel.add(deleteBtn);
 		inputPanel.add(payBackBtn);
-		
 		inputPanel.add(calBtn);
+		inputPanel.add(calUnPaidbackBtn);
 		
 		panel.add(inputPanel);
 		
@@ -290,13 +308,14 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		checkForButtons();
 	}
 	
-	private void updateRecord() {
+	private void updateRecord(boolean forceUpdate) {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
 			return;
 		}
-		if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将更新包括发生时间在内的改变值，确定要更新吗？")) {
+		if ((!forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将会以填入的数量值作为增量值加入前次数量值，且发生时间不变，确定要更新吗？(右键可更新所有值)"))
+				|| (forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将强制覆盖数量值，且更新发生时间，但不会产生历史记录，确定要更新吗？"))) {
 			return;
 		}
 		
@@ -310,7 +329,8 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		bean.setAmount(Double.parseDouble(amountField.getText().trim()));
 		bean.setDescription(descField.getText().trim());
 		bean.setOccurTs(dp.getResultAsTimestamp());
-		if (LendDao.updateRecord(bean) == DaoResponse.UPDATE_SUCCESS) {
+		if ((!forceUpdate && LendDao.saveHistoryAndUpdateRecord(bean) == DaoResponse.UPDATE_SUCCESS)
+				|| (forceUpdate && LendDao.updateRecord(bean) == DaoResponse.UPDATE_SUCCESS)) {
 			clearInput();
 			datagrid.clearSelection();
 			loadDatagrid();

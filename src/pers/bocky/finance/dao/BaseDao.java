@@ -860,6 +860,7 @@ public class BaseDao {
 				+ " AND b." + idConverter + " = d.id"
 				+ " AND D.active_flg = 'Y'"
 				+ " AND D.CATEGORY_ID = " + paramBean.getCategoryId()
+				+ " AND d.history_type = '" + paramBean.getHistoryType() + "'"
 				+ " AND b." + idConverter + " = ?");
 
 		try {

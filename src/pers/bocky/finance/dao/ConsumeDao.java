@@ -358,7 +358,7 @@ public class ConsumeDao extends BaseDao {
 		
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"update consume set type_id = ?, dest = ?, amount = ?, description = ?, last_update_ts = now()"
+				"update consume set type_id = ?, dest = ?, amount = amount + ?, description = ?, last_update_ts = now()"
 				+ " where consume_id = ?");
 		
 		try {

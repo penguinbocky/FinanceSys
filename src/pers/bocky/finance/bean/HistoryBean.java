@@ -12,6 +12,7 @@ public class HistoryBean {
 	private Timestamp addTs;
 	private Timestamp lastUpdateTs;
 	private Timestamp occurTs;
+	private HistoryType historyType;;
 	
 	public Integer getHistoryId() {
 		return historyId;
@@ -65,6 +66,14 @@ public class HistoryBean {
 	}
 	public void setLastUpdateTs(Timestamp lastUpdateTs) {
 		this.lastUpdateTs = lastUpdateTs;
+	}
+
+	public HistoryType getHistoryType() {
+		return historyType;
+	}
+
+	public void setHistoryType(HistoryType historyType) {
+		this.historyType = historyType;
 	}
 	
 }

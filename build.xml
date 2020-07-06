@@ -20,7 +20,8 @@
 		
        <mkdir dir="${bin.dir}"/>
 
-       <javac srcdir="${src.dir}" destdir="${bin.dir}" classpathref="classpath">
+    <!-- Added debug=true to avoid unable to install breakpoint for debugging in eclipse when last compilation was by ANT -->
+       <javac srcdir="${src.dir}" destdir="${bin.dir}" classpathref="classpath" debug="true">
 		<compilerarg line="-encoding UTF-8 "/>
 	   </javac>
     	

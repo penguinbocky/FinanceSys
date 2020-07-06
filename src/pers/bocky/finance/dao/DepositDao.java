@@ -315,7 +315,7 @@ public class DepositDao extends BaseDao {
 		
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"update deposit set type_id = ?, source = ?, amount = ?, description = ?, last_update_ts = now()"
+				"update deposit set type_id = ?, source = ?, amount = amount + ?, description = ?, last_update_ts = now()"
 				+ " where deposit_id = ?");
 		
 		try {

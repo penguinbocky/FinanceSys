@@ -28,6 +28,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import pers.bocky.finance.bean.DepositBean;
+import pers.bocky.finance.bean.HistoryType;
 import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.component.DataGrid;
 import pers.bocky.finance.component.DateField;
@@ -158,7 +159,7 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 	private void startHistoryFrame() {
 		int selectedRowIndex = datagrid.getSelectedRow();
 		String idStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
-		new HistoryFrame(DepositBean.CATEGORY_ID, Integer.parseInt(idStr));
+		new HistoryFrame(DepositBean.CATEGORY_ID, Integer.parseInt(idStr), HistoryType.UPDATE_AMOUNT);
 	}
 
 	private void checkForButtons() {
@@ -325,8 +326,8 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
 			return;
 		}
-		if ((!forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将会以填入的数量值作为最终值覆盖前次数量值，且发生时间不变，确定要更新吗？(右键可更新所有值)"))
-				|| (forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将更新包括发生时间在内的改变值，确定要更新吗？"))) {
+		if ((!forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将会以填入的数量值作为增量值加入前次数量值，且发生时间不变，确定要更新吗？(右键可更新所有值)"))
+				|| (forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将强制覆盖数量值，且更新发生时间，但不会产生历史记录，确定要更新吗？"))) {
 			return;
 		}
 		
