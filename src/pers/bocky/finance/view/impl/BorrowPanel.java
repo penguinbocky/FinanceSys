@@ -132,9 +132,11 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 
 	protected void startHistoryFrame() {
 		int selectedRowIndex = datagrid.getSelectedRow();
+		int selectedColumnIndex = datagrid.getSelectedColumn();
+		System.out.println("selectedColumnIndex [4 - amount] | [9 - paid] > " + selectedColumnIndex + datagrid.isColumnSelected(9));
 		String borrowIdStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
 //		BorrowHistoryFrame.getSingletonById(Integer.parseInt(borrowIdStr));
-		new HistoryFrame(BorrowBean.CATEGORY_ID, Integer.parseInt(borrowIdStr), HistoryType.UPDATE_AMOUNT);
+		new HistoryFrame(BorrowBean.CATEGORY_ID, Integer.parseInt(borrowIdStr), selectedColumnIndex == 9 ? HistoryType.PAY_BACK : HistoryType.UPDATE_AMOUNT);
 	}
 
 	protected void fillFields(DataGrid datagrid, int selectedRowIndex) {

@@ -130,6 +130,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 	protected void startHistoryFrame() {
 		int selectedRowIndex = datagrid.getSelectedRow();
 		int selectedColumnIndex = datagrid.getSelectedColumn();
+		System.out.println("selectedColumnIndex [4 - amount] | [9 - paid] > " + selectedColumnIndex + datagrid.isColumnSelected(9));
 		String lendIdStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
 		new HistoryFrame(LendBean.CATEGORY_ID, Integer.parseInt(lendIdStr), selectedColumnIndex == 9 ? HistoryType.PAY_BACK : HistoryType.UPDATE_AMOUNT);
 	}

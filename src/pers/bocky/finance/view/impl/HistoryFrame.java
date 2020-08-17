@@ -43,7 +43,7 @@ public class HistoryFrame extends JFrame {
 		
 		String title = null;
 		switch (categoryId) {
-		case BorrowBean.CATEGORY_ID: title = "借款还款历史"; break;
+		case BorrowBean.CATEGORY_ID: ;
 		case LendBean.CATEGORY_ID: if (historyType == HistoryType.UPDATE_AMOUNT) title = "更新历史"; else title = "欠款还款历史"; break;
 		default: title = "历史记录";
 		}

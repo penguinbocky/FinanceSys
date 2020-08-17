@@ -22,7 +22,7 @@ public class BorrowDao extends BaseDao {
 			+ " FROM ("
 			+ " SELECT d.occur_ts, d.borrow_id, d.type_id, t.type_name, d.from_who, d.amount, d.description, d.add_ts, d.last_update_ts, SUM(H.AMOUNT) PAYBACKEDAMT"
 			+ " FROM borrow d LEFT JOIN ("
-			+ " SELECT * FROM HISTORY WHERE category_id = " + BorrowBean.CATEGORY_ID
+			+ " SELECT * FROM HISTORY WHERE history_type = 'PAY_BACK' and category_id = " + BorrowBean.CATEGORY_ID
 			+ " ) H ON D.BORROW_ID = H.ID, type_dfntn t, category_dfntn c"
 			+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
 			+ " AND d.type_id = t.type_id"
@@ -338,7 +338,7 @@ public class BorrowDao extends BaseDao {
 		boolean success = false;
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"insert into history(category_id, id, amount, description, add_ts, occur_ts) values(?, ?, ?, ?, now(), ?)");
+				"insert into history(category_id, id, amount, description, add_ts, occur_ts, history_type) values(?, ?, ?, ?, now(), ?, 'PAY_BACK')");
 		
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());

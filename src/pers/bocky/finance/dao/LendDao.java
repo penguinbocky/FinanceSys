@@ -21,7 +21,7 @@ public class LendDao extends BaseDao {
 			+ ", paybackedAmt, CASE WHEN PAYBACKEDAMT IS NULL THEN amount else (amount - paybackedAmt) end leftAmt"
 			+ " FROM ("
 			+ " SELECT d.occur_ts, d.lend_id, d.type_id, t.type_name, d.to_who, d.amount, d.description, d.add_ts, d.last_update_ts, SUM(h.amount) paybackedAmt"
-			+ " FROM lend d LEFT JOIN (select * from history where category_id = " + LendBean.CATEGORY_ID
+			+ " FROM lend d LEFT JOIN (select * from history where history_type = 'PAY_BACK' and category_id = " + LendBean.CATEGORY_ID
 			+ " ) H ON D.LEND_ID = H.ID, type_dfntn t, category_dfntn c"
 			+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
 			+ " AND d.type_id = t.type_id"
