@@ -33,8 +33,10 @@ import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.component.DataGrid;
 import pers.bocky.finance.component.DateField;
 import pers.bocky.finance.component.FilterPanel;
+import pers.bocky.finance.dao.BorrowDao;
 import pers.bocky.finance.dao.ConsumeDao;
 import pers.bocky.finance.dao.DepositDao;
+import pers.bocky.finance.dao.LendDao;
 import pers.bocky.finance.dao.TypeDao;
 import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
@@ -281,14 +283,14 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		});
 		
 		calNetDepositBtn = new JButton("实际存款");
-		calNetDepositBtn.setToolTipText("实际存款为扣除【首付/房贷/动用固存】后的实际可支配余额，请注意该值包含借出【本人本金】，若有出入请核对借出项.");
+		calNetDepositBtn.setToolTipText("实际存款为扣除【首付/房贷/动用固存/固存还信用卡】后的实际可支配余额，同时已考虑借入借出项的相关数据.");
 		calNetDepositBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				double result = calNetDeposit();
 				if (result == -2) {
-					JOptionPane.showMessageDialog(DepositPanel.this, "请检查配置文件中[cal.realdeposit.excludedconsumetypeids]项是否合法", "实际存款", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(DepositPanel.this, "请检查配置文件中[cal.realdeposit.excluded*typeids]项是否合法", "实际存款", JOptionPane.INFORMATION_MESSAGE);
 				} else if (result == -1) {
 					JOptionPane.showMessageDialog(DepositPanel.this, "读取到type id为0的项", "实际存款", JOptionPane.INFORMATION_MESSAGE);
 				} else {
@@ -389,26 +391,45 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 	}
 
 	private double calNetDeposit() {
-		final String KEY = "cal.realdeposit.excludedconsumetypeids";
-		List<Integer> excludedConsumeTypeIdsList = null;
-		try {
-			excludedConsumeTypeIdsList = Arrays.asList(PropertiesUtil.getValueAsStringArray(KEY)).stream()
-					.map(str -> Integer.parseInt(str))
-					.collect(Collectors.toList());
-		} catch (Exception e) {
-			System.out.println("读取【实际存款】计算公式配置出错：格式不正确或者不合法的数字");
-			return -2;
+		Integer[] excludedConsumeTypeIds = getIdsByPropertyKey("cal.realdeposit.excludedconsumetypeids");
+		if (excludedConsumeTypeIds != null && excludedConsumeTypeIds.length == 1 && excludedConsumeTypeIds[0] < 0) {// Error code
+			return excludedConsumeTypeIds[0];
 		}
-		boolean valid = excludedConsumeTypeIdsList.stream().allMatch(id -> id > 0);
-		if (!valid) {
-			return -1;
+		
+		Integer[] excludedBorrowTypeIds = getIdsByPropertyKey("cal.realdeposit.excludedborrowtypeids");
+		if (excludedBorrowTypeIds != null && excludedBorrowTypeIds.length == 1 && excludedBorrowTypeIds[0] < 0) {// Error code
+			return excludedBorrowTypeIds[0];
 		}
-		Integer[] excludedConsumeTypeIds = excludedConsumeTypeIdsList.toArray(new Integer[0]);
+		
+		Integer[] excludedLendTypeIds = getIdsByPropertyKey("cal.realdeposit.excludedlendtypeids");
+		if (excludedLendTypeIds != null && excludedLendTypeIds.length == 1 && excludedLendTypeIds[0] < 0) {// Error code
+			return excludedLendTypeIds[0];
+		}
 		
 		return ((double) Math.round(
 				(DepositDao.calculateAllDepositRecsAmount() 
 				- ConsumeDao.calculateAmountOfType(excludedConsumeTypeIds)
+				+ BorrowDao.calculateAmountOfType(excludedBorrowTypeIds)
+				- LendDao.calculateAmountOfType(excludedLendTypeIds)
 				) * 100)) / 100;
+	}
+
+	private Integer[] getIdsByPropertyKey(final String propertyKey) {
+		List<Integer> excludedConsumeTypeIdsList = null;
+		try {
+			excludedConsumeTypeIdsList = Arrays.asList(PropertiesUtil.getValueAsStringArray(propertyKey)).stream()
+					.map(str -> Integer.parseInt(str))
+					.collect(Collectors.toList());
+		} catch (Exception e) {
+			System.out.println("读取【实际存款】计算公式配置出错：格式不正确或者不合法的数字");
+			return new Integer[] {-2};
+		}
+		boolean valid = excludedConsumeTypeIdsList.stream().allMatch(id -> id > 0);
+		if (!valid) {
+			return new Integer[] {-1};
+		}
+		Integer[] excludedConsumeTypeIds = excludedConsumeTypeIdsList.toArray(new Integer[0]);
+		return excludedConsumeTypeIds;
 	}
 	
 	@Override

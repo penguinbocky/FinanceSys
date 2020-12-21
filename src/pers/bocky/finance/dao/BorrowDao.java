@@ -486,5 +486,9 @@ public class BorrowDao extends BaseDao {
 	public static Map<String, Double> getAmountGroupByMonth(Integer[] selectedTypeIds) {
 		return getAmountGroupByMonth(BorrowBean.CATEGORY_ID, selectedTypeIds);
 	}
+
+	public static double calculateAmountOfType(Integer[] typeId) {
+		return calculateAmountOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
 	
 }

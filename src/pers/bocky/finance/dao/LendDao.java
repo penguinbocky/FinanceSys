@@ -521,5 +521,9 @@ public class LendDao extends BaseDao {
 	public static Map<String, Double> getAmountGroupByMonth(Integer[] selectedTypeIds) {
 		return getAmountGroupByMonth(LendBean.CATEGORY_ID, selectedTypeIds);
 	}
+
+	public static double calculateAmountOfType(Integer[] typeId) {
+		return calculateAmountOfType(LendBean.CATEGORY_ID, typeId);
+	}
 	
 }
