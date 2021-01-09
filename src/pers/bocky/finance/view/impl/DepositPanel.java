@@ -409,8 +409,8 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		return ((double) Math.round(
 				(DepositDao.calculateAllDepositRecsAmount() 
 				- ConsumeDao.calculateAmountOfType(excludedConsumeTypeIds)
-				+ BorrowDao.calculateAmountOfType(excludedBorrowTypeIds)
-				- LendDao.calculateAmountOfType(excludedLendTypeIds)
+				+ BorrowDao.calculateUnpaidAmountOfType(excludedBorrowTypeIds)
+				- LendDao.calculateUnpaidAmountOfType(excludedLendTypeIds)
 				) * 100)) / 100;
 	}
 

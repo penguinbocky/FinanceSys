@@ -490,5 +490,8 @@ public class BorrowDao extends BaseDao {
 	public static double calculateAmountOfType(Integer[] typeId) {
 		return calculateAmountOfType(BorrowBean.CATEGORY_ID, typeId);
 	}
-	
+
+	public static double calculateUnpaidAmountOfType(Integer[] typeId) {
+		return calculateAmountOfType(BorrowBean.CATEGORY_ID, typeId) - calculatePaidAmountOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
 }

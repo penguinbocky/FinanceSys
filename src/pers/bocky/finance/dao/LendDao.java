@@ -526,4 +526,7 @@ public class LendDao extends BaseDao {
 		return calculateAmountOfType(LendBean.CATEGORY_ID, typeId);
 	}
 	
+	public static double calculateUnpaidAmountOfType(Integer[] typeId) {
+		return calculateAmountOfType(LendBean.CATEGORY_ID, typeId) - calculatePaidAmountOfType(LendBean.CATEGORY_ID, typeId);
+	}
 }

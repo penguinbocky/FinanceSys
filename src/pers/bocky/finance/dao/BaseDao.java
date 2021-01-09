@@ -82,6 +82,74 @@ public class BaseDao {
 		return sum;
 	}
 	
+	protected static double calculatePaidAmountOfType(int categoryId, Integer... typeId){
+		System.out.println("calculating paid amount of type >>> for categoryId: " + categoryId + ", and typeId: " + typeId);
+		double sum = 0;
+		Connection con = dbUtil.getCon();
+		String tableName = null;
+		String primaryIdName = null;
+		switch (categoryId) {
+		case CategoryBean.DEPOSIT:
+			tableName = "deposit";
+			primaryIdName = "deposit_id";
+			break;
+		case CategoryBean.CONSUME:
+			tableName = "consume";
+			primaryIdName = "consume_id";
+			break;
+		case CategoryBean.BORROW:
+			tableName = "borrow";
+			primaryIdName = "borrow_id";
+			break;
+		case CategoryBean.LEND:
+			tableName = "lend";
+			primaryIdName = "lend_id";
+			break;
+
+		default:
+			tableName = "consume";
+			primaryIdName = "consume_id";
+			break;
+		}
+		StringBuffer sql = new StringBuffer(
+				"SELECT sum(h.amount) as sum"
+				+ " FROM "
+				+ tableName
+				+ " d, type_dfntn t, category_dfntn c, HISTORY h"
+				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
+				+ " and h.history_type = 'PAY_BACK' and h.id = d." + primaryIdName + " and h.category_id =" + categoryId
+				+ " AND d.type_id = t.type_id"
+				+ " AND t.category_id = c.category_id"
+				+ " AND c.category_id = " + categoryId);
+
+		if (typeId.length > 0) {
+			sql.append(" AND ( d.type_id = " + typeId[0]);
+			for (int i = 1; i < typeId.length; i++) {
+				Integer type = typeId[i];
+				sql.append(" or d.type_id = " + type);
+			}
+			sql.append(" ) ");
+		}
+		
+		logger.log(sql.toString());
+		try {
+			PreparedStatement pstat = con.prepareStatement(sql.toString());
+			ResultSet rs = pstat.executeQuery();
+			
+			if(rs != null && rs.next()){
+				sum = rs.getDouble("sum");
+			}
+			pstat.close();
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(con);
+		}
+		System.out.println("sum of calculatePaidAmountOfType: " + sum);
+		return sum;
+	}
+	
 	protected static double calculateAmountOfLatestMonthOfType(int categoryId, Integer... typeId){
 		System.out.println("calculating latest 30 days for categoryId: " + categoryId + ", and typeId: " + typeId);
 		double sum = 0;
