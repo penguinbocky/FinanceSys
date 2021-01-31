@@ -358,7 +358,7 @@ public class ConsumeDao extends BaseDao {
 		
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"update consume set type_id = ?, dest = ?, amount = amount + ?, description = ?, last_update_ts = now()"
+				"update consume set type_id = ?, dest = ?, amount = amount + ?, description = ?, occur_ts = ?, last_update_ts = now()"
 				+ " where consume_id = ?");
 		
 		try {
@@ -367,8 +367,8 @@ public class ConsumeDao extends BaseDao {
 			pstat.setString(2, bean.getDest());
 			pstat.setDouble(3, bean.getAmount());
 			pstat.setString(4, bean.getDescription());
-//			pstat.setTimestamp(5, bean.getOccurTs());
-			pstat.setInt(5, bean.getConsumeId());
+			pstat.setTimestamp(5, bean.getOccurTs());
+			pstat.setInt(6, bean.getConsumeId());
 			if (pstat.executeUpdate() == 1) {
 				System.out.println("ConsumeDao.updateRecord result == 1");
 				response = DaoResponse.UPDATE_SUCCESS;

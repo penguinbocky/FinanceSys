@@ -38,6 +38,7 @@ import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
+import pers.bocky.finance.util.MessageUtils;
 import pers.bocky.finance.util.NumberUtil;
 import pers.bocky.finance.util.PropertiesUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
@@ -200,11 +201,13 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		JLabel amountLabel = new JLabel("数量");
 		amountField = new JTextField();
 		
-		MyDocument mm = new MyDocument(10, savebtn, fromWhoField, amountField);
-		fromWhoField.setDocument(mm);
-		fromWhoField.getDocument().addDocumentListener(mm);
-		amountField.setDocument(new MyDocument(true, 7));//Mainly for bank loan 1340000￥
-		amountField.getDocument().addDocumentListener(mm);
+		MyDocument mm = new MyDocument(10, new JTextField[] { amountField, fromWhoField }, new JButton[]{ savebtn });
+		fromWhoField.setDocument(mm); // insertString listener
+		fromWhoField.getDocument().addDocumentListener(mm); // insertUpdate listener
+//		amountField.setDocument(new MyDocument(true, 7));//Mainly for bank loan 1340000￥
+		MyDocument mm1 = new MyDocument(true, 7, new JTextField[] { amountField, fromWhoField }, new JButton[]{ savebtn });
+		amountField.setDocument(mm1);
+		amountField.getDocument().addDocumentListener(mm1); // insertUpdate listener
 		
 		JLabel descLabel = new JLabel("备注");
 		descField = new JTextField();
@@ -322,7 +325,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
 			return;
 		}
-		if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将更新包括发生时间在内的改变值，但不会产生历史记录，确定要更新吗？")) {
+		if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, MessageUtils.MESSAGE_FORCE_ONLY_UPDATE_OPS)) {
 			return;
 		}
 		

@@ -37,6 +37,7 @@ import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
+import pers.bocky.finance.util.MessageUtils;
 import pers.bocky.finance.util.NumberUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
@@ -196,11 +197,12 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		JLabel amountLabel = new JLabel("数量");
 		amountField = new JTextField();
 		
-		MyDocument mm = new MyDocument(10, savebtn, destField, amountField);
+		MyDocument mm = new MyDocument(10, new JTextField[]{ amountField, destField }, new JButton[]{ savebtn });
 		destField.setDocument(mm);
 		destField.getDocument().addDocumentListener(mm);
-		amountField.setDocument(new MyDocument(true, 9));//123456.89
-		amountField.getDocument().addDocumentListener(mm);
+		MyDocument mm1 = new MyDocument(true, 9, new JTextField[] { amountField, destField }, new JButton[]{ savebtn });
+		amountField.setDocument(mm1);//123456.89
+		amountField.getDocument().addDocumentListener(mm1);
 		
 		JLabel descLabel = new JLabel("备注");
 		descField = new JTextField();
@@ -315,8 +317,8 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
 			return;
 		}
-		if ((!forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将会以填入的数量值作为增量值加入前次数量值，且发生时间不变，确定要更新吗？(右键可更新所有值)"))
-				|| (forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, "将强制覆盖数量值，且更新发生时间，但不会产生历史记录，确定要更新吗？"))) {
+		if ((!forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, MessageUtils.MESSAGE_UPDATE_OPS))
+				|| (forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, MessageUtils.MESSAGE_FORCE_UPDATE_OPS))) {
 			return;
 		}
 		

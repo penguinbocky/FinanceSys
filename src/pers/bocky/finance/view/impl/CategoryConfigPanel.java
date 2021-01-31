@@ -92,7 +92,7 @@ public class CategoryConfigPanel extends JPanel implements WillBeInConfigTabbed{
 		
 		JLabel categoryLabel = new JLabel("类别名称");
 		categoryField = new JTextField();
-		MyDocument mm = new MyDocument(20, save, categoryField);
+		MyDocument mm = new MyDocument(20, categoryField, save);
 		categoryField.setDocument(mm);//For length limit
 		categoryField.getDocument().addDocumentListener(mm);//For check input
 		JLabel descLabel = new JLabel("类别描述");

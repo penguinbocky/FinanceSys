@@ -347,7 +347,7 @@ public class LendDao extends BaseDao {
 		
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"update lend set type_id = ?, to_who = ?, amount = amount + ?, description = ?, last_update_ts = now()"
+				"update lend set type_id = ?, to_who = ?, amount = amount + ?, description = ?, occur_ts = ?, last_update_ts = now()"
 				+ " where lend_id = ?");
 		
 		try {
@@ -356,8 +356,8 @@ public class LendDao extends BaseDao {
 			pstat.setString(2, bean.getToWho());
 			pstat.setDouble(3, bean.getAmount());
 			pstat.setString(4, bean.getDescription());
-//			pstat.setTimestamp(5, bean.getOccurTs());
-			pstat.setInt(5, bean.getLendId());
+			pstat.setTimestamp(5, bean.getOccurTs());
+			pstat.setInt(6, bean.getLendId());
 			if (pstat.executeUpdate() == 1) {
 				System.out.println("LendDao.updateRecord result == 1");
 				response = DaoResponse.UPDATE_SUCCESS;
