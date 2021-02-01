@@ -52,10 +52,11 @@ public class MyDocument extends PlainDocument implements DocumentListener {
 			System.out.println("checking..." + text);
 			matcher = pattern.matcher(text);
 			if (!matcher.matches()) {
-				System.out.println("no matches");
+				System.out.println("valid whole Text > no matches");
 				return false;
 			}
 		}
+		System.out.println("valid whole Text > success");
 		return true;
 	}
 	
@@ -64,9 +65,10 @@ public class MyDocument extends PlainDocument implements DocumentListener {
 			throws BadLocationException {
 		System.out.println("insertString , onlyAllowNumber " + str + "," + onlyAllowNumber);
 		if (onlyAllowNumber) {
-			Pattern pattern = Pattern.compile("[\\-0-9\\.]");
+			Pattern pattern = Pattern.compile("[\\-0-9\\.]*"); // the * is for directly insertion of a clicked multi-number text
 			Matcher matcher = pattern.matcher(str);
 			if (!matcher.matches()) {
+				System.out.println("insertString>no matches");
 				return;
 			}
 		}
