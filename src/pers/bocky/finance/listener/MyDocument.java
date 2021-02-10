@@ -47,7 +47,7 @@ public class MyDocument extends PlainDocument implements DocumentListener {
 	
 	private boolean validText(String text) {
 		if (onlyAllowNumber) {
-			Pattern pattern = Pattern.compile("(\\-\\d+|[1-9]+)(\\.[1-9]+|\\d+)?");
+			Pattern pattern = Pattern.compile("(\\-?)([1-9][0-9]*)(\\.[0-9]+)?");
 			Matcher matcher;
 			System.out.println("checking..." + text);
 			matcher = pattern.matcher(text);

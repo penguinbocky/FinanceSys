@@ -19,7 +19,7 @@ import pers.bocky.finance.util.StringUtil;
 
 public class ConsumeDao extends BaseDao {
 	private final static String preSql = "SELECT d.occur_ts, d.consume_id, d.type_id, t.type_name, d.dest, d.amount, d.description, d.add_ts, d.last_update_ts"
-			+ ", (SELECT COUNT(1) FROM history h WHERE h.category_id = t.category_id AND h.id = d.consume_id) has_history"
+			+ ", (SELECT COUNT(1) FROM history h WHERE h.category_id = t.category_id AND h.id = d.consume_id) has_history, d.using_deposit"
 			+ " FROM consume d, type_dfntn t, category_dfntn c"
 			+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
 			+ " AND d.type_id = t.type_id"
@@ -130,6 +130,28 @@ public class ConsumeDao extends BaseDao {
 				break;
 			case 包含:
 				sql.append(" AND d.dest like '%" + dest + "%'");
+				break;
+			default:
+				break;
+			}
+		}
+		sql.append(" ORDER BY last_update_ts DESC");
+		
+		logger.log(new LogBean(sql.toString(), new Date()));
+		
+		return getRecListBySql(sql.toString());
+	}
+	
+	private static List<ConsumeBean> fetchConsumeRecsByUsingDeposit(Comparator selectedComparator, String dest){
+		StringBuffer sql = getPreSql();
+
+		if (dest != null && !"".equals(dest)) {
+			switch (selectedComparator) {
+			case 等于:
+				sql.append(" AND d.using_Deposit = '" + dest + "'");
+				break;
+			case 不等于:
+				sql.append(" AND d.using_Deposit <> '" + dest + "'");
 				break;
 			default:
 				break;
@@ -266,7 +288,7 @@ public class ConsumeDao extends BaseDao {
 		DaoResponse response = DaoResponse.SAVE_ERROR;
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"insert into consume(type_id, dest, amount, description, occur_ts, add_ts) values(?, ?, ?, ?, ?, now())");
+				"insert into consume(type_id, dest, amount, description, occur_ts, add_ts, using_deposit) values(?, ?, ?, ?, ?, now(), ?)");
 		
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
@@ -275,6 +297,7 @@ public class ConsumeDao extends BaseDao {
 			pstat.setDouble(3, bean.getAmount());
 			pstat.setString(4, bean.getDescription());
 			pstat.setTimestamp(5, bean.getOccurTs());
+			pstat.setString(6, bean.isUsingDeposit() ? "Y" : "N");
 			if (pstat.executeUpdate() == 1) {
 				response = DaoResponse.SAVE_SUCCESS;
 			}
@@ -415,6 +438,11 @@ public class ConsumeDao extends BaseDao {
 		return calculateAmountOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
 	
+	public static double calculateAmountOfUsingDeposit(){
+		double amt = fetchAllConsumeRecs().stream().filter(rec -> rec.isUsingDeposit()).mapToDouble(rec -> rec.getAmount()).sum();
+		return amt;
+	}
+	
 	public static double calculateAmountOfLatestMonthOfType(Integer... typeId){
 		return calculateAmountOfLatestMonthOfType(ConsumeBean.CATEGORY_ID, typeId);
 	}
@@ -468,6 +496,9 @@ public class ConsumeDao extends BaseDao {
 			break;
 		case "创建时间":
 			list = fetchConsumeRecsByCreatedTs(selectedComparator, new Timestamp(Long.parseLong(_filterValue)), new Timestamp(Long.parseLong(_filterValue2)));
+			break;
+		case "动用固存":
+			list = fetchConsumeRecsByUsingDeposit(selectedComparator, _filterValue);
 			break;
 		default:
 			break;

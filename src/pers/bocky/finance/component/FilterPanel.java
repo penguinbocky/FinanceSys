@@ -59,6 +59,9 @@ public class FilterPanel extends JPanel {
 	// Another kind of filter value standing for types
 	private JComboBox<TypeBean> filterValueOfTypes;
 
+	// Another kind of filter value: true or false
+	private JComboBox<String> filterValueOfTrueOrFalse;
+		
 	private JButton okBtn;
 	
 	private FilterBean lastFilterBean;
@@ -102,6 +105,8 @@ public class FilterPanel extends JPanel {
 					}
 				} else if (filterType.equalsIgnoreCase("type")) {
 					_filterValue = "" + ((TypeBean) filterValueOfTypes.getSelectedItem()).getTypeId();
+				} else if (filterType.equalsIgnoreCase("trueOrFalse")) {
+					_filterValue = "" + filterValueOfTrueOrFalse.getSelectedItem();
 				} else {
 					_filterValue = filterValueOfStrNum.getText().trim();
 				}
@@ -163,6 +168,11 @@ public class FilterPanel extends JPanel {
 					Comparator.等于,
 					Comparator.不等于
 			};
+		} else if (selectedFilter.getType().equalsIgnoreCase("trueOrFalse")) {
+			comparators = new Comparator[] {
+					Comparator.等于,
+					Comparator.不等于
+			};
 		}
 		
 		//Do not change reference once being initiated to save the memory
@@ -220,7 +230,11 @@ public class FilterPanel extends JPanel {
 			filterValueOfTypes.setModel(new DefaultComboBoxModel<TypeBean>(actions));
 			add(filterValueOfTypes);
 //			remove(comparator);
-		}else {
+		} else if (selectedFilter.getType().equalsIgnoreCase("trueOrFalse")) {
+			filterValueOfTrueOrFalse = new JComboBox<String>();
+			filterValueOfTrueOrFalse.setModel(new DefaultComboBoxModel<String>(new String[] {"Y", "N"}));
+			add(filterValueOfTrueOrFalse);
+		} else {
 			filterValueOfStrNum = new JTextField();
 			filterValueOfStrNum.setPreferredSize(new Dimension(100, 25));
 			add(filterValueOfStrNum);
@@ -304,6 +318,14 @@ public class FilterPanel extends JPanel {
 			b.setFilterId(id++);
 			b.setType("date");
 			b.setFilterName("最后更新于");
+			filterList.add(b);
+		}
+		
+		if (categoryId == ConsumeBean.CATEGORY_ID) {
+			b = new FilterBean();
+			b.setFilterId(id++);
+			b.setType("trueOrFalse");
+			b.setFilterName("动用固存");
 			filterList.add(b);
 		}
 		

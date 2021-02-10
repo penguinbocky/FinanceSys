@@ -121,7 +121,7 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 //		PopupFactory popupFactory = PopupFactory.getSharedInstance();
 		
 		Function<DefaultTableCellRenderer, ?> fnForYes = (e) -> {
-			e.setForeground(Color.GRAY);
+			e.setForeground(Color.BLUE);
 			return true;
 		};
 		
@@ -393,10 +393,10 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 	}
 
 	private double calNetDeposit() {
-		Integer[] excludedConsumeTypeIds = getIdsByPropertyKey("cal.realdeposit.excludedconsumetypeids");
-		if (excludedConsumeTypeIds != null && excludedConsumeTypeIds.length == 1 && excludedConsumeTypeIds[0] < 0) {// Error code
-			return excludedConsumeTypeIds[0];
-		}
+//		Integer[] excludedConsumeTypeIds = getIdsByPropertyKey("cal.realdeposit.excludedconsumetypeids");
+//		if (excludedConsumeTypeIds != null && excludedConsumeTypeIds.length == 1 && excludedConsumeTypeIds[0] < 0) {// Error code
+//			return excludedConsumeTypeIds[0];
+//		}
 		
 		Integer[] excludedBorrowTypeIds = getIdsByPropertyKey("cal.realdeposit.excludedborrowtypeids");
 		if (excludedBorrowTypeIds != null && excludedBorrowTypeIds.length == 1 && excludedBorrowTypeIds[0] < 0) {// Error code
@@ -410,7 +410,7 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		
 		return ((double) Math.round(
 				(DepositDao.calculateAllDepositRecsAmount() 
-				- ConsumeDao.calculateAmountOfType(excludedConsumeTypeIds)
+				- ConsumeDao.calculateAmountOfUsingDeposit()
 				+ BorrowDao.calculateUnpaidAmountOfType(excludedBorrowTypeIds)
 				- LendDao.calculateUnpaidAmountOfType(excludedLendTypeIds)
 				) * 100)) / 100;

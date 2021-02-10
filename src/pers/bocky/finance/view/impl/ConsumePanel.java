@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -55,6 +56,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 	private JButton updateBtn;
 	private JButton deleteBtn;
 	private DateField dp;
+	private JCheckBox checkUsingDeposit;
 
 	private boolean hasMainUI;
 	
@@ -99,8 +101,8 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
-		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "去向", "数量", "备注", "发生时间", "最后更新于", "创建时间", "Has_History"};
-		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID", "Has_History"}
+		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "去向", "数量", "备注", "发生时间", "最后更新于", "创建时间", "Has_History", "Using_Deposit"};
+		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID", "Has_History", "Using_Deposit"}
 		, new String[] {"类型", "去向", "数量"}, new String[] {"备注"});
 		
 		JPanel p1 = new JPanel();
@@ -113,7 +115,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 //		PopupFactory popupFactory = PopupFactory.getSharedInstance();
 		
 		Function<DefaultTableCellRenderer, ?> fnForYes = (e) -> {
-			e.setForeground(Color.GRAY);
+			e.setForeground(Color.BLUE);
 			return true;
 		};
 		
@@ -164,6 +166,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 			String amount = (String) datagrid.getValueAt(selectedRowIndex, 4);
 			String desc = (String) datagrid.getValueAt(selectedRowIndex, 5);
 			String occurTs = (String) datagrid.getValueAt(selectedRowIndex, 6);
+			String usingDeposit = (String) datagrid.getValueAt(selectedRowIndex, 10);
 			
 			typesDropdown.setSelectedIndex(getDropdownIndexByTypeId(Integer.parseInt(typeId)));
 			destField.setText(dest);
@@ -174,6 +177,8 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 			} else {
 				dp.fillFields("", "", "");
 			}
+			checkUsingDeposit.setSelected("true".equals(usingDeposit));
+			checkUsingDeposit.setEnabled(false);
 		}
 	}
 	
@@ -265,6 +270,9 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 			}
 		});
 		
+		checkUsingDeposit = new JCheckBox("动用固存", false);
+		checkUsingDeposit.setOpaque(false);
+		
 		inputPanel.add(typeLabel);
 		inputPanel.add(typesDropdown);
 		inputPanel.add(sourceLabel);
@@ -278,8 +286,9 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		inputPanel.add(savebtn);
 		inputPanel.add(updateBtn);
 		inputPanel.add(deleteBtn);
-		
+				
 		inputPanel.add(calBtn);
+		inputPanel.add(checkUsingDeposit);
 		
 		panel.add(inputPanel);
 		
@@ -357,6 +366,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 
 	@Override
 	public void loadDatagrid() {
+		resetPanels();
 		List<ConsumeBean> list = ConsumeDao.fetchAllConsumeRecs();
 		loadDatagrid(list);
 	}
@@ -379,6 +389,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 			v.add(DateUtil.timestamp2Str(bean.getLastUpdateTs()));
 			v.add(DateUtil.timestamp2Str(bean.getAddTs()));
 			v.add("" + bean.hasHistory());
+			v.add("" + bean.isUsingDeposit());
 			dataVectorList.add(v);
 		}
 		datagrid.setData(dataVectorList);
@@ -396,6 +407,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		bean.setAmount(Double.parseDouble(amountField.getText().trim()));
 		bean.setDescription(descField.getText().trim());
 		bean.setOccurTs(dp.getResultAsTimestamp());
+		bean.setUsingDeposit(checkUsingDeposit.isSelected());
 		System.out.println("The formed deposit to save bean > " + bean);
 		return bean;
 	}
@@ -414,7 +426,12 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		destField.setText("");
 		amountField.setText("");
 		descField.setText("");
+		checkUsingDeposit.setSelected(false);
 		checkForButtons();
+	}
+	
+	private void resetPanels() {
+		checkUsingDeposit.setEnabled(true);
 	}
 	
 	@Override
