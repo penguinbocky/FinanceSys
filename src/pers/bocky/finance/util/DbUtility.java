@@ -116,7 +116,7 @@ public enum DbUtility {
 			String cmd = "cmd /c mysqldump -u" + this.userName 
 					+ " -p" + this.password 
 					+ " -t " + (dbName == null ? DB_NAME : dbName)//only data, no structure 
-					+ " > " + path + "/generated_by_java_" + DateUtil.getCurrentDateAsString("yy_MM_dd") + ".sql";
+					+ " > " + path + "/DATA_DUMP_BY_JAVA_" + DateUtil.getCurrentDateAsString("yy_MM_dd") + ".sql";
 			Process process = Runtime.getRuntime().exec(cmd);
 			br = new BufferedReader(new InputStreamReader(process.getErrorStream(), Charset.forName("gbk")));
 			sBuilder = new StringBuilder();
