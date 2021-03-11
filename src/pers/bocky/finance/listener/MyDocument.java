@@ -16,28 +16,28 @@ public class MyDocument extends PlainDocument implements DocumentListener {
 	private static final long serialVersionUID = 1L;
 	private boolean onlyAllowNumber;
 	private int maxLength;
-	private JButton btn;
-	private JTextField[] fields;
-	  
-	public MyDocument(int maxLength, JButton btn, JTextField... fields){ 
+	private JButton[] affectedBtns;
+	private JTextField[] consideredFields;
+	
+	public MyDocument(int maxLength, JTextField[] fields, JButton[] btns){ 
 		super(); 
 		this.maxLength = maxLength;
-		this.btn = btn;
-		this.fields = fields;
-	} 
-	public MyDocument(){ 
-		this(10, null); 
-	} 
-	
-	public MyDocument(boolean onlyAllowNumber, int maxLength) {
-		super();
-		this.onlyAllowNumber = onlyAllowNumber;
-		this.maxLength = maxLength;
+		this.affectedBtns = btns;
+		this.consideredFields = fields;
 	}
 	
-	private boolean validAllFieldLength() {
-		for (int i = 0; i < fields.length; i++) {
-			JTextField jTextField = fields[i];
+	public MyDocument(int maxLength, JTextField field, JButton btn) {
+		this(maxLength, new JTextField[]{ field }, new JButton[] { btn });
+	}
+	
+	public MyDocument(boolean onlyAllowNumber, int maxLength, JTextField[] fields, JButton[] btns) {
+		this(maxLength, fields, btns);
+		this.onlyAllowNumber = onlyAllowNumber;
+	}
+	
+	private boolean validFieldLength() {
+		for (int i = 0; i < consideredFields.length; i++) {
+			JTextField jTextField = consideredFields[i];
 			if (jTextField.getText().equals("")) {
 				return false;
 			}
@@ -45,14 +45,30 @@ public class MyDocument extends PlainDocument implements DocumentListener {
 		return true;
 	}
 	
+	private boolean validText(String text) {
+		if (onlyAllowNumber) {
+			Pattern pattern = Pattern.compile("(\\-?)([1-9][0-9]*)(\\.[0-9]+)?");
+			Matcher matcher;
+			System.out.println("checking..." + text);
+			matcher = pattern.matcher(text);
+			if (!matcher.matches()) {
+				System.out.println("valid whole Text > no matches");
+				return false;
+			}
+		}
+		System.out.println("valid whole Text > success");
+		return true;
+	}
+	
 	@Override
 	public void insertString(int offset, String str, AttributeSet a)
 			throws BadLocationException {
+		System.out.println("insertString , onlyAllowNumber " + str + "," + onlyAllowNumber);
 		if (onlyAllowNumber) {
-			Pattern pattern = Pattern.compile("^[1-9][0-9]{0,5}\\.?[0-9]{0,2}|(0\\.[0-9]{1}[1-9]?)$");
-			Matcher matcher = pattern.matcher(getText(0,  getLength()) + str);
-			System.out.println(getText(0,  getLength()) + str);
+			Pattern pattern = Pattern.compile("[\\-0-9\\.]*"); // the * is for directly insertion of a clicked multi-number text
+			Matcher matcher = pattern.matcher(str);
 			if (!matcher.matches()) {
+				System.out.println("insertString>no matches");
 				return;
 			}
 		}
@@ -66,18 +82,49 @@ public class MyDocument extends PlainDocument implements DocumentListener {
 	
 	@Override
 	public void insertUpdate(DocumentEvent e) {
-		if (validAllFieldLength()) {
-			btn.setEnabled(true);
+		System.out.println("insertUpdate...");
+		if (validFieldLength()) {
+			Boolean enabled = true;
+			try {
+				if (!validText(e.getDocument().getText(0, e.getDocument().getLength()))) {
+					enabled = false;
+				} else {
+					enabled = true;
+				}
+			} catch (BadLocationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			for (JButton btn : affectedBtns) {
+				btn.setEnabled(enabled);
+			}
 		} else {
-			btn.setEnabled(false);
+			for (JButton btn : affectedBtns) {
+				btn.setEnabled(false);
+			}
 		}
 	}
 	@Override
 	public void removeUpdate(DocumentEvent e) {
-		if (validAllFieldLength()) {
-			btn.setEnabled(true);
+		if (validFieldLength()) {
+			Boolean enabled = true;
+			try {
+				if (!validText(e.getDocument().getText(0, e.getDocument().getLength()))) {
+					enabled = false;
+				} else {
+					enabled = true;
+				}
+			} catch (BadLocationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			for (JButton btn : affectedBtns) {
+				btn.setEnabled(enabled);
+			}
 		} else {
-			btn.setEnabled(false);
+			for (JButton btn : affectedBtns) {
+				btn.setEnabled(false);
+			}
 		}
 	}
 	@Override

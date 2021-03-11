@@ -4,10 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import pers.bocky.finance.bean.CategoryBean;
+import pers.bocky.finance.bean.HistoryBean;
 import pers.bocky.finance.util.DbUtility;
 import pers.bocky.finance.util.LoggerUtil;
 
@@ -76,6 +79,74 @@ public class BaseDao {
 		} finally {
 			dbUtil.close(con);
 		}
+		return sum;
+	}
+	
+	protected static double calculatePaidAmountOfType(int categoryId, Integer... typeId){
+		System.out.println("calculating paid amount of type >>> for categoryId: " + categoryId + ", and typeId: " + typeId);
+		double sum = 0;
+		Connection con = dbUtil.getCon();
+		String tableName = null;
+		String primaryIdName = null;
+		switch (categoryId) {
+		case CategoryBean.DEPOSIT:
+			tableName = "deposit";
+			primaryIdName = "deposit_id";
+			break;
+		case CategoryBean.CONSUME:
+			tableName = "consume";
+			primaryIdName = "consume_id";
+			break;
+		case CategoryBean.BORROW:
+			tableName = "borrow";
+			primaryIdName = "borrow_id";
+			break;
+		case CategoryBean.LEND:
+			tableName = "lend";
+			primaryIdName = "lend_id";
+			break;
+
+		default:
+			tableName = "consume";
+			primaryIdName = "consume_id";
+			break;
+		}
+		StringBuffer sql = new StringBuffer(
+				"SELECT sum(h.amount) as sum"
+				+ " FROM "
+				+ tableName
+				+ " d, type_dfntn t, category_dfntn c, HISTORY h"
+				+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
+				+ " and h.history_type = 'PAY_BACK' and h.id = d." + primaryIdName + " and h.category_id =" + categoryId
+				+ " AND d.type_id = t.type_id"
+				+ " AND t.category_id = c.category_id"
+				+ " AND c.category_id = " + categoryId);
+
+		if (typeId.length > 0) {
+			sql.append(" AND ( d.type_id = " + typeId[0]);
+			for (int i = 1; i < typeId.length; i++) {
+				Integer type = typeId[i];
+				sql.append(" or d.type_id = " + type);
+			}
+			sql.append(" ) ");
+		}
+		
+		logger.log(sql.toString());
+		try {
+			PreparedStatement pstat = con.prepareStatement(sql.toString());
+			ResultSet rs = pstat.executeQuery();
+			
+			if(rs != null && rs.next()){
+				sum = rs.getDouble("sum");
+			}
+			pstat.close();
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(con);
+		}
+		System.out.println("sum of calculatePaidAmountOfType: " + sum);
 		return sum;
 	}
 	
@@ -820,6 +891,70 @@ public class BaseDao {
 			dbUtil.close(con);
 		}
 		return map;
+	}
+
+	public static List<HistoryBean> fetchHistoryRecs(HistoryBean paramBean) {
+		List<HistoryBean> list = new ArrayList<HistoryBean>();
+		Connection con = dbUtil.getCon();
+		String tableName = null;
+		String idConverter = null;
+		switch (paramBean.getCategoryId()) {
+		case CategoryBean.DEPOSIT:
+			tableName = "deposit";
+			idConverter = "deposit_id";
+			break;
+		case CategoryBean.CONSUME:
+			tableName = "consume";
+			idConverter = "consume_id";
+			break;
+		case CategoryBean.BORROW:
+			tableName = "borrow";
+			idConverter = "borrow_id";
+			break;
+		case CategoryBean.LEND:
+			tableName = "lend";
+			idConverter = "lend_id";
+			break;
+
+		default:
+			tableName = "consume";
+			idConverter = "consume_id";
+			break;
+		}
+		StringBuffer sql = new StringBuffer(
+				"SELECT d.history_id, d.occur_ts, d.amount, d.description, d.add_ts, d.last_update_ts"
+				+ " FROM " + tableName + " b, history d"
+				+ " WHERE b.active_flg = 'Y' AND b.active_flg = 'Y'"
+				+ " AND b." + idConverter + " = d.id"
+				+ " AND D.active_flg = 'Y'"
+				+ " AND D.CATEGORY_ID = " + paramBean.getCategoryId()
+				+ " AND d.history_type = '" + paramBean.getHistoryType() + "'"
+				+ " AND b." + idConverter + " = ?");
+
+		try {
+			PreparedStatement pstat = con.prepareStatement(sql.toString());
+			pstat.setInt(1, paramBean.getId());
+			ResultSet rs = pstat.executeQuery();
+			
+			HistoryBean bean = null;
+			while(rs != null && rs.next()){
+				bean = new HistoryBean();
+				bean.setHistoryId(rs.getInt("history_id"));
+				bean.setAmount(rs.getDouble("amount"));
+				bean.setDescription(rs.getString("description"));
+				bean.setAddTs(rs.getTimestamp("add_ts"));
+				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
+				bean.setOccurTs(rs.getTimestamp("occur_ts"));
+				list.add(bean);
+			}
+			pstat.close();
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			dbUtil.close(con);
+		}
+		return list;
 	}
 	
 }

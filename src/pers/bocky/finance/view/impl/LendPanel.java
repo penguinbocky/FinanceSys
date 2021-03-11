@@ -14,6 +14,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.function.Function;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -24,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import pers.bocky.finance.bean.HistoryType;
 import pers.bocky.finance.bean.LendBean;
 import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.component.DataGrid;
@@ -35,6 +37,7 @@ import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
+import pers.bocky.finance.util.MessageUtils;
 import pers.bocky.finance.util.NumberUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
@@ -127,11 +130,13 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 
 	protected void startHistoryFrame() {
 		int selectedRowIndex = datagrid.getSelectedRow();
+		int selectedColumnIndex = datagrid.getSelectedColumn();
+		System.out.println("selectedColumnIndex [4 - amount] | [9 - paid] > " + selectedColumnIndex + datagrid.isColumnSelected(9));
 		String lendIdStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
-		new LendHistoryFrame(Integer.parseInt(lendIdStr));
+		new HistoryFrame(LendBean.CATEGORY_ID, Integer.parseInt(lendIdStr), selectedColumnIndex == 9 ? HistoryType.PAY_BACK : HistoryType.UPDATE_AMOUNT);
 	}
 	
-	protected void fillFields(DataGrid datagrid, int selectedRowIndex) {
+	private void fillFields(DataGrid datagrid, int selectedRowIndex) {
 		if (datagrid != null && selectedRowIndex > -1) {
 			String typeId = (String) datagrid.getValueAt(selectedRowIndex, 1);
 			String dest = (String) datagrid.getValueAt(selectedRowIndex, 3);
@@ -192,11 +197,12 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		JLabel amountLabel = new JLabel("数量");
 		amountField = new JTextField();
 		
-		MyDocument mm = new MyDocument(10, savebtn, destField, amountField);
+		MyDocument mm = new MyDocument(10, new JTextField[]{ amountField, destField }, new JButton[]{ savebtn });
 		destField.setDocument(mm);
 		destField.getDocument().addDocumentListener(mm);
-		amountField.setDocument(new MyDocument(true, 9));//123456.89
-		amountField.getDocument().addDocumentListener(mm);
+		MyDocument mm1 = new MyDocument(true, 9, new JTextField[] { amountField, destField }, new JButton[]{ savebtn });
+		amountField.setDocument(mm1);//123456.89
+		amountField.getDocument().addDocumentListener(mm1);
 		
 		JLabel descLabel = new JLabel("备注");
 		descField = new JTextField();
@@ -213,14 +219,29 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			}
 		});
 		
-		updateBtn = new JButton("更新");
-		updateBtn.setEnabled(false);
-		updateBtn.addActionListener(new ActionListener() {
+		JButton calUnPaidbackBtn = new JButton("未还项本金求和");
+		calUnPaidbackBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				updateRecord();
+				Function<Integer, Boolean> predict = (row) -> Double.parseDouble(((String) datagrid.getValueAt(row, 9)).replaceAll(",", "")) == 0;
+				JOptionPane.showMessageDialog(LendPanel.this, NumberFormat.getNumberInstance().format(NumberUtil.sumAmount(datagrid, 4, predict)), "未偿还账目的本金总和", JOptionPane.INFORMATION_MESSAGE);
 			}
+		});
+		
+		updateBtn = new JButton("更新");
+		updateBtn.setEnabled(false);
+		updateBtn.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					updateRecord(true);
+				} else {
+					updateRecord(false);
+				}
+			}
+			
 		});
 		
 		deleteBtn = new JButton("删除");
@@ -257,15 +278,15 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		inputPanel.add(updateBtn);
 		inputPanel.add(deleteBtn);
 		inputPanel.add(payBackBtn);
-		
 		inputPanel.add(calBtn);
+		inputPanel.add(calUnPaidbackBtn);
 		
 		panel.add(inputPanel);
 		
 		return panel;
 	}
 
-	protected void payback() {
+	private void payback() {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要偿还的款项");
@@ -290,12 +311,17 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		checkForButtons();
 	}
 	
-	protected void updateRecord() {
+	private void updateRecord(boolean forceUpdate) {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
 			return;
 		}
+		if ((!forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, MessageUtils.MESSAGE_UPDATE_OPS))
+				|| (forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, MessageUtils.MESSAGE_FORCE_UPDATE_OPS))) {
+			return;
+		}
+		
 		int id = Integer.parseInt(
 				datagrid.getValueAt(selectedRow, 0).toString()
 				);
@@ -306,7 +332,8 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		bean.setAmount(Double.parseDouble(amountField.getText().trim()));
 		bean.setDescription(descField.getText().trim());
 		bean.setOccurTs(dp.getResultAsTimestamp());
-		if (LendDao.updateRecord(bean) == DaoResponse.UPDATE_SUCCESS) {
+		if ((!forceUpdate && LendDao.saveHistoryAndUpdateRecord(bean) == DaoResponse.UPDATE_SUCCESS)
+				|| (forceUpdate && LendDao.updateRecord(bean) == DaoResponse.UPDATE_SUCCESS)) {
 			clearInput();
 			datagrid.clearSelection();
 			loadDatagrid();
@@ -317,7 +344,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 		checkForButtons();
 	}
 	
-	protected void deleteRecord() {
+	private void deleteRecord() {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要删除的记录");
@@ -370,7 +397,7 @@ public class LendPanel extends JPanel implements WillBeInMainTabbed{
 			v.add(bean.getToWho());
 			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
-			v.add(DateUtil.timestamp2Str(bean.getOccurTs()));
+			v.add(DateUtil.date2Str(bean.getOccurTs()));
 			v.add(DateUtil.timestamp2Str(bean.getLastUpdateTs()));
 			v.add(DateUtil.timestamp2Str(bean.getAddTs()));
 			v.add(NumberFormat.getNumberInstance().format(bean.getPaybackedAmt()));

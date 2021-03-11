@@ -41,7 +41,7 @@ public class DateUtil {
 	}
 	
 	public static String timestamp2Str(Timestamp ts) {
-		return date2Str(ts, null) ;
+		return date2Str(ts, "yyyy-MM-dd HH:mm:ss") ;
 	}
 	
 	/**

@@ -17,6 +17,7 @@ public class DepositBean extends BaseBean {
 	private Timestamp addTs;
 	private Timestamp lastUpdateTs;
 	private Timestamp occurTs;
+	private boolean hasHistory;
 	
 	public Integer getDepositId() {
 		return depositId;
@@ -75,6 +76,13 @@ public class DepositBean extends BaseBean {
 	public void setLastUpdateTs(Timestamp lastUpdateTs) {
 		this.lastUpdateTs = lastUpdateTs;
 	}
+	
+	public boolean hasHistory() {
+		return hasHistory;
+	}
+	public void setHasHistory(Boolean hasHistory) {
+		this.hasHistory = hasHistory;
+	}
 	@Override
 	public String toString() {
 		return "DepositBean [depositId=" + depositId + ", typeId=" + typeId + ", source=" + source + ", amount="
@@ -91,6 +99,7 @@ public class DepositBean extends BaseBean {
 		setAddTs(rs.getTimestamp("add_ts"));
 		setLastUpdateTs(rs.getTimestamp("last_update_ts"));
 		setOccurTs(rs.getTimestamp("occur_ts"));
+		setHasHistory(rs.getBoolean("has_history"));
 		return this;
 	}
 	

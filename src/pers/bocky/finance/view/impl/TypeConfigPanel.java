@@ -160,7 +160,7 @@ public class TypeConfigPanel extends JPanel implements WillBeInConfigTabbed{
 		
 		JLabel typeLabel = new JLabel("类型名称");
 		typeField = new JTextField();
-		MyDocument mm = new MyDocument(20, save, typeField);
+		MyDocument mm = new MyDocument(20, typeField, save);
 		typeField.setDocument(mm);//For length limit
 		typeField.getDocument().addDocumentListener(mm);//For check input
 		JLabel descLabel = new JLabel("类型描述");

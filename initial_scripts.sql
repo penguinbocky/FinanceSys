@@ -34,22 +34,6 @@ CREATE TABLE `borrow` (
   PRIMARY KEY (`borrow_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
-/*Table structure for table `borrow_history` */
-
-DROP TABLE IF EXISTS `borrow_history`;
-
-CREATE TABLE `borrow_history` (
-  `borrow_history_id` int(11) NOT NULL AUTO_INCREMENT,
-  `borrow_id` int(11) NOT NULL,
-  `amount` double NOT NULL,
-  `description` varchar(1000) DEFAULT NULL,
-  `last_update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `active_flg` char(1) NOT NULL DEFAULT 'Y',
-  `occur_ts` timestamp NULL DEFAULT NULL,
-  `add_ts` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`borrow_history_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
-
 /*Table structure for table `category_dfntn` */
 
 DROP TABLE IF EXISTS `category_dfntn`;
@@ -78,6 +62,7 @@ CREATE TABLE `consume` (
   `active_flg` char(1) NOT NULL DEFAULT 'Y',
   `occur_ts` timestamp NULL DEFAULT NULL,
   `add_ts` timestamp NULL DEFAULT NULL,
+  `using_deposit` char(1) NOT NULL DEFAULT 'N',
   PRIMARY KEY (`consume_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
@@ -98,6 +83,24 @@ CREATE TABLE `deposit` (
   PRIMARY KEY (`deposit_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
+/*Table structure for table `history` */
+
+DROP TABLE IF EXISTS `history`;
+
+CREATE TABLE `history` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_id` int(11) NOT NULL,
+  `id` int(11) NOT NULL COMMENT 'primary key in each table',
+  `amount` double NOT NULL,
+  `description` varchar(1000) DEFAULT NULL,
+  `last_update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `active_flg` char(1) NOT NULL DEFAULT 'Y',
+  `occur_ts` timestamp NULL DEFAULT NULL,
+  `add_ts` timestamp NULL DEFAULT NULL,
+  `history_type` varchar(20) NOT NULL DEFAULT 'UPDATE_AMOUNT',
+  PRIMARY KEY (`history_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
+
 /*Table structure for table `lend` */
 
 DROP TABLE IF EXISTS `lend`;
@@ -115,11 +118,11 @@ CREATE TABLE `lend` (
   PRIMARY KEY (`lend_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC;
 
-/*Table structure for table `lend_history` */
+/*Table structure for table `lend_history_deprecated` */
 
-DROP TABLE IF EXISTS `lend_history`;
+DROP TABLE IF EXISTS `lend_history_deprecated`;
 
-CREATE TABLE `lend_history` (
+CREATE TABLE `lend_history_deprecated` (
   `lend_history_id` int(11) NOT NULL AUTO_INCREMENT,
   `lend_id` int(11) NOT NULL,
   `amount` double NOT NULL,
@@ -200,8 +203,6 @@ DELIMITER ;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
-
 /*Data for the table `category_dfntn` */
 
 insert  into `category_dfntn`(`category_id`,`category_name`,`description`,`last_update_ts`,`active_flg`,`add_ts`) values (1,'收入','所有进账收入','2018-06-10 17:11:55','Y','2018-06-15 20:28:46'),(2,'支出','所有向外支出','2018-06-10 17:12:54','Y','2018-06-15 20:28:46'),(3,'借入','所有借贷性质','2018-06-10 17:13:37','Y','2018-06-15 20:28:46'),(4,'借出','所有向外借出','2018-06-10 17:13:57','Y','2018-06-15 20:28:46');

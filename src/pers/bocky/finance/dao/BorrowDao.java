@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import pers.bocky.finance.bean.BorrowBean;
-import pers.bocky.finance.bean.BorrowHistoryBean;
 import pers.bocky.finance.component.Comparator;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
@@ -22,7 +21,9 @@ public class BorrowDao extends BaseDao {
 			+ ", PAYBACKEDAMT, CASE WHEN PAYBACKEDAMT IS NULL THEN amount else (AMOUNT - PAYBACKEDAMT) end LEFTAMT"
 			+ " FROM ("
 			+ " SELECT d.occur_ts, d.borrow_id, d.type_id, t.type_name, d.from_who, d.amount, d.description, d.add_ts, d.last_update_ts, SUM(H.AMOUNT) PAYBACKEDAMT"
-			+ " FROM borrow d LEFT JOIN BORROW_HISTORY H ON D.BORROW_ID = H.BORROW_ID, type_dfntn t, category_dfntn c"
+			+ " FROM borrow d LEFT JOIN ("
+			+ " SELECT * FROM HISTORY WHERE history_type = 'PAY_BACK' and category_id = " + BorrowBean.CATEGORY_ID
+			+ " ) H ON D.BORROW_ID = H.ID, type_dfntn t, category_dfntn c"
 			+ " WHERE d.active_flg = 'Y' AND t.active_flg = 'Y' AND c.active_flg = 'Y'"
 			+ " AND d.type_id = t.type_id"
 			+ " AND t.category_id = c.category_id"
@@ -337,14 +338,15 @@ public class BorrowDao extends BaseDao {
 		boolean success = false;
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
-				"insert into borrow_history(borrow_id, amount, description, add_ts, occur_ts) values(?, ?, ?, now(), ?)");
+				"insert into history(category_id, id, amount, description, add_ts, occur_ts, history_type) values(?, ?, ?, ?, now(), ?, 'PAY_BACK')");
 		
 		try {
 			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			pstat.setInt(1, bean.getBorrowId());
-			pstat.setDouble(2, bean.getAmount());
-			pstat.setString(3, bean.getDescription());
-			pstat.setTimestamp(4, bean.getOccurTs());
+			pstat.setInt(1, BorrowBean.CATEGORY_ID);
+			pstat.setInt(2, bean.getBorrowId());
+			pstat.setDouble(3, bean.getAmount());
+			pstat.setString(4, bean.getDescription());
+			pstat.setTimestamp(5, bean.getOccurTs());
 			pstat.executeUpdate();
 			pstat.close();
 			success = true;
@@ -358,51 +360,16 @@ public class BorrowDao extends BaseDao {
 		return success;
 	}
 	
-	public static List<BorrowHistoryBean> fetchAllBorrowHistoryRecs(BorrowHistoryBean param){
-		List<BorrowHistoryBean> list = new ArrayList<BorrowHistoryBean>();
-		Connection con = dbUtil.getCon();
-		StringBuffer sql = new StringBuffer(
-				"SELECT d.borrow_history_id, d.occur_ts, d.amount, d.description, d.add_ts, d.last_update_ts"
-				+ " FROM borrow b, borrow_history d"
-				+ " WHERE b.active_flg = 'Y' AND b.active_flg = 'Y'"
-				+ " AND b.borrow_id = d.borrow_id"
-				+ " AND b.borrow_id = ?");
-
-		try {
-			PreparedStatement pstat = con.prepareStatement(sql.toString());
-			pstat.setInt(1, param.getBorrowId());
-			ResultSet rs = pstat.executeQuery();
-			
-			BorrowHistoryBean bean = null;
-			while(rs != null && rs.next()){
-				bean = new BorrowHistoryBean();
-				bean.setBorrowHistoryId(rs.getInt("borrow_history_id"));
-				bean.setAmount(rs.getDouble("amount"));
-				bean.setDescription(rs.getString("description"));
-				bean.setAddTs(rs.getTimestamp("add_ts"));
-				bean.setLastUpdateTs(rs.getTimestamp("last_update_ts"));
-				bean.setOccurTs(rs.getTimestamp("occur_ts"));
-				list.add(bean);
-			}
-			pstat.close();
-			rs.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			dbUtil.close(con);
-		}
-		return list;
-	}
-	
 	public static double calAllBorrowHistoryAmountOfType(Integer typeId){
 		System.out.println("In calAllBorrowHistoryAmountOfType >>> ");
 		double sum = 0;
 		Connection con = dbUtil.getCon();
 		StringBuffer sql = new StringBuffer(
 				"SELECT sum(d.amount) sum"
-				+ " FROM borrow b, borrow_history d"
+				+ " FROM borrow b, history d"
 				+ " WHERE b.active_flg = 'Y' AND b.active_flg = 'Y'"
-				+ " AND b.borrow_id = d.borrow_id"
+				+ " AND b.borrow_id = d.id"
+				+ " AND D.CATEGORY_ID = " + BorrowBean.CATEGORY_ID
 				+ " AND b.type_id = ?");
 
 		try {
@@ -519,5 +486,12 @@ public class BorrowDao extends BaseDao {
 	public static Map<String, Double> getAmountGroupByMonth(Integer[] selectedTypeIds) {
 		return getAmountGroupByMonth(BorrowBean.CATEGORY_ID, selectedTypeIds);
 	}
-	
+
+	public static double calculateAmountOfType(Integer[] typeId) {
+		return calculateAmountOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
+
+	public static double calculateUnpaidAmountOfType(Integer[] typeId) {
+		return calculateAmountOfType(BorrowBean.CATEGORY_ID, typeId) - calculatePaidAmountOfType(BorrowBean.CATEGORY_ID, typeId);
+	}
 }

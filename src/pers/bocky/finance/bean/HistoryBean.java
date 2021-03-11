@@ -2,27 +2,39 @@ package pers.bocky.finance.bean;
 
 import java.sql.Timestamp;
 
-public class LendHistoryBean {
+public class HistoryBean {
 	
-	private Integer lendHistoryId;
-	private Integer lendId;
+	private Integer historyId;
+	private Integer categoryId;
+	private Integer id;
 	private Double amount;
 	private String description;
 	private Timestamp addTs;
 	private Timestamp lastUpdateTs;
 	private Timestamp occurTs;
+	private HistoryType historyType;;
 	
-	public Integer getLendHistoryId() {
-		return lendHistoryId;
+	public Integer getHistoryId() {
+		return historyId;
 	}
-	public void setLendHistoryId(Integer lendHistoryId) {
-		this.lendHistoryId = lendHistoryId;
+	
+	public void setHistoryId(Integer historyId) {
+		this.historyId = historyId;
 	}
-	public Integer getLendId() {
-		return lendId;
+	
+	public Integer getCategoryId() {
+		return categoryId;
 	}
-	public void setLendId(Integer lendId) {
-		this.lendId = lendId;
+
+	public void setCategoryId(Integer categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
 	}
 	public Double getAmount() {
 		return amount;
@@ -54,6 +66,14 @@ public class LendHistoryBean {
 	}
 	public void setLastUpdateTs(Timestamp lastUpdateTs) {
 		this.lastUpdateTs = lastUpdateTs;
+	}
+
+	public HistoryType getHistoryType() {
+		return historyType;
+	}
+
+	public void setHistoryType(HistoryType historyType) {
+		this.historyType = historyType;
 	}
 	
 }

@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -118,6 +120,29 @@ public class DataGrid extends JTable {
 	
 	public void setRowColor(int columnIndex1, int columnIndex2, BiPredicate<String, String> predict) {
 		setRowColor(columnIndex1, columnIndex2, predict, null, null);
+	}
+	
+	public void setRowStyleByCondition(int columnIndex, Predicate<String> predict, Function<DefaultTableCellRenderer, ?> fnForYes, Function<DefaultTableCellRenderer, ?> fnForElse) {
+		DefaultTableCellRenderer renderer = new DefaultTableCellRenderer() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
+				if (predict.test("" + getValueAt(row, columnIndex))) {
+					if (null != fnForYes) fnForYes.apply(this);
+				} else {
+					if (null != fnForElse) fnForElse.apply(this);
+				}
+				return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			}
+			
+		};
+		
+		int columnCount = getColumnCount();
+        for (int i = 0; i < columnCount; i++) {
+            getColumn(getColumnName(i)).setCellRenderer(renderer);
+        }
 	}
 	
 	public void setRowColor(int columnIndex1, int columnIndex2, BiPredicate<String, String> predict, Color colorForFlag, Color colorForElse) {

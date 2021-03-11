@@ -27,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import pers.bocky.finance.bean.BorrowBean;
+import pers.bocky.finance.bean.HistoryType;
 import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.component.DataGrid;
 import pers.bocky.finance.component.DateField;
@@ -37,6 +38,7 @@ import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
+import pers.bocky.finance.util.MessageUtils;
 import pers.bocky.finance.util.NumberUtil;
 import pers.bocky.finance.util.PropertiesUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
@@ -131,9 +133,11 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 
 	protected void startHistoryFrame() {
 		int selectedRowIndex = datagrid.getSelectedRow();
+		int selectedColumnIndex = datagrid.getSelectedColumn();
+		System.out.println("selectedColumnIndex [4 - amount] | [9 - paid] > " + selectedColumnIndex + datagrid.isColumnSelected(9));
 		String borrowIdStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
 //		BorrowHistoryFrame.getSingletonById(Integer.parseInt(borrowIdStr));
-		new BorrowHistoryFrame(Integer.parseInt(borrowIdStr));
+		new HistoryFrame(BorrowBean.CATEGORY_ID, Integer.parseInt(borrowIdStr), selectedColumnIndex == 9 ? HistoryType.PAY_BACK : HistoryType.UPDATE_AMOUNT);
 	}
 
 	protected void fillFields(DataGrid datagrid, int selectedRowIndex) {
@@ -197,11 +201,13 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 		JLabel amountLabel = new JLabel("数量");
 		amountField = new JTextField();
 		
-		MyDocument mm = new MyDocument(10, savebtn, fromWhoField, amountField);
-		fromWhoField.setDocument(mm);
-		fromWhoField.getDocument().addDocumentListener(mm);
-		amountField.setDocument(new MyDocument(true, 7));//Mainly for bank loan 1340000￥
-		amountField.getDocument().addDocumentListener(mm);
+		MyDocument mm = new MyDocument(10, new JTextField[] { amountField, fromWhoField }, new JButton[]{ savebtn });
+		fromWhoField.setDocument(mm); // insertString listener
+		fromWhoField.getDocument().addDocumentListener(mm); // insertUpdate listener
+//		amountField.setDocument(new MyDocument(true, 7));//Mainly for bank loan 1340000￥
+		MyDocument mm1 = new MyDocument(true, 7, new JTextField[] { amountField, fromWhoField }, new JButton[]{ savebtn });
+		amountField.setDocument(mm1);
+		amountField.getDocument().addDocumentListener(mm1); // insertUpdate listener
 		
 		JLabel descLabel = new JLabel("备注");
 		descField = new JTextField();
@@ -319,6 +325,10 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
 			return;
 		}
+		if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, MessageUtils.MESSAGE_FORCE_ONLY_UPDATE_OPS)) {
+			return;
+		}
+		
 		int id = Integer.parseInt(
 				datagrid.getValueAt(selectedRow, 0).toString()
 				);
@@ -415,7 +425,7 @@ public class BorrowPanel extends JPanel implements WillBeInMainTabbed{
 			v.add(bean.getFromWho());
 			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
-			v.add(DateUtil.timestamp2Str(bean.getOccurTs()));
+			v.add(DateUtil.date2Str(bean.getOccurTs()));
 			v.add(DateUtil.timestamp2Str(bean.getLastUpdateTs()));
 			v.add(DateUtil.timestamp2Str(bean.getAddTs()));
 			v.add(NumberFormat.getNumberInstance().format(bean.getPaybackedAmt()));

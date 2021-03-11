@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import pers.bocky.finance.dao.BaseDao;
+import pers.bocky.finance.util.PropertiesUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 import pers.bocky.finance.view.impl.ConfigFrame.ConfigFrameLazyHolder;
 
@@ -22,7 +23,7 @@ public class MorePanel extends JPanel implements WillBeInMainTabbed {
 	private JButton openConfigBtn;
 	private JButton dumpDataBaseBtn;
 	
-	private final String DUMP_PATH = "C:\\Users\\bocky\\git\\FinanceSys";
+	private final String DUMP_PATH = PropertiesUtil.getValueAsString("mysql.dump.path");
 	
 	public MorePanel() {
 		setStyles();

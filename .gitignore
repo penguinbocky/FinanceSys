@@ -5,3 +5,5 @@
 /lib/
 
 /*.sql
+
+/local_dump_data/*

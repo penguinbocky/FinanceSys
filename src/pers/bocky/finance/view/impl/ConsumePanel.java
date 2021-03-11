@@ -13,17 +13,21 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.function.Function;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import pers.bocky.finance.bean.ConsumeBean;
+import pers.bocky.finance.bean.HistoryType;
 import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.component.DataGrid;
 import pers.bocky.finance.component.DateField;
@@ -34,6 +38,7 @@ import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
+import pers.bocky.finance.util.MessageUtils;
 import pers.bocky.finance.util.NumberUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
 
@@ -51,6 +56,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 	private JButton updateBtn;
 	private JButton deleteBtn;
 	private DateField dp;
+	private JCheckBox checkUsingDeposit;
 
 	private boolean hasMainUI;
 	
@@ -95,8 +101,8 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
-		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "去向", "数量", "备注", "发生时间", "最后更新于", "创建时间"};
-		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID"}
+		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "去向", "数量", "备注", "发生时间", "最后更新于", "创建时间", "Has_History", "Using_Deposit"};
+		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID", "Has_History", "Using_Deposit"}
 		, new String[] {"类型", "去向", "数量"}, new String[] {"备注"});
 		
 		JPanel p1 = new JPanel();
@@ -107,6 +113,17 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		p2.setForeground(Color.MAGENTA);
 //		JList<String> items = new JList<String>(new String[]{new String("更新"), new String("删除")});
 //		PopupFactory popupFactory = PopupFactory.getSharedInstance();
+		
+		Function<DefaultTableCellRenderer, ?> fnForYes = (e) -> {
+			e.setForeground(Color.BLUE);
+			return true;
+		};
+		
+		Function<DefaultTableCellRenderer, ?> fnForElse = (e) -> {
+			e.setForeground(Color.BLACK);
+			return true;
+		};
+		datagrid.setRowStyleByCondition(9, (a) -> ("true".equals(a)), fnForYes, fnForElse);
 		datagrid.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -117,12 +134,14 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 				if (selectedRowIndex != -1) {
 					if (e.getButton() == MouseEvent.BUTTON1) {
 						fillFields(datagrid, selectedRowIndex);
-					} else if (e.getButton() == MouseEvent.BUTTON3) {
+					} else if (e.getButton() == MouseEvent.BUTTON3
+							&& "true".equals(datagrid.getValueAt(selectedRowIndex, 9))) {
 //						Popup pop = popupFactory.getPopup(datagrid, items, e.getXOnScreen(), e.getYOnScreen());
 //						pop.show();
 //						
 //						String depositId = datagrid.getValueAt(selectedRowIndex, 0).toString();
 //						System.out.println("depositId > " + depositId);
+						startHistoryFrame();
 					}
 				}
 			}
@@ -134,13 +153,20 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		return scrollPane;
 	}
 
-	protected void fillFields(DataGrid datagrid, int selectedRowIndex) {
+	private void startHistoryFrame() {
+		int selectedRowIndex = datagrid.getSelectedRow();
+		String idStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
+		new HistoryFrame(ConsumeBean.CATEGORY_ID, Integer.parseInt(idStr), HistoryType.UPDATE_AMOUNT);
+	}
+
+	private void fillFields(DataGrid datagrid, int selectedRowIndex) {
 		if (datagrid != null && selectedRowIndex > -1) {
 			String typeId = (String) datagrid.getValueAt(selectedRowIndex, 1);
 			String dest = (String) datagrid.getValueAt(selectedRowIndex, 3);
 			String amount = (String) datagrid.getValueAt(selectedRowIndex, 4);
 			String desc = (String) datagrid.getValueAt(selectedRowIndex, 5);
 			String occurTs = (String) datagrid.getValueAt(selectedRowIndex, 6);
+			String usingDeposit = (String) datagrid.getValueAt(selectedRowIndex, 10);
 			
 			typesDropdown.setSelectedIndex(getDropdownIndexByTypeId(Integer.parseInt(typeId)));
 			destField.setText(dest);
@@ -151,6 +177,8 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 			} else {
 				dp.fillFields("", "", "");
 			}
+			checkUsingDeposit.setSelected("true".equals(usingDeposit));
+			checkUsingDeposit.setEnabled(false);
 		}
 	}
 	
@@ -195,11 +223,12 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		JLabel amountLabel = new JLabel("数量");
 		amountField = new JTextField();
 		
-		MyDocument mm = new MyDocument(10, savebtn, destField, amountField);
+		MyDocument mm = new MyDocument(10, new JTextField[] { amountField, destField }, new JButton[]{ savebtn });
 		destField.setDocument(mm);
 		destField.getDocument().addDocumentListener(mm);
-		amountField.setDocument(new MyDocument(true, 9));//123456.89
-		amountField.getDocument().addDocumentListener(mm);
+		MyDocument mm1 = new MyDocument(true, 9, new JTextField[] { amountField, destField }, new JButton[]{ savebtn });
+		amountField.setDocument(mm1);//123456.89
+		amountField.getDocument().addDocumentListener(mm1);
 		
 		JLabel descLabel = new JLabel("备注");
 		descField = new JTextField();
@@ -218,12 +247,17 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		
 		updateBtn = new JButton("更新");
 		updateBtn.setEnabled(false);
-		updateBtn.addActionListener(new ActionListener() {
-			
+		updateBtn.addMouseListener(new MouseAdapter() {
+
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				updateRecord();
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					updateRecord(true);
+				} else {
+					updateRecord(false);
+				}
 			}
+			
 		});
 		
 		deleteBtn = new JButton("删除");
@@ -235,6 +269,9 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 				deleteRecord();
 			}
 		});
+		
+		checkUsingDeposit = new JCheckBox("动用固存", false);
+		checkUsingDeposit.setOpaque(false);
 		
 		inputPanel.add(typeLabel);
 		inputPanel.add(typesDropdown);
@@ -249,20 +286,26 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		inputPanel.add(savebtn);
 		inputPanel.add(updateBtn);
 		inputPanel.add(deleteBtn);
-		
+				
 		inputPanel.add(calBtn);
+		inputPanel.add(checkUsingDeposit);
 		
 		panel.add(inputPanel);
 		
 		return panel;
 	}
 
-	protected void updateRecord() {
+	private void updateRecord(boolean forceUpdate) {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
 			return;
 		}
+		if ((!forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, MessageUtils.MESSAGE_UPDATE_OPS))
+				|| (forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, MessageUtils.MESSAGE_FORCE_UPDATE_OPS))) {
+			return;
+		}
+		
 		int id = Integer.parseInt(
 				datagrid.getValueAt(selectedRow, 0).toString()
 				);
@@ -273,7 +316,8 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		bean.setAmount(Double.parseDouble(amountField.getText().trim()));
 		bean.setDescription(descField.getText().trim());
 		bean.setOccurTs(dp.getResultAsTimestamp());
-		if (ConsumeDao.updateRecord(bean) == DaoResponse.UPDATE_SUCCESS) {
+		if ((!forceUpdate && ConsumeDao.saveHistoryAndUpdateRecord(bean) == DaoResponse.UPDATE_SUCCESS)
+				|| (forceUpdate && ConsumeDao.updateRecord(bean) == DaoResponse.UPDATE_SUCCESS)) {
 			clearInput();
 			datagrid.clearSelection();
 			loadDatagrid();
@@ -284,7 +328,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		checkForButtons();
 	}
 	
-	protected void deleteRecord() {
+	private void deleteRecord() {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要删除的记录");
@@ -322,6 +366,7 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 
 	@Override
 	public void loadDatagrid() {
+		resetPanels();
 		List<ConsumeBean> list = ConsumeDao.fetchAllConsumeRecs();
 		loadDatagrid(list);
 	}
@@ -341,8 +386,10 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
 			v.add(DateUtil.date2Str(bean.getOccurTs()));
-			v.add(DateUtil.date2Str(bean.getLastUpdateTs()));
-			v.add(DateUtil.date2Str(bean.getAddTs()));
+			v.add(DateUtil.timestamp2Str(bean.getLastUpdateTs()));
+			v.add(DateUtil.timestamp2Str(bean.getAddTs()));
+			v.add("" + bean.hasHistory());
+			v.add("" + bean.isUsingDeposit());
 			dataVectorList.add(v);
 		}
 		datagrid.setData(dataVectorList);
@@ -360,11 +407,12 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		bean.setAmount(Double.parseDouble(amountField.getText().trim()));
 		bean.setDescription(descField.getText().trim());
 		bean.setOccurTs(dp.getResultAsTimestamp());
+		bean.setUsingDeposit(checkUsingDeposit.isSelected());
 		System.out.println("The formed deposit to save bean > " + bean);
 		return bean;
 	}
 	
-	protected void checkForButtons() {
+	private void checkForButtons() {
 		if (datagrid.getSelectedRow() == -1) {
 			updateBtn.setEnabled(false);
 			deleteBtn.setEnabled(false);
@@ -378,7 +426,12 @@ public class ConsumePanel extends JPanel implements WillBeInMainTabbed{
 		destField.setText("");
 		amountField.setText("");
 		descField.setText("");
+		checkUsingDeposit.setSelected(false);
 		checkForButtons();
+	}
+	
+	private void resetPanels() {
+		checkUsingDeposit.setEnabled(true);
 	}
 	
 	@Override

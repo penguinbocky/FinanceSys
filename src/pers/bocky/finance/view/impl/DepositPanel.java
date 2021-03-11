@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
@@ -24,19 +25,24 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import pers.bocky.finance.bean.DepositBean;
+import pers.bocky.finance.bean.HistoryType;
 import pers.bocky.finance.bean.TypeBean;
 import pers.bocky.finance.component.DataGrid;
 import pers.bocky.finance.component.DateField;
 import pers.bocky.finance.component.FilterPanel;
+import pers.bocky.finance.dao.BorrowDao;
 import pers.bocky.finance.dao.ConsumeDao;
 import pers.bocky.finance.dao.DepositDao;
+import pers.bocky.finance.dao.LendDao;
 import pers.bocky.finance.dao.TypeDao;
 import pers.bocky.finance.listener.ButtonActionListener;
 import pers.bocky.finance.listener.MyDocument;
 import pers.bocky.finance.util.DaoResponse;
 import pers.bocky.finance.util.DateUtil;
+import pers.bocky.finance.util.MessageUtils;
 import pers.bocky.finance.util.NumberUtil;
 import pers.bocky.finance.util.PropertiesUtil;
 import pers.bocky.finance.view.WillBeInMainTabbed;
@@ -101,8 +107,8 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(new Color(199, 237, 204, 255));
 		
-		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "来源", "数量", "备注", "发生时间", "最后更新于", "创建时间"};
-		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID"}
+		final String[] COL_NAMES = {"ID", "类型 ID", "类型", "来源", "数量", "备注", "发生时间", "最后更新于", "创建时间", "Has_History"};
+		datagrid = new DataGrid(COL_NAMES, new String[] {"ID", "类型 ID", "Has_History"}
 		, new String[] {"类型", "来源", "数量"}, new String[] {"备注"});
 		
 		JPanel p1 = new JPanel();
@@ -113,6 +119,17 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		p2.setForeground(Color.MAGENTA);
 //		JList<String> items = new JList<String>(new String[]{new String("更新"), new String("删除")});
 //		PopupFactory popupFactory = PopupFactory.getSharedInstance();
+		
+		Function<DefaultTableCellRenderer, ?> fnForYes = (e) -> {
+			e.setForeground(Color.BLUE);
+			return true;
+		};
+		
+		Function<DefaultTableCellRenderer, ?> fnForElse = (e) -> {
+			e.setForeground(Color.BLACK);
+			return true;
+		};
+		datagrid.setRowStyleByCondition(9, (a) -> ("true".equals(a)), fnForYes, fnForElse);
 		datagrid.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -123,12 +140,14 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 				if (selectedRowIndex != -1) {
 					if (e.getButton() == MouseEvent.BUTTON1) {
 						fillFields(datagrid, selectedRowIndex);
-					} else if (e.getButton() == MouseEvent.BUTTON3) {
+					} else if (e.getButton() == MouseEvent.BUTTON3
+							&& "true".equals(datagrid.getValueAt(selectedRowIndex, 9))) {
 //						Popup pop = popupFactory.getPopup(datagrid, items, e.getXOnScreen(), e.getYOnScreen());
 //						pop.show();
 //						
 //						String depositId = datagrid.getValueAt(selectedRowIndex, 0).toString();
 //						System.out.println("depositId > " + depositId);
+						startHistoryFrame();
 					}
 				}
 			}
@@ -140,7 +159,13 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		return scrollPane;
 	}
 
-	protected void checkForButtons() {
+	private void startHistoryFrame() {
+		int selectedRowIndex = datagrid.getSelectedRow();
+		String idStr = datagrid.getValueAt(selectedRowIndex, 0).toString();
+		new HistoryFrame(DepositBean.CATEGORY_ID, Integer.parseInt(idStr), HistoryType.UPDATE_AMOUNT);
+	}
+
+	private void checkForButtons() {
 		if (datagrid.getSelectedRow() == -1) {
 			updateBtn.setEnabled(false);
 			deleteBtn.setEnabled(false);
@@ -150,7 +175,7 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		}
 	}
 
-	protected void fillFields(DataGrid datagrid, int selectedRowIndex) {
+	private void fillFields(DataGrid datagrid, int selectedRowIndex) {
 		if (datagrid != null && selectedRowIndex > -1) {
 			String typeId = (String) datagrid.getValueAt(selectedRowIndex, 1);
 			String source = (String) datagrid.getValueAt(selectedRowIndex, 3);
@@ -212,16 +237,17 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		JLabel amountLabel = new JLabel("数量");
 		amountField = new JTextField();
 		
-		MyDocument mm = new MyDocument(10, savebtn, sourceField, amountField);
+		MyDocument mm = new MyDocument(10, new JTextField[] { amountField, sourceField }, new JButton[]{ savebtn });
 		sourceField.setDocument(mm);
 		sourceField.getDocument().addDocumentListener(mm);
-		amountField.setDocument(new MyDocument(true, 9));//123456.89
-		amountField.getDocument().addDocumentListener(mm);
+		MyDocument mm1 = new MyDocument(true, 9, new JTextField[] { amountField, sourceField }, new JButton[]{ savebtn });
+		amountField.setDocument(mm1);//123456.89
+		amountField.getDocument().addDocumentListener(mm1);
 		
 		JLabel descLabel = new JLabel("备注");
 		descField = new JTextField();
 		
-		JLabel occurTsLabel = new JLabel("实际发生时间(yyyy MM dd)");
+		JLabel occurTsLabel = new JLabel("实际发生时间");
 		dp = new DateField();
 		
 		JButton calBtn = new JButton("求和");
@@ -235,12 +261,17 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		
 		updateBtn = new JButton("更新");
 		updateBtn.setEnabled(false);
-		updateBtn.addActionListener(new ActionListener() {
-			
+		updateBtn.addMouseListener(new MouseAdapter() {
+
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				updateRecord();
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					updateRecord(true);
+				} else {
+					updateRecord(false);
+				}
 			}
+			
 		});
 		
 		deleteBtn = new JButton("删除");
@@ -254,14 +285,14 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		});
 		
 		calNetDepositBtn = new JButton("实际存款");
-		calNetDepositBtn.setToolTipText("实际存款为扣除【首付/房贷/动用固存】后的实际可支配余额，请注意该值包含借出【本人本金】，若有出入请核对借出项.");
+		calNetDepositBtn.setToolTipText("实际存款为扣除【首付/房贷/动用固存/固存还信用卡】后的实际可支配余额，同时已考虑借入借出项的相关数据.");
 		calNetDepositBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				double result = calNetDeposit();
 				if (result == -2) {
-					JOptionPane.showMessageDialog(DepositPanel.this, "请检查配置文件中[cal.realdeposit.excludedconsumetypeids]项是否合法", "实际存款", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(DepositPanel.this, "请检查配置文件中[cal.realdeposit.excluded*typeids]项是否合法", "实际存款", JOptionPane.INFORMATION_MESSAGE);
 				} else if (result == -1) {
 					JOptionPane.showMessageDialog(DepositPanel.this, "读取到type id为0的项", "实际存款", JOptionPane.INFORMATION_MESSAGE);
 				} else {
@@ -293,12 +324,17 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		return panel;
 	}
 
-	protected void updateRecord() {
+	private void updateRecord(boolean forceUpdate) {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要更新的记录");
 			return;
 		}
+		if ((!forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, MessageUtils.MESSAGE_UPDATE_OPS))
+				|| (forceUpdate && JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(this, MessageUtils.MESSAGE_FORCE_UPDATE_OPS))) {
+			return;
+		}
+		
 		int depositId = Integer.parseInt(
 				datagrid.getValueAt(selectedRow, 0).toString()
 				);
@@ -309,7 +345,8 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		bean.setAmount(Double.parseDouble(amountField.getText().trim()));
 		bean.setDescription(descField.getText().trim());
 		bean.setOccurTs(dp.getResultAsTimestamp());
-		if (DepositDao.updateRecord(bean) == DaoResponse.UPDATE_SUCCESS) {
+		if ((!forceUpdate && DepositDao.saveHistoryAndUpdateRecord(bean) == DaoResponse.UPDATE_SUCCESS)
+				|| (forceUpdate && DepositDao.updateRecord(bean) == DaoResponse.UPDATE_SUCCESS)) {
 			clearInput();
 			datagrid.clearSelection();
 			loadDatagrid();
@@ -320,7 +357,7 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 		checkForButtons();
 	}
 
-	protected void deleteRecord() {
+	private void deleteRecord() {
 		int selectedRow = datagrid.getSelectedRow();
 		if (selectedRow < 0) {
 			JOptionPane.showMessageDialog(this, "请选择需要删除的记录");
@@ -356,26 +393,45 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 	}
 
 	private double calNetDeposit() {
-		final String KEY = "cal.realdeposit.excludedconsumetypeids";
+//		Integer[] excludedConsumeTypeIds = getIdsByPropertyKey("cal.realdeposit.excludedconsumetypeids");
+//		if (excludedConsumeTypeIds != null && excludedConsumeTypeIds.length == 1 && excludedConsumeTypeIds[0] < 0) {// Error code
+//			return excludedConsumeTypeIds[0];
+//		}
+		
+		Integer[] excludedBorrowTypeIds = getIdsByPropertyKey("cal.realdeposit.excludedborrowtypeids");
+		if (excludedBorrowTypeIds != null && excludedBorrowTypeIds.length == 1 && excludedBorrowTypeIds[0] < 0) {// Error code
+			return excludedBorrowTypeIds[0];
+		}
+		
+		Integer[] excludedLendTypeIds = getIdsByPropertyKey("cal.realdeposit.excludedlendtypeids");
+		if (excludedLendTypeIds != null && excludedLendTypeIds.length == 1 && excludedLendTypeIds[0] < 0) {// Error code
+			return excludedLendTypeIds[0];
+		}
+		
+		return ((double) Math.round(
+				(DepositDao.calculateAllDepositRecsAmount() 
+				- ConsumeDao.calculateAmountOfUsingDeposit()
+				+ BorrowDao.calculateUnpaidAmountOfType(excludedBorrowTypeIds)
+				- LendDao.calculateUnpaidAmountOfType(excludedLendTypeIds)
+				) * 100)) / 100;
+	}
+
+	private Integer[] getIdsByPropertyKey(final String propertyKey) {
 		List<Integer> excludedConsumeTypeIdsList = null;
 		try {
-			excludedConsumeTypeIdsList = Arrays.asList(PropertiesUtil.getValueAsStringArray(KEY)).stream()
+			excludedConsumeTypeIdsList = Arrays.asList(PropertiesUtil.getValueAsStringArray(propertyKey)).stream()
 					.map(str -> Integer.parseInt(str))
 					.collect(Collectors.toList());
 		} catch (Exception e) {
 			System.out.println("读取【实际存款】计算公式配置出错：格式不正确或者不合法的数字");
-			return -2;
+			return new Integer[] {-2};
 		}
 		boolean valid = excludedConsumeTypeIdsList.stream().allMatch(id -> id > 0);
 		if (!valid) {
-			return -1;
+			return new Integer[] {-1};
 		}
 		Integer[] excludedConsumeTypeIds = excludedConsumeTypeIdsList.toArray(new Integer[0]);
-		
-		return ((double) Math.round(
-				(DepositDao.calculateAllDepositRecsAmount() 
-				- ConsumeDao.calculateAmountOfType(excludedConsumeTypeIds)
-				) * 100)) / 100;
+		return excludedConsumeTypeIds;
 	}
 	
 	@Override
@@ -398,9 +454,10 @@ public class DepositPanel extends JPanel implements WillBeInMainTabbed{
 			v.add(bean.getSource());
 			v.add(NumberFormat.getNumberInstance().format(bean.getAmount()));
 			v.add(bean.getDescription());
-			v.add(DateUtil.timestamp2Str(bean.getOccurTs()));
+			v.add(DateUtil.date2Str(bean.getOccurTs()));
 			v.add(DateUtil.timestamp2Str(bean.getLastUpdateTs()));
 			v.add(DateUtil.timestamp2Str(bean.getAddTs()));
+			v.add("" + bean.hasHistory());
 			dataVectorList.add(v);
 		}
 		datagrid.setData(dataVectorList);
